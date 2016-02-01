@@ -1,14 +1,16 @@
 define(function (require) {
   require('./kibi_timeline');
+  require('ui/modules');
+
   var _ = require('lodash');
 
-  var module = require('ui/modules').get('kibi-timeline-plugin/kibi_timeline_vis', ['kibana']);
+  var module = require('ui/modules').get('kibi_timeline_vis/kibi_timeline_vis', ['kibana']);
   module.controller(
     'KbnTimelineVisController',
     function ($rootScope, $scope, $route, $log, courier, savedSearches, savedVisualizations, Private, $element, Promise) {
 
-      var requestQueue = Private(require('ui/kibi/components/courier/_request_queue_wrapped'));
       var SearchSource = Private(require('ui/courier/data_source/search_source'));
+      var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
 
       function initOptions(savedVis) {
         var options = {
@@ -48,8 +50,8 @@ define(function (require) {
             var savedSearch = result.savedSearch;
             var group = result.group;
 
-            var _id = '_kibi_timetable_ids_source_flag' + savedSearch.id;
-            requestQueue.markAllRequestsWithSourceIdAsInactive(_id);
+            var _id = '_kibi_timetable_ids_source_flag' + savedSearch.id; // used only by kibi
+            requestQueue.markAllRequestsWithSourceIdAsInactive(_id);      //
 
             var searchSource = new SearchSource();
             searchSource.inherits(savedSearch.searchSource);

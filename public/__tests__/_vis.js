@@ -12,7 +12,7 @@ describe('Visualization', function () {
   var vis;
   var init;
 
-  beforeEach(ngMock.module('kibana', 'kibi-timeline-plugin/kibi_timeline_vis'));
+  beforeEach(ngMock.module('kibana', 'kibi_timeline_vis/kibi_timeline_vis'));
 
   beforeEach(ngMock.inject(function ($injector) {
     Private = $injector.get('Private');

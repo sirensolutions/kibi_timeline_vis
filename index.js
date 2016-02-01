@@ -4,7 +4,7 @@ module.exports = function (kibana) {
     require: ['kibana', 'elasticsearch'],
     uiExports: {
       visTypes: [
-        'plugins/kibi-timeline-plugin/kibi_timeline_vis'
+        'plugins/kibi_timeline_vis/kibi_timeline_vis'
       ]
     }
   });

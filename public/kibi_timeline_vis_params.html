@@ -11,7 +11,8 @@
 
           <div class="form-group">
             <label>Saved search id</label>
-            <kibi-select required object-type="search" ng-model="group.savedSearchId"></kibi-select>
+            <kibi-select-port required object-type="search" ng-model="group.savedSearchId">
+            </kibi-select-port>
           </div>
 
           <div class="form-group">
@@ -21,17 +22,20 @@
 
           <div class="form-group">
             <label>Event label</label>
-            <kibi-select required object-type="field" index-pattern-id="group.indexPatternId" ng-model="group.labelField"></kibi-select>
+            <kibi-select-port required object-type="field" index-pattern-id="group.indexPatternId" ng-model="group.labelField">
+            </kibi-select-port>
           </div>
 
           <div class="form-group">
             <label>Event start date</label>
-            <kibi-select required object-type="field" index-pattern-id="group.indexPatternId" field-types="['date']" ng-model="group.startField"></kibi-select>
+            <kibi-select-port required object-type="field" index-pattern-id="group.indexPatternId" field-types="['date']" ng-model="group.startField">
+            </kibi-select-port>
           </div>
 
           <div class="form-group">
             <label>Event end date  <span class="small_note">(Optional)</span></label>
-            <kibi-select object-type="field" index-pattern-id="group.indexPatternId" field-types="['date']" ng-model="group.endField"></kibi-select>
+            <kibi-select-port object-type="field" index-pattern-id="group.indexPatternId" field-types="['date']" ng-model="group.endField">
+            </kibi-select-port>
           </div>
 
           <div class="form-group">
@@ -40,15 +44,15 @@
           </div>
 
           <div class="btn-group rightCorner">
-            <array-param-up index="{{ $index }}" model="vis.params.groups"></array-param-up>
-            <array-param-down index="{{ $index }}" model="vis.params.groups"></array-param-down>
-            <array-param-remove index="{{ $index }}" model="vis.params.groups"></array-param-remove>
+            <array-param-up-port index="{{ $index }}" model="vis.params.groups"></array-param-up-port>
+            <array-param-down-port index="{{ $index }}" model="vis.params.groups"></array-param-down-port>
+            <array-param-remove-port index="{{ $index }}" model="vis.params.groups"></array-param-remove-port>
           </div>
 
         </div>
       </li>
     </ul>
-    <array-param-add required label="group" model="vis.params.groups"></array-param-add>
+    <array-param-add-port required label="group" model="vis.params.groups"></array-param-add-port>
   </div>
 
   <div class="vis-editor-agg-editor-advanced-toggle">

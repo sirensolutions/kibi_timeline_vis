@@ -1,8 +1,8 @@
 define(function (require) {
 
-  require('plugins/kibi-timeline-plugin/kibi_timeline_vis.less');
-  require('plugins/kibi-timeline-plugin/kibi_timeline_vis_controller');
-  require('plugins/kibi-timeline-plugin/kibi_timeline_vis_params');
+  require('plugins/kibi_timeline_vis/kibi_timeline_vis.less');
+  require('plugins/kibi_timeline_vis/kibi_timeline_vis_controller');
+  require('plugins/kibi_timeline_vis/kibi_timeline_vis_params');
 
   require('ui/registry/vis_types').register(KibiTimelineVisProvider);
 
@@ -17,7 +17,7 @@ define(function (require) {
       title: 'Kibi Timeline',
       icon: 'fa-align-left',
       description: 'Timeline widget for visualization of events',
-      template: require('plugins/kibi-timeline-plugin/kibi_timeline_vis.html'),
+      template: require('plugins/kibi_timeline_vis/kibi_timeline_vis.html'),
       params: {
         defaults: {
           groups: [],

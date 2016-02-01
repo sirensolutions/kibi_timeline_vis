@@ -7,8 +7,7 @@ var Rsync = require('rsync');
 var Promise = require('bluebird');
 var eslint = require('gulp-eslint');
 var rimraf = require('rimraf');
-var tar = require('gulp-tar');
-var gzip = require('gulp-gzip');
+var zip = require('gulp-zip');
 var fs = require('fs');
 var spawn = require('child_process').spawn;
 var minimist = require('minimist');
@@ -18,7 +17,7 @@ var packageName = pkg.name  + '-' + pkg.version;
 
 var buildDir = path.resolve(__dirname, 'build');
 var targetDir = path.resolve(__dirname, 'target');
-var buildTarget = path.resolve(buildDir, pkg.name);
+var buildTarget = path.resolve(buildDir, packageName);
 
 var include = [
   'package.json',
@@ -103,8 +102,7 @@ gulp.task('build', ['clean'], function (done) {
 
 gulp.task('package', ['build'], function (done) {
   return gulp.src(path.join(buildDir, '**', '*'))
-    .pipe(tar(packageName + '.tar'))
-    .pipe(gzip())
+    .pipe(zip(packageName + '.zip'))
     .pipe(gulp.dest(targetDir));
 });
 

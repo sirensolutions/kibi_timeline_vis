@@ -1,12 +1,12 @@
 {
-  "name": "kibi-timeline-plugin",
-  "version": "0.3.0",
+  "name": "kibi_timeline_vis",
+  "version": "0.1.0",
   "authors": [
     "SIREn Solutions <info@siren.solutions>"
   ],
   "description": "Kibi Timeline visualization plugin",
-  "main": "gulpfile.js",
-  "license": "Apache 2.0",
+  "main": "index.js",
+  "license": "Apache-2.0",
   "homepage": "http://siren.solutions/kibi",
   "scripts": {
     "test": "gulp test",
@@ -23,8 +23,7 @@
     "eslint": "^1.10.3",
     "gulp": "^3.9.0",
     "gulp-eslint": "^1.1.1",
-    "gulp-gzip": "^1.2.0",
-    "gulp-tar": "^1.6.0",
+    "gulp-zip": "3.1.0",
     "gulp-util": "^3.0.7",
     "husky": "^0.10.2",
     "lodash": "^3.10.1",

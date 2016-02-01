@@ -55,17 +55,6 @@ define(function (require) {
         }
       };
 
-      $scope.$watch('options', function (newOptions, oldOptions) {
-        if (!newOptions || newOptions === oldOptions) {
-          return;
-        }
-        initTimeline();
-        timeline.setOptions(newOptions);
-        timeline.redraw();
-      }, true); // has to be true in other way the change in height is not detected
-
-      var groupEvents = [];
-
       var initTimeline = function () {
         if (!timeline) {
           // create a new one
@@ -74,6 +63,8 @@ define(function (require) {
           timeline.on('select', onSelect);
         }
       };
+
+      var groupEvents = [];
 
       var updateTimeline = function (groupIndex, events) {
         initTimeline();
@@ -208,6 +199,16 @@ define(function (require) {
         var dataGroups = new vis.DataSet(groups);
         timeline.setGroups(dataGroups);
       };
+
+
+      $scope.$watch('options', function (newOptions, oldOptions) {
+        if (!newOptions || newOptions === oldOptions) {
+          return;
+        }
+        initTimeline();
+        timeline.setOptions(newOptions);
+        timeline.redraw();
+      }, true); // has to be true in other way the change in height is not detected
 
 
       $scope.$watch(

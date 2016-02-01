@@ -1,20 +1,19 @@
 define(function (require) {
 
-  // === depends on kibi features ===
-  require('ui/kibi/directives/array_param');
-  require('ui/kibi/directives/kibi_select');
-  require('ui/kibi/helpers/array_helper');
-  // === depends on kibi features ===
+  // === ported kibi directives ===
+  require('./lib/directives/array_param');
+  require('./lib/directives/kibi_select');
+  // === ported kibi directives ===
 
   var _ = require('lodash');
   var vis = require('vis');
 
-  require('ui/modules').get('kibi-timeline-plugin/kibi_timeline_vis')
+  require('ui/modules').get('kibi_timeline_vis/kibi_timeline_vis')
   .directive('kibiTimelineVisParams', function ($rootScope, savedSearches) {
 
     return {
       restrict: 'E',
-      template: require('plugins/kibi-timeline-plugin/kibi_timeline_vis_params.html'),
+      template: require('plugins/kibi_timeline_vis/kibi_timeline_vis_params.html'),
       link: function ($scope, $element, attr) {
 
         // here deal with the parameters
