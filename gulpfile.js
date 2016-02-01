@@ -77,9 +77,8 @@ gulp.task('sync', function (done) {
 
 gulp.task('lint', function (done) {
   return gulp.src([
-    'server/**/*.js',
     'public/**/*.js',
-    '!public/webpackShims/**'
+    '!**/webpackShims/**'
   ]).pipe(eslint())
     .pipe(eslint.formatEach())
     .pipe(eslint.failOnError());
@@ -101,7 +100,11 @@ gulp.task('build', ['clean'], function (done) {
 });
 
 gulp.task('package', ['build'], function (done) {
-  return gulp.src(path.join(buildDir, '**', '*'))
+  return gulp.src([
+      path.join(buildDir, '**', '*'),
+      '!**/webpackShims/bower_components/vis/examples/**',
+      '!**/webpackShims/bower_components/vis/docs/**'
+    ])
     .pipe(zip(packageName + '.zip'))
     .pipe(gulp.dest(targetDir));
 });
