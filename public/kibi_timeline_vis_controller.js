@@ -13,9 +13,18 @@ define(function (require) {
       var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
 
       function initOptions(savedVis) {
+        var height = $element[0].offsetHeight;
+        // make sure that it is never too small
+        // as the height might be reported wrongly when element is not yet fully rendered
+        if (height >= 20) {
+          height -= 20;
+        }
+        if (height < 175) {
+          height = 175;
+        }
         var options = {
           width: '100%',
-          height: ($element[0].offsetHeight || 350) + 'px',
+          height: height + 'px',
           selectable: true,
           // ! does not work correctly inside the panel
           // instead we would have to calculate the proper height on panel resize and change it
@@ -25,8 +34,8 @@ define(function (require) {
         $scope.options = options;
       }
 
-      var initSearchSources = function (savedVis) {
 
+      function initSearchSources(savedVis) {
         // here iterate over groups from savedVis.vis.params.groups
         var promises = [];
         _.each(savedVis.vis.params.groups, function (group) {
@@ -41,7 +50,6 @@ define(function (require) {
             );
           }
         });
-
 
         Promise.all(promises).then(function (results) {
           var groups = [];
@@ -74,7 +82,7 @@ define(function (require) {
           $scope.savedObj.groups = groups;
           $scope.savedObj.groupsOnSeparateLevels = savedVis.vis.params.groupsOnSeparateLevels;
         });
-      };
+      }
 
 
       $scope.savedObj = {
@@ -96,9 +104,7 @@ define(function (require) {
       }
 
       $scope.$on('change:vis', function () {
-        if ($scope.options) {
-          $scope.options.height = $element[0].offsetHeight;
-        }
+        initOptions($scope.savedVis);
       });
 
       $scope.$watch('vis', function () {
@@ -119,6 +125,7 @@ define(function (require) {
 
       if (editing) {
         var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
+          initOptions($scope.savedVis);
           initSearchSources($scope.savedVis);
         });
 
