@@ -5,6 +5,10 @@
     <ul>
       <li ng-repeat="group in vis.params.groups" class="queryOptionArea" >
 
+        <div class="header">
+          Group {{$index + 1}}
+        </div>
+
         <div class="content">
 
           <input type="hidden" ng-model="group.id" />
