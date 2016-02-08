@@ -1,9 +1,9 @@
 define(function (require) {
   var module = require('ui/modules').get('kibana');
 
-  module.directive('arrayParamAddPort', function (Notifier, Private, arrayParamServicePort) {
+  module.directive('arrayParamAddPort', function (createNotifier, Private, arrayParamServicePort) {
     var arrayHelper = Private(require('../helpers/array_helper'));
-    var notify = new Notifier({
+    var notify = createNotifier({
       location: 'Array Param Directive'
     });
 
@@ -85,9 +85,11 @@ define(function (require) {
         };
       }
     };
-  }).directive('arrayParamRemovePort', function (Private, Notifier, arrayParamServicePort) {
+  }).directive('arrayParamRemovePort', function (Private, createNotifier, arrayParamServicePort) {
     var arrayHelper = Private(require('../helpers/array_helper'));
-    var notify = new Notifier();
+    var notify = createNotifier({
+      location: 'Array Param Directive'
+    });
 
     return {
       restrict: 'E',

@@ -4,11 +4,11 @@ define(function (require) {
   var vis = require('vis');
   var moment = require('moment');
 
-  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, Notifier, courier) {
+  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier) {
 
     var color = Private(require('ui/vislib/components/color/color'));
     var filterManager = Private(require('ui/filter_manager/filter_manager'));
-    var notify = new Notifier({
+    var notify = createNotifier({
       location: 'Kibi Timeline'
     });
 
