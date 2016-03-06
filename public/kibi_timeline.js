@@ -6,7 +6,6 @@ define(function (require) {
 
   require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, Notifier, courier) {
 
-    var color = Private(require('ui/vislib/components/color/color'));
     var filterManager = Private(require('ui/filter_manager/filter_manager'));
     var notify = new Notifier({
       location: 'Kibi Timeline'
@@ -24,7 +23,6 @@ define(function (require) {
     };
 
     function _link($scope, $element) {
-      var mapGroupIdToColor;
       var timeline;
       var data;
 
@@ -98,6 +96,7 @@ define(function (require) {
         var searchSource = group.searchSource;
         var params = group.params;
         var groupId = group.id;
+        const groupColor = group.color;
         searchSource.onResults().then(function onResults(searchResp) {
           var events = [];
 
@@ -126,7 +125,7 @@ define(function (require) {
                   start: moment(startValue).toDate(),
                   type: 'box',
                   group: $scope.groupsOnSeparateLevels === true ? index : 0,
-                  style: 'background-color: ' + mapGroupIdToColor(groupId) + '; color: #fff;',
+                  style: 'background-color: ' + groupColor + '; color: #fff;',
                   groupId: groupId
                 };
 
@@ -175,19 +174,13 @@ define(function (require) {
       var initGroups = function () {
         initTimeline();
 
-        var groupIds = [0]; // 0 should always be there in case user switch to mixed mode
-        _.each($scope.groups, function (group) {
-          groupIds.push(group.id);
-        });
-        mapGroupIdToColor = color(groupIds);
-
         var groups = [];
         if ($scope.groupsOnSeparateLevels === true) {
           _.each($scope.groups, function (group, index) {
             groups.push({
               id: index,
               content: group.label,
-              style: 'background-color:' + mapGroupIdToColor(group.id) + '; color: #fff;'
+              style: 'background-color:' + group.color + '; color: #fff;'
             });
           });
         } else {

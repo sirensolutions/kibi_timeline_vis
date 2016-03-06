@@ -9,7 +9,9 @@ define(function (require) {
   var vis = require('vis');
 
   require('ui/modules').get('kibi_timeline_vis/kibi_timeline_vis')
-  .directive('kibiTimelineVisParams', function ($rootScope, savedSearches) {
+  .directive('kibiTimelineVisParams', function ($rootScope, savedSearches, Private) {
+
+    var color = Private(require('ui/vislib/components/color/color'));
 
     return {
       restrict: 'E',
@@ -31,7 +33,6 @@ define(function (require) {
           if (takenIds.length === 0) {
             return 5000;
           }
-          takenIds.sort();
           return takenIds[takenIds.length - 1] + 1;
         };
 
@@ -43,6 +44,7 @@ define(function (require) {
               existingGroupIds.push(group.id);
             }
           });
+          existingGroupIds.sort();
           _.each($scope.vis.params.groups, function (group) {
 
             // we need unique ids to manage data series in timeline component
@@ -58,6 +60,11 @@ define(function (require) {
                 group.indexPatternId = savedSearch.searchSource._state.index.id;
               });
             }
+          });
+          // 0 should always be there in case user switch to mixed mode
+          const mapGroupIdToColor = color([0].concat(_.map($scope.vis.params.groups, 'id')));
+          _.each($scope.vis.params.groups, function (group) {
+            group.color = mapGroupIdToColor(group.id);
           });
         }, true);
       }

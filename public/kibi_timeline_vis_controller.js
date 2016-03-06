@@ -69,6 +69,7 @@ define(function (require) {
 
             groups.push({
               id: group.id,
+              color: group.color,
               label: group.groupLabel,
               searchSource: searchSource,
               params: {
@@ -136,3 +137,4 @@ define(function (require) {
 
     });
 });
+
