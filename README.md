@@ -14,7 +14,7 @@ This plugin can be installed in both:
 ### Automatic
 
 ```
-bin/kibana plugin --install sirensolutions/kibi_timeline_vis/0.1.0
+bin/kibana plugin --install sirensolutions/kibi_timeline_vis/0.1.1
 ```
 
 ### Manual    
