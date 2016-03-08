@@ -7,6 +7,7 @@ define(function (require) {
   require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier) {
 
     var filterManager = Private(require('ui/filter_manager/filter_manager'));
+    var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
     var notify = createNotifier({
       location: 'Kibi Timeline'
     });
@@ -226,7 +227,10 @@ define(function (require) {
           if ($scope.groups) {
             initGroups();
             // do not use newValue as it does not have searchSource as we filtered it out
-            _.each($scope.groups, initSingleGroup);
+            _.each($scope.groups, (group, index) => {
+              requestQueue.markAllRequestsWithSourceIdAsActive(group.searchSource._id);
+              initSingleGroup(group, index);
+            });
             courier.fetch();
           }
         },
@@ -235,6 +239,9 @@ define(function (require) {
 
 
       $element.on('$destroy', function () {
+        _.each($scope.groups, (group) => {
+          requestQueue.markAllRequestsWithSourceIdAsInactive(group.searchSource._id);
+        });
         if (timeline) {
           timeline.off('select', onSelect);
         }

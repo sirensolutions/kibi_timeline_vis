@@ -12,8 +12,19 @@ define(function (require) {
         if (r && r.source && r.source._id === _id) {
           // mark source as inactive
           r.source._disabled = true;
-          // remove the request from queue
-          this.splice(i, 1);
+        }
+      }
+    };
+
+    requestQueue.markAllRequestsWithSourceIdAsActive = function (_id) {
+      // iterate backwords so when we remove 1 item we do not care about the length being changed
+      var n = this.length - 1;
+
+      for (var i = n; i >= 0; i--) {
+        var r = this[i];
+        if (r && r.source && r.source._id === _id) {
+          // mark source as inactive
+          r.source._disabled = false;
         }
       }
     };
