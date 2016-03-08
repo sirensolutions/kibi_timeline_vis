@@ -108,7 +108,7 @@ define(function (require) {
         initOptions($scope.savedVis);
       });
 
-      $scope.$watch('vis', function () {
+      $scope.$watch('savedVis', function () {
         if ($scope.savedVis) {
           initOptions($scope.savedVis);
           initSearchSources($scope.savedVis);

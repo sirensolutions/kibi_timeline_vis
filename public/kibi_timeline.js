@@ -227,10 +227,7 @@ define(function (require) {
           if ($scope.groups) {
             initGroups();
             // do not use newValue as it does not have searchSource as we filtered it out
-            _.each($scope.groups, (group, index) => {
-              requestQueue.markAllRequestsWithSourceIdAsActive(group.searchSource._id);
-              initSingleGroup(group, index);
-            });
+            _.each($scope.groups, initSingleGroup);
             courier.fetch();
           }
         },
