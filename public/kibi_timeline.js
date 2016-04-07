@@ -8,6 +8,8 @@ define(function (require) {
 
     var filterManager = Private(require('ui/filter_manager/filter_manager'));
     var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
+    var timelineHelper = Private(require('./lib/helpers/timeline_helper'));
+
     var notify = createNotifier({
       location: 'Kibi Timeline'
     });
@@ -36,22 +38,6 @@ define(function (require) {
           var value = selected.value;
           var operator = '+';
           filterManager.add(field, value, operator, index);
-        }
-      };
-
-      var _isMultivalued = function (doc, field) {
-        return doc[field] instanceof Array;
-      };
-
-      var _pickFirstIfMultivalued = function (doc, field, defaultValue) {
-        if (!doc[field]) {
-          return defaultValue || '';
-        } else {
-          if (_isMultivalued(doc, field) && doc[field].length > 0) {
-            return doc[field][0];
-          } else {
-            return doc[field];
-          }
         }
       };
 
@@ -105,24 +91,32 @@ define(function (require) {
             var detectedMultivaluedLabel;
             var detectedMultivaluedStart;
             var detectedMultivaluedEnd;
-            _.each(searchResp.hits.hits, function (hit) {
-              if (hit._source[params.startField]) {
+            var labelFieldValue;
+            var startFieldValue;
+            var endFieldValue;
 
-                if (_isMultivalued(hit._source, params.labelField)) {
-                  detectedMultivaluedLabel = true;
-                }
-                if (_isMultivalued(hit._source, params.startField)) {
+            _.each(searchResp.hits.hits, function (hit) {
+              var labelFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.labelField);
+              var startFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.startField);
+              var endFieldValue = null;
+
+              if (startFieldValue) {
+
+                if (timelineHelper.isMultivalued(startFieldValue)) {
                   detectedMultivaluedStart = true;
                 }
+                if (timelineHelper.isMultivalued(labelFieldValue)) {
+                  detectedMultivaluedLabel = true;
+                }
                 var indexId = searchSource.get('index').id;
-                var startValue = _pickFirstIfMultivalued(hit._source, params.startField);
-                var labelFieldValue = _pickFirstIfMultivalued(hit._source, params.labelField, '');
+                var startValue = timelineHelper.pickFirstIfMultivalued(startFieldValue);
+                var labelValue = timelineHelper.pickFirstIfMultivalued(labelFieldValue, '');
                 var e =  {
                   // index, field and content needed to create a filter on click
                   index: indexId,
                   field: params.labelField,
-                  content: '<div title="index: ' + indexId + ', field: ' + params.labelField + '">' + labelFieldValue + '</div>',
-                  value: labelFieldValue,
+                  content: '<div title="index: ' + indexId + ', field: ' + params.labelField + '">' + labelValue + '</div>',
+                  value: labelValue,
                   start: moment(startValue).toDate(),
                   type: 'box',
                   group: $scope.groupsOnSeparateLevels === true ? index : 0,
@@ -131,15 +125,16 @@ define(function (require) {
                 };
 
                 if (params.endField) {
-                  if (_isMultivalued(hit._source, params.endField)) {
+                  endFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.endField);
+                  if (timelineHelper.isMultivalued(endFieldValue)) {
                     detectedMultivaluedEnd = true;
                   }
-                  if (!hit._source[params.endField]) {
+                  if (!endFieldValue) {
                     // here the end field value missing but expected
                     // force the event to be of type point
                     e.type = 'point';
                   } else {
-                    var endValue = _pickFirstIfMultivalued(hit._source, params.endField);
+                    var endValue = timelineHelper.pickFirstIfMultivalued(endFieldValue);
                     if (startValue === endValue) {
                       // also force it to be a point
                       e.type = 'point';

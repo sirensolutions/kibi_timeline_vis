@@ -45,8 +45,8 @@ bin/kibana plugin  --remove kibi_timeline_vis
 If you are running kibana from folder with a name other than kibana, e.g. kibi
 
 ```
-gulp dev  --kibanahome=kibi
-gulp test --kibanahome=kibi
+gulp dev  --kibanahomepath=../kibi
+gulp test --kibanahomepath=../kibi
 ```
 
 
