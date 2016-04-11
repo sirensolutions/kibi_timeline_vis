@@ -1,7 +1,6 @@
 define(function (require) {
   return function TimelineHelperFactory() {
-    var _ = require('lodash');
-
+    
     function TimelineHelper() {
     }
 
