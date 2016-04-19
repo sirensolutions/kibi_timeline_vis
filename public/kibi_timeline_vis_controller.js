@@ -75,7 +75,8 @@ define(function (require) {
               params: {
                 labelField: group.labelField,
                 startField: group.startField,
-                endField: group.endField
+                endField: group.endField,
+                size: group.size
               }
             });
           });
