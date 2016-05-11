@@ -16,6 +16,9 @@
     "precommit": "gulp lint",
     "build": "gulp build"
   },
+  "dependencies": {
+    "kibi-icons": "sirensolutions/kibi-icons#1.0.0"
+  },
   "devDependencies": {
     "babel-eslint": "^4.1.7",
     "bluebird": "^3.0.6",
