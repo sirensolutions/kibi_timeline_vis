@@ -7,7 +7,11 @@ define(function (require) {
   var module = require('ui/modules').get('kibi_timeline_vis/kibi_timeline_vis', ['kibana']);
   module.controller(
     'KbnTimelineVisController',
-    function ($rootScope, $scope, $route, $log, courier, savedSearches, savedVisualizations, Private, $element, Promise) {
+    function (createNotifier, $location, $rootScope, $scope, $route, savedSearches, savedVisualizations, Private, $element, Promise) {
+
+      var notify = createNotifier({
+        location: 'Kibi Timeline'
+      });
 
       var SearchSource = Private(require('ui/courier/data_source/search_source'));
       var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
@@ -91,18 +95,33 @@ define(function (require) {
         groups: []
       };
       // Set to true in editing mode
-      var editing = false;
+      var configMode = $location.path().indexOf('/visualize/') !== -1;
 
       $scope.savedVis = $route.current.locals.savedVis;
-      if ($scope.savedVis) {
-        editing = true;
-      } else {
+      if (!$scope.savedVis) {
         // NOTE: reloading the visualization to get the searchSource,
         // which would otherwise be unavailable by design
-        savedVisualizations.get($scope.vis.id).then(function (savedVis) {
-          $scope.vis = savedVis.vis;
-          $scope.savedVis = savedVis;
-        });
+        if ($scope.vis.id) {
+          savedVisualizations.get($scope.vis.id).then(function (savedVis) {
+            $scope.vis = savedVis.vis;
+            $scope.savedVis = savedVis;
+          }).catch(notify.error);
+        } else {
+          savedVisualizations.find($scope.vis.title).then(function (results) {
+            const vis = _.find(results.hits, function (hit) {
+              return hit.title === $scope.vis.title;
+            });
+            if (!vis) {
+              notify.error('Unable to find visualization with title == "' + $scope.vis.title + '"');
+              return;
+            }
+            return savedVisualizations.get(vis.id).then(function (savedVis) {
+              $scope.vis = savedVis.vis;
+              $scope.vis.id = vis.id;
+              $scope.savedVis = savedVis;
+            });
+          }).catch(notify.error);
+        }
       }
 
       $scope.$on('change:vis', function () {
@@ -125,7 +144,7 @@ define(function (require) {
         }
       });
 
-      if (editing) {
+      if (configMode) {
         var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
           initOptions($scope.savedVis);
           initSearchSources($scope.savedVis);

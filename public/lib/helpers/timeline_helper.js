@@ -1,6 +1,6 @@
 define(function (require) {
   return function TimelineHelperFactory() {
-    
+
     function TimelineHelper() {
     }
 
