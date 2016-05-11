@@ -3,7 +3,9 @@
 This is a plugin for Kibana 4.3+ and Kibi 0.3 (our extention of Kibana for Relational Data).
 
 The plugin displays a timeline of events taken from multiple saved searches.
-    
+
+![image](img/timeline.png)
+
 ##Installation
 
 This plugin can be installed in both:
