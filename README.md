@@ -16,7 +16,7 @@ This plugin can be installed in both:
 ### Automatic
 
 ```
-./bin/kibi plugin -i kibi_timeline_vis -u https://github.com/sirensolutions/kibi_timeline_vis/raw/0.1.2/target/kibi_timeline_vis-0.1.2.zip
+./bin/kibi plugin -i kibi_timeline_vis -u https://github.com/sirensolutions/kibi_timeline_vis/raw/0.1.4/target/kibi_timeline_vis-0.1.4.zip
 ```
 
 ### Manual    
