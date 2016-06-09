@@ -1,6 +1,6 @@
 {
   "name": "kibi_timeline",
-  "version": "0.1.3",
+  "version": "4.4.2",
   "dependencies": {
     "lodash": "3.10.1",
     "vis": "4.9.0"
