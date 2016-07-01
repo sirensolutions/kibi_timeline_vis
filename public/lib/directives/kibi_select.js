@@ -175,7 +175,12 @@ define(function (require) {
 
           scope.retrieveError = '';
           if (promise) {
-            promise.then(_renderSelect).catch(function (err) {
+            promise
+            .then(function (items) {
+              return _.sortBy(items, 'label');
+            })
+            .then(_renderSelect)
+            .catch(function (err) {
               scope.retrieveError = _.isEmpty(err) ? '' : err;
               ngModelCtrl.$setValidity('stSelect', false);
             });
