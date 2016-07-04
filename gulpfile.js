@@ -126,7 +126,7 @@ gulp.task('test', ['sync'], function(done) {
 });
 
 gulp.task('testdev', ['sync'], function(done) {
-  spawn('grunt', ['test:dev', '--grep=Kibi Timeline'], {
+  spawn('grunt', ['test:dev', '--browser=Chrome'], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
   }).on('close', done);
