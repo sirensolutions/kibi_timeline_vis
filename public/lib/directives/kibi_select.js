@@ -117,7 +117,6 @@ define(function (require) {
           scope.items = items;
           if (scope.items) {
             if (scope.include && scope.include.length) {
-              // adds the extra items at the head
               // remove elements in items that appear in the extra items
               _.remove(scope.items, function (item) {
                 return !!_.find(scope.include, function (extraItem) {
@@ -126,6 +125,9 @@ define(function (require) {
               });
               scope.items = scope.include.concat(scope.items);
             }
+            // sort by label
+            scope.items = _.sortBy(scope.items, 'label');
+
             if (scope.filter && _.isFunction(scope.filter())) {
               _.remove(scope.items, function (item) {
                 var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
@@ -175,12 +177,7 @@ define(function (require) {
 
           scope.retrieveError = '';
           if (promise) {
-            promise
-            .then(function (items) {
-              return _.sortBy(items, 'label');
-            })
-            .then(_renderSelect)
-            .catch(function (err) {
+            promise.then(_renderSelect).catch(function (err) {
               scope.retrieveError = _.isEmpty(err) ? '' : err;
               ngModelCtrl.$setValidity('stSelect', false);
             });
