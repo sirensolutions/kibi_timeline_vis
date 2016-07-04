@@ -71,8 +71,8 @@ describe('Kibi Directives', function () {
     });
 
     it('should sort the included items too', function () {
-      var items = [ { value: 1, label: 'bbb' } ];
-      var include = [ { value: 2, label: 'aaa' } ];
+      var items = [ { value: 2, label: 'aaa' } ];
+      var include = [ { value: 1, label: 'bbb' } ];
 
       init(null,items, 'search', include);
 
