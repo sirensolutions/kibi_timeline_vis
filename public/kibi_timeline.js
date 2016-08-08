@@ -61,14 +61,12 @@ define(function (require) {
               });
 
               var rangeFilter1 = buildRangeFilter(startF, {
-                gte: selected.startField.value,
-                format: selected.startField.format
+                gte: selected.startField.value
               }, i);
               rangeFilter1.meta.alias = selected.startField.name + ' >= ' + selected.start;
 
               var rangeFilter2 = buildRangeFilter(endF, {
-                lte: selected.endField.value,
-                format: selected.endField.format
+                lte: selected.endField.value
               }, i);
               rangeFilter2.meta.alias = selected.endField.name + ' <= ' + selected.end;
 
