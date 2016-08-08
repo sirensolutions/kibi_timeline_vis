@@ -36,7 +36,7 @@ define(function (require) {
         var selected = data._data[properties.items];
         if (selected) {
           if (selected.start && !selected.end) {
-            // single point do range query
+            // single point - do query match query filter
             var q = {
               query: {
                 match: {}
@@ -52,7 +52,7 @@ define(function (require) {
             };
             queryFilter.addFilters([q]);
           } else if (selected.start && selected.end) {
-            // range do the range query
+            // range - do 2 range filters
             indexPatterns.get(selected.index).then(function (i) {
               var startF = _.find(i.fields, function (f) {
                 return f.name === selected.startField.name;
@@ -304,24 +304,23 @@ define(function (require) {
           initTimeline();
           if ($scope.groups) {
             initGroups();
-
-            var indexeIds = _.map($scope.groups, (g) => {
-              return g.searchSource.get('index').id;
-            });
-
+            var indexIds = [];
             var fieldIds = [];
             _.each($scope.groups, (g) => {
-              if (g.params.startField) {
+              if (g.params.startField && fieldIds.indexOf(g.params.startField) === -1) {
                 fieldIds.push(g.params.startField);
               }
-              if (g.params.endField) {
+              if (g.params.endField && fieldIds.indexOf(g.params.endField) === -1) {
                 fieldIds.push(g.params.endField);
+              }
+              if (indexIds.indexOf(g.searchSource.get('index').id) === -1) {
+                indexIds.push(g.searchSource.get('index').id);
               }
             });
 
             // grab mapping map
             es.indices.getFieldMapping({
-              index: indexeIds,
+              index: indexIds,
               field: fieldIds,
               ignoreUnavailable: false,
               allowNoIndices: false,
