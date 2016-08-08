@@ -2,7 +2,6 @@ define(function (require) {
 
   var _ = require('lodash');
   var vis = require('vis');
-  var moment = require('moment');
   var buildRangeFilter = require('ui/filter_manager/lib/range');
 
   require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier, es, indexPatterns) {
@@ -62,14 +61,12 @@ define(function (require) {
               });
 
               var rangeFilter1 = buildRangeFilter(startF, {
-                gte: selected.startField.value,
-                format: selected.startField.format
+                gte: selected.startField.value
               }, i);
               rangeFilter1.meta.alias = selected.startField.name + ' >= ' + selected.start;
 
               var rangeFilter2 = buildRangeFilter(endF, {
-                lte: selected.endField.value,
-                format: selected.endField.format
+                lte: selected.endField.value
               }, i);
               rangeFilter2.meta.alias = selected.endField.name + ' <= ' + selected.end;
 
@@ -117,36 +114,7 @@ define(function (require) {
         timeline.fit();
       };
 
-      var convertJodaToMomentFormat = function (jodaFormat) {
-        return jodaFormat.replace(/d/g, 'D').replace(/y/g, 'Y');
-      };
-
-      var tryToGetFormat = function (userProvidedMomentFormat, mappingsMap, indexId, typeId, fieldId) {
-        // format not provided by the user try to use the mappings joda format
-        var format;
-        var momentFormat = userProvidedMomentFormat;
-
-        try {
-          format = mappingsMap[indexId].mappings[typeId][fieldId].mapping[fieldId].format;
-          if (format === 'strict_date_optional_time||epoch_millis') {
-            // do nothing for now
-          } else {
-            if (!momentFormat) {
-              momentFormat = convertJodaToMomentFormat(format);
-            }
-          }
-        } catch (err) {
-          notify.warning('Could not retrieve data format for field: ' + fieldId);
-        }
-
-        return {
-          format: format,
-          momentFormat: momentFormat
-        };
-      };
-
-
-      var initSingleGroup = function (group, index, mappingsMap) {
+      var initSingleGroup = function (group, index) {
         var searchSource = group.searchSource;
         var params = group.params;
         var groupId = group.id;
@@ -160,11 +128,15 @@ define(function (require) {
             var detectedMultivaluedEnd;
             var labelFieldValue;
             var startFieldValue;
+            var startRawFieldValue;
             var endFieldValue;
+            var endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
-              var labelFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.labelField);
-              var startFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.startField);
+              labelFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.labelField);
+              startFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.startField);
+              startRawFieldValue = timelineHelper.getDescendantPropValue(hit.fields, params.startField);
+
               var endFieldValue = null;
 
               if (startFieldValue) {
@@ -177,7 +149,7 @@ define(function (require) {
                 }
                 var indexId = searchSource.get('index').id;
                 var startValue = timelineHelper.pickFirstIfMultivalued(startFieldValue);
-                var startFormat = tryToGetFormat(group.startFieldFormat, mappingsMap, indexId, hit._type, params.startField);
+                var startRawValue = timelineHelper.pickFirstIfMultivalued(startRawFieldValue);
                 var labelValue = timelineHelper.pickFirstIfMultivalued(labelFieldValue, '');
                 var content =
                   '<div title="index: ' + indexId +
@@ -189,10 +161,9 @@ define(function (require) {
                   index: indexId,
                   content: content,
                   value: labelValue,
-                  start: startFormat.momentFormat ? moment(startValue, startFormat.momentFormat).toDate() : moment(startValue).toDate(),
+                  start: new Date(startRawValue),
                   startField: {
                     name: params.startField,
-                    format: startFormat.format,
                     value: startValue
                   },
                   type: 'box',
@@ -203,6 +174,7 @@ define(function (require) {
 
                 if (params.endField) {
                   endFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.endField);
+                  endRawFieldValue = timelineHelper.getDescendantPropValue(hit.fields, params.endField);
                   if (timelineHelper.isMultivalued(endFieldValue)) {
                     detectedMultivaluedEnd = true;
                   }
@@ -212,16 +184,15 @@ define(function (require) {
                     e.type = 'point';
                   } else {
                     var endValue = timelineHelper.pickFirstIfMultivalued(endFieldValue);
-                    var endFormat = tryToGetFormat(group.endFieldFormat, mappingsMap, indexId, hit._type, params.endField);
+                    var endRawValue = timelineHelper.pickFirstIfMultivalued(endRawFieldValue);
                     if (startValue === endValue) {
                       // also force it to be a point
                       e.type = 'point';
                     } else {
                       e.type = 'range';
-                      e.end =  endFormat.momentFormat ? moment(endValue, endFormat.momentFormat).toDate() : moment(endValue).toDate();
+                      e.end =  new Date(endRawValue);
                       e.endField = {
                         name: params.endField,
-                        format: endFormat.format,
                         value: endValue
                       };
                     }
@@ -304,34 +275,10 @@ define(function (require) {
           initTimeline();
           if ($scope.groups) {
             initGroups();
-            var indexIds = [];
-            var fieldIds = [];
-            _.each($scope.groups, (g) => {
-              if (g.params.startField && fieldIds.indexOf(g.params.startField) === -1) {
-                fieldIds.push(g.params.startField);
-              }
-              if (g.params.endField && fieldIds.indexOf(g.params.endField) === -1) {
-                fieldIds.push(g.params.endField);
-              }
-              if (indexIds.indexOf(g.searchSource.get('index').id) === -1) {
-                indexIds.push(g.searchSource.get('index').id);
-              }
+            _.each($scope.groups, (group, index) => {
+              initSingleGroup(group, index);
             });
-
-            // grab mapping map
-            es.indices.getFieldMapping({
-              index: indexIds,
-              field: fieldIds,
-              ignoreUnavailable: false,
-              allowNoIndices: false,
-              includeDefaults: true
-            }).then(function (mappingsMap) {
-              _.each($scope.groups, (group, index) => {
-                initSingleGroup(group, index, mappingsMap);
-              });
-              // do not use newValue as it does not have searchSource as we filtered it out
-              courier.fetch();
-            });
+            courier.fetch();
           }
         },
         true
