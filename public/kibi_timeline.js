@@ -3,12 +3,14 @@ define(function (require) {
   var _ = require('lodash');
   var vis = require('vis');
   var moment = require('moment');
+  var buildRangeFilter = require('ui/filter_manager/lib/range');
 
-  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier) {
+  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier, es, indexPatterns) {
 
-    var filterManager = Private(require('ui/filter_manager/filter_manager'));
     var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
     var timelineHelper = Private(require('./lib/helpers/timeline_helper'));
+
+    var queryFilter = Private(require('ui/filter_bar/query_filter'));
 
     var notify = createNotifier({
       location: 'Kibi Timeline'
@@ -33,11 +35,47 @@ define(function (require) {
         // pass this to a scope variable
         var selected = data._data[properties.items];
         if (selected) {
-          var index = selected.index;
-          var field = selected.field;
-          var value = selected.value;
-          var operator = '+';
-          filterManager.add(field, value, operator, index);
+          if (selected.start && !selected.end) {
+            // single point - do query match query filter
+            var q = {
+              query: {
+                match: {}
+              },
+              meta: {
+                index: selected.index
+              }
+            };
+
+            q.query.match[selected.startField.name] = {
+              query: selected.start.getTime(),
+              type: 'phrase'
+            };
+            queryFilter.addFilters([q]);
+          } else if (selected.start && selected.end) {
+            // range - do 2 range filters
+            indexPatterns.get(selected.index).then(function (i) {
+              var startF = _.find(i.fields, function (f) {
+                return f.name === selected.startField.name;
+              });
+              var endF = _.find(i.fields, function (f) {
+                return f.name === selected.endField.name;
+              });
+
+              var rangeFilter1 = buildRangeFilter(startF, {
+                gte: selected.startField.value,
+                format: selected.startField.format
+              }, i);
+              rangeFilter1.meta.alias = selected.startField.name + ' >= ' + selected.start;
+
+              var rangeFilter2 = buildRangeFilter(endF, {
+                lte: selected.endField.value,
+                format: selected.endField.format
+              }, i);
+              rangeFilter2.meta.alias = selected.endField.name + ' <= ' + selected.end;
+
+              queryFilter.addFilters([rangeFilter1, rangeFilter2]);
+            });
+          }
         }
       };
 
@@ -79,7 +117,36 @@ define(function (require) {
         timeline.fit();
       };
 
-      var initSingleGroup = function (group, index) {
+      var convertJodaToMomentFormat = function (jodaFormat) {
+        return jodaFormat.replace(/d/g, 'D').replace(/y/g, 'Y');
+      };
+
+      var tryToGetFormat = function (userProvidedMomentFormat, mappingsMap, indexId, typeId, fieldId) {
+        // format not provided by the user try to use the mappings joda format
+        var format;
+        var momentFormat = userProvidedMomentFormat;
+
+        try {
+          format = mappingsMap[indexId].mappings[typeId][fieldId].mapping[fieldId].format;
+          if (format === 'strict_date_optional_time||epoch_millis') {
+            // do nothing for now
+          } else {
+            if (!momentFormat) {
+              momentFormat = convertJodaToMomentFormat(format);
+            }
+          }
+        } catch (err) {
+          notify.warning('Could not retrieve data format for field: ' + fieldId);
+        }
+
+        return {
+          format: format,
+          momentFormat: momentFormat
+        };
+      };
+
+
+      var initSingleGroup = function (group, index, mappingsMap) {
         var searchSource = group.searchSource;
         var params = group.params;
         var groupId = group.id;
@@ -110,14 +177,24 @@ define(function (require) {
                 }
                 var indexId = searchSource.get('index').id;
                 var startValue = timelineHelper.pickFirstIfMultivalued(startFieldValue);
+                var startFormat = tryToGetFormat(group.startFieldFormat, mappingsMap, indexId, hit._type, params.startField);
                 var labelValue = timelineHelper.pickFirstIfMultivalued(labelFieldValue, '');
+                var content =
+                  '<div title="index: ' + indexId +
+                  ', startField: ' + params.startField +
+                  (params.endField ? ', endField: ' + params.endField : '') +
+                  '">' + labelValue + '</div>';
+
                 var e =  {
-                  // index, field and content needed to create a filter on click
                   index: indexId,
-                  field: params.labelField,
-                  content: '<div title="index: ' + indexId + ', field: ' + params.labelField + '">' + labelValue + '</div>',
+                  content: content,
                   value: labelValue,
-                  start: moment(startValue).toDate(),
+                  start: startFormat.momentFormat ? moment(startValue, startFormat.momentFormat).toDate() : moment(startValue).toDate(),
+                  startField: {
+                    name: params.startField,
+                    format: startFormat.format,
+                    value: startValue
+                  },
                   type: 'box',
                   group: $scope.groupsOnSeparateLevels === true ? index : 0,
                   style: 'background-color: ' + groupColor + '; color: #fff;',
@@ -135,12 +212,18 @@ define(function (require) {
                     e.type = 'point';
                   } else {
                     var endValue = timelineHelper.pickFirstIfMultivalued(endFieldValue);
+                    var endFormat = tryToGetFormat(group.endFieldFormat, mappingsMap, indexId, hit._type, params.endField);
                     if (startValue === endValue) {
                       // also force it to be a point
                       e.type = 'point';
                     } else {
                       e.type = 'range';
-                      e.end = moment(endValue).toDate();
+                      e.end =  endFormat.momentFormat ? moment(endValue, endFormat.momentFormat).toDate() : moment(endValue).toDate();
+                      e.endField = {
+                        name: params.endField,
+                        format: endFormat.format,
+                        value: endValue
+                      };
                     }
                   }
                 }
@@ -221,9 +304,34 @@ define(function (require) {
           initTimeline();
           if ($scope.groups) {
             initGroups();
-            // do not use newValue as it does not have searchSource as we filtered it out
-            _.each($scope.groups, initSingleGroup);
-            courier.fetch();
+            var indexIds = [];
+            var fieldIds = [];
+            _.each($scope.groups, (g) => {
+              if (g.params.startField && fieldIds.indexOf(g.params.startField) === -1) {
+                fieldIds.push(g.params.startField);
+              }
+              if (g.params.endField && fieldIds.indexOf(g.params.endField) === -1) {
+                fieldIds.push(g.params.endField);
+              }
+              if (indexIds.indexOf(g.searchSource.get('index').id) === -1) {
+                indexIds.push(g.searchSource.get('index').id);
+              }
+            });
+
+            // grab mapping map
+            es.indices.getFieldMapping({
+              index: indexIds,
+              field: fieldIds,
+              ignoreUnavailable: false,
+              allowNoIndices: false,
+              includeDefaults: true
+            }).then(function (mappingsMap) {
+              _.each($scope.groups, (group, index) => {
+                initSingleGroup(group, index, mappingsMap);
+              });
+              // do not use newValue as it does not have searchSource as we filtered it out
+              courier.fetch();
+            });
           }
         },
         true
