@@ -135,7 +135,7 @@ define(function (require) {
             _.each(searchResp.hits.hits, function (hit) {
               labelFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.labelField);
               startFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.startField);
-              startRawFieldValue = timelineHelper.getDescendantPropValue(hit.fields, params.startField);
+              startRawFieldValue = hit.fields[params.startField];
 
               var endFieldValue = null;
 
@@ -174,7 +174,7 @@ define(function (require) {
 
                 if (params.endField) {
                   endFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.endField);
-                  endRawFieldValue = timelineHelper.getDescendantPropValue(hit.fields, params.endField);
+                  endRawFieldValue = hit.fields[params.endField];
                   if (timelineHelper.isMultivalued(endFieldValue)) {
                     detectedMultivaluedEnd = true;
                   }
