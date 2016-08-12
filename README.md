@@ -15,25 +15,27 @@ This plugin can be installed in both:
 
 ### Automatic
 
-```
-./bin/kibi plugin -i kibi_timeline_vis -u https://github.com/sirensolutions/kibi_timeline_vis/raw/0.1.4/target/kibi_timeline_vis-0.1.4.zip
+```sh
+$ ./bin/kibi plugin -i kibi_timeline_vis -u https://github.com/sirensolutions/kibi_timeline_vis/raw/4.5.3/target/kibi_timeline_vis-4.5.3.zip
 ```
 
 ### Manual    
 
-```
-git clone https://github.com/sirensolutions/kibi_timeline_vis.git
-cd kibi_timeline_vis
-npm install
-npm run build
-cp -R build/kibi_timeline_vis KIBANA_FOLDER_PATH/installedPlugins/
+```sh
+$ git clone https://github.com/sirensolutions/kibi_timeline_vis.git
+$ cd kibi_timeline_vis
+$ npm install
+$ npm run build
+$ gulp package
+$ unzip target/kibi_timeline_vis-4.5.3.zip -d KIBANA_FOLDER_PATH/installedPlugins/
 ```
 
 ## Uninstall
 
+```sh
+$ bin/kibana plugin  --remove kibi_timeline_vis
 ```
-bin/kibana plugin  --remove kibi_timeline_vis
-```
+
 ## Development
 
 - Clone the repository at the same level of a Kibana > 4.2 clone
@@ -46,11 +48,10 @@ bin/kibana plugin  --remove kibi_timeline_vis
 
 If you are running kibana from folder with a name other than kibana, e.g. kibi
 
+```sh
+$ gulp dev  --kibanahomepath=../kibi
+$ gulp test --kibanahomepath=../kibi
 ```
-gulp dev  --kibanahomepath=../kibi
-gulp test --kibanahomepath=../kibi
-```
-
 
 ## Breaking changes with respect to the version embedded in Kibi 0.1x and 0.2.x
 
@@ -62,5 +63,3 @@ ui/kibi/directives/array_param
 ui/kibi/directives/kibi_select
 ui/kibi/helpers/array_helper
 ```
-
-
