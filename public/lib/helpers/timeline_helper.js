@@ -1,6 +1,5 @@
 define(function (require) {
 
-  var vis = require('vis');
   var moment = require('moment');
 
   return function TimelineHelperFactory() {
