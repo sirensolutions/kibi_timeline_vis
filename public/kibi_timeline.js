@@ -4,7 +4,7 @@ define(function (require) {
   var vis = require('vis');
   var buildRangeFilter = require('ui/filter_manager/lib/range');
 
-  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier, es, indexPatterns) {
+  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier, es, indexPatterns, config) {
 
     var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
     var timelineHelper = Private(require('./lib/helpers/timeline_helper'));
@@ -80,6 +80,13 @@ define(function (require) {
         if (!timeline) {
           // create a new one
           timeline = new vis.Timeline($element[0]);
+          var utcOffset = null;
+          utcOffset = timelineHelper.changeTimezone(config.get('dateFormat:tz'));
+          if (utcOffset !== 'Browser') {
+            $scope.options.moment = function (date) {
+              return vis.moment(date).utcOffset(utcOffset);
+            };
+          }
           if ($scope.options) {
             timeline.setOptions($scope.options);
           }
@@ -252,7 +259,6 @@ define(function (require) {
           return;
         }
         initTimeline();
-        timeline.setOptions(newOptions);
         timeline.redraw();
       }, true); // has to be true in other way the change in height is not detected
 

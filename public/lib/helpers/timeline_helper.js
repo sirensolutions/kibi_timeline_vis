@@ -1,4 +1,7 @@
 define(function (require) {
+
+  var moment = require('moment');
+
   return function TimelineHelperFactory() {
 
     function TimelineHelper() {
@@ -23,6 +26,14 @@ define(function (require) {
         } else {
           return value;
         }
+      }
+    };
+
+    TimelineHelper.prototype.changeTimezone  = function (timezone) {
+      if (timezone !== 'Browser') {
+        return moment().tz(timezone).format('Z');
+      } else {
+        return timezone;
       }
     };
 
