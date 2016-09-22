@@ -46,12 +46,26 @@ $ bin/kibana plugin  --remove kibi_timeline_vis
   `npm start`
 - run tests with `npm test`
 
-If you are running kibana from folder with a name other than kibana, e.g. kibi
+If you are running kibana from folder with a name other than kibana, e.g. kibi-internal
 
 ```sh
-$ gulp dev  --kibanahomepath=../kibi
-$ gulp test --kibanahomepath=../kibi
+$ gulp dev  --kibanahomepath=../kibi-internal
+$ gulp test --kibanahomepath=../kibi-internal
+$ gulp testdev --kibanahomepath=../kibi-internal
 ```
+
+The best setup for development is to run 2 parallel terminals with:
+
+```sh
+$ gulp dev  --kibanahomepath=../kibi-internal
+$ gulp testdev --kibanahomepath=../kibi-internal
+```
+
+In this way files are synced on every change 
+and you can reload the browser to re-run tests 
+In the browser adress bar put ```?grep=Kibi Timeline``` 
+to execute test relevant for this visualisation
+
 
 ## Breaking changes with respect to the version embedded in Kibi 0.1x and 0.2.x
 
