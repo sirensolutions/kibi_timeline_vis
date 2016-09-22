@@ -1,30 +1,34 @@
-describe('Visualization', function () {
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
+var ngMock = require('ngMock');
+var expect = require('expect.js');
 
-  var Vis;
+require('../kibi_timeline');
 
-  var vis;
-  var init;
+describe('Kibi Timeline', function () {
+  describe('Visualization', function () {
 
-  beforeEach(ngMock.module('kibana', 'kibi_timeline_vis/kibi_timeline_vis'));
+    var vis;
 
-  beforeEach(ngMock.inject(function ($injector) {
-    var Private = $injector.get('Private');
-    Vis = Private(require('ui/Vis'));
-    var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    beforeEach(function () {
 
-    init = function () {
-      vis = new Vis(indexPattern, {
-        type: 'kibi_timeline'
+      ngMock.module('kibana', function ($provide) {
+        $provide.constant('kbnDefaultAppId', '');
+        $provide.constant('kibiDefaultDashboardId', '');
+        $provide.constant('kibiEnterpriseEnabled', false);
+        $provide.constant('elasticsearchPlugins', ['siren-join']);
       });
 
-    };
-  }));
+      ngMock.inject(function ($injector, Private) {
+        var Vis = Private(require('ui/Vis'));
+        var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        vis = new Vis(indexPattern, {
+          type: 'kibi_timeline'
+        });
+      });
+    });
 
-  it('check vis', function () {
-    init();
-    expect(vis.type.name).to.be('kibi_timeline');
+    it('check vis', function () {
+      expect(vis.type.name).to.be('kibi_timeline');
+    });
+
   });
-
 });
