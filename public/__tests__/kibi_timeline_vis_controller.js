@@ -16,37 +16,51 @@ describe('Kibi Timeline', function () {
 
   function init(options) {
 
-    var fakeSavedSearches = [
-      {
-        id: 'savedSearchIdA',
-        searchSource: {
-          _state: {
-            index: {}
-          }
-        }
-      },
-      {
-        id: 'savedSearchIdB',
-        searchSource: {
-          _state: {
-            index: {}
-          }
-        }
-      }
-    ];
-
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
       $provide.constant('kibiEnterpriseEnabled', false);
       $provide.constant('elasticsearchPlugins', ['siren-join']);
-      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', fakeSavedSearches));
+      $provide.service('savedSearches', (Promise, Private) => {
+        const StubIndexPattern = Private(require('testUtils/stub_index_pattern'));
+        const mockLogstashFields = Private(require('fixtures/logstash_fields'));
+
+        var indexPatternAStub = new StubIndexPattern('logstash-*', 'time', mockLogstashFields);
+        var indexPatternBStub = new StubIndexPattern('logstash-*', 'time', mockLogstashFields);
+
+        var fakeSavedSearches = [
+          {
+            id: 'savedSearchIdA',
+            searchSource: {
+              _state: {
+                index: indexPatternAStub
+              }
+            }
+          },
+          {
+            id: 'savedSearchIdB',
+            searchSource: {
+              _state: {
+                index: indexPatternBStub
+              }
+            }
+          }
+        ];
+        return mockSavedObjects(Promise)('savedSearches', fakeSavedSearches);
+      });
     });
 
     ngMock.inject(function (_$rootScope_, $controller, _$location_) {
       var fakeRoute = {
         current: {
           locals: {
+            savedVis: {
+              vis: {
+                params: {
+                  groups: []
+                }
+              }
+            }
           }
         }
       };
@@ -55,7 +69,6 @@ describe('Kibi Timeline', function () {
       $scope.vis = {
         id: 'a'
       };
-      $scope.savedVis = {};
       $element = $('<div></div>');
       $controller('KbnTimelineVisController', {
         $scope: $scope,
@@ -121,17 +134,19 @@ describe('Kibi Timeline', function () {
       };
 
       $scope.$digest();
-      console.log($scope.savedObj.groups[0].searchSource);
+      // console.log($scope.savedObj.groups[0].searchSource);
       var group0 = $scope.savedObj.groups[0];
       var group1 = $scope.savedObj.groups[1];
 
-      expect(group0.searchSource._id).to.be.eqaul('_kibi_timetable_ids_source_flagsavedSearchIdA');
-      expect(group1.searchSource._id).to.be.eqaul('_kibi_timetable_ids_source_flagsavedSearchIdB');
+      // console.log(">>>" + group0);
+
+      expect(group0.searchSource._id).to.be.equal('_kibi_timetable_ids_source_flagsavedSearchIdA');
+      // expect(group1.searchSource._id).to.be.equal('_kibi_timetable_ids_source_flagsavedSearchIdB');
       done();
     });
 
 
-    // sinon.stub($location, 'path').returns('/visalise/');
+    // sinon.stub($location, 'path').returns('/visualise/');
 
   });
 });
