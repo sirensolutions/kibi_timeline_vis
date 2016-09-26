@@ -1,33 +1,61 @@
-var ngMock = require('ngMock');
-var expect = require('expect.js');
-var $ = require('jquery');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
+const $ = require('jquery');
+const sinon = require('auto-release-sinon');
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+
 require('../kibi_timeline_vis_controller');
 
 describe('Kibi Timeline', function () {
+
+  require('testUtils/noDigestPromises').activateForSuite();
+
   var $scope;
   var $element;
+  var $location;
 
   function init(options) {
+
+    var fakeSavedSearches = [
+      {
+        id: 'savedSearchIdA',
+        searchSource: {
+          _state: {
+            index: {}
+          }
+        }
+      },
+      {
+        id: 'savedSearchIdB',
+        searchSource: {
+          _state: {
+            index: {}
+          }
+        }
+      }
+    ];
 
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
       $provide.constant('kibiEnterpriseEnabled', false);
       $provide.constant('elasticsearchPlugins', ['siren-join']);
+      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', fakeSavedSearches));
     });
 
-    ngMock.inject(function (_$rootScope_, $controller) {
+    ngMock.inject(function (_$rootScope_, $controller, _$location_) {
       var fakeRoute = {
         current: {
           locals: {
           }
         }
       };
-
+      $location = _$location_;
       $scope = _$rootScope_;
       $scope.vis = {
         id: 'a'
       };
+      $scope.savedVis = {};
       $element = $('<div></div>');
       $controller('KbnTimelineVisController', {
         $scope: $scope,
@@ -56,6 +84,54 @@ describe('Kibi Timeline', function () {
 
       expect($scope.options).to.eql(expectedOptions);
     });
+
+    it('Should init search source without values', function () {
+      init();
+      expect($scope.savedObj.groups).to.be.undefined;
+      expect($scope.savedObj.groupsOnSeparateLevels).to.be.undefined;
+    });
+
+
+    it('Should correctly init search sources for each group', function (done) {
+      init();
+      $scope.savedVis = {
+        vis: {
+          params: {
+            groups: [{
+              color: 'colorA',
+              endField: 'endFieldA',
+              groupLabel: 'groupLabelA',
+              id: 'idA',
+              indexPatternId: 'indexPatternIdA',
+              labelField: 'labelFieldA',
+              savedSearchId: 'savedSearchIdA',
+              startField: 'startFieldA'
+            },{
+              color: 'colorB',
+              endField: 'endFieldB',
+              groupLabel: 'groupLabelB',
+              id: 'idB',
+              indexPatternId: 'indexPatternIdB',
+              labelField: 'labelFieldB',
+              savedSearchId: 'savedSearchIdB',
+              startField: 'startFieldB'
+            }]
+          }
+        }
+      };
+
+      $scope.$digest();
+      console.log($scope.savedObj.groups[0].searchSource);
+      var group0 = $scope.savedObj.groups[0];
+      var group1 = $scope.savedObj.groups[1];
+
+      expect(group0.searchSource._id).to.be.eqaul('_kibi_timetable_ids_source_flagsavedSearchIdA');
+      expect(group1.searchSource._id).to.be.eqaul('_kibi_timetable_ids_source_flagsavedSearchIdB');
+      done();
+    });
+
+
+    // sinon.stub($location, 'path').returns('/visalise/');
 
   });
 });
