@@ -21,12 +21,13 @@ describe('Kibi Timeline', function () {
       $provide.constant('kibiDefaultDashboardId', '');
       $provide.constant('kibiEnterpriseEnabled', false);
       $provide.constant('elasticsearchPlugins', ['siren-join']);
-      $provide.service('savedSearches', (Promise, Private) => {
-        const StubIndexPattern = Private(require('testUtils/stub_index_pattern'));
-        const mockLogstashFields = Private(require('fixtures/logstash_fields'));
 
-        var indexPatternAStub = new StubIndexPattern('logstash-*', 'time', mockLogstashFields);
-        var indexPatternBStub = new StubIndexPattern('logstash-*', 'time', mockLogstashFields);
+      $provide.service('savedSearches', (Promise, Private) => {
+
+        const StubIndexPattern = Private(require('testUtils/stub_index_pattern'));
+
+        var indexPatternAStub = new StubIndexPattern('logstash-*', 'time', []);
+        var indexPatternBStub = new StubIndexPattern('logstash-*', 'time', []);
 
         var fakeSavedSearches = [
           {
@@ -41,7 +42,7 @@ describe('Kibi Timeline', function () {
             id: 'savedSearchIdB',
             searchSource: {
               _state: {
-                index: indexPatternBStub
+                index: indexPatternAStub
               }
             }
           }
@@ -54,13 +55,7 @@ describe('Kibi Timeline', function () {
       var fakeRoute = {
         current: {
           locals: {
-            savedVis: {
-              vis: {
-                params: {
-                  groups: []
-                }
-              }
-            }
+
           }
         }
       };
@@ -69,6 +64,7 @@ describe('Kibi Timeline', function () {
       $scope.vis = {
         id: 'a'
       };
+      $scope.savedVis = {};
       $element = $('<div></div>');
       $controller('KbnTimelineVisController', {
         $scope: $scope,
@@ -134,19 +130,18 @@ describe('Kibi Timeline', function () {
       };
 
       $scope.$digest();
-      // console.log($scope.savedObj.groups[0].searchSource);
-      var group0 = $scope.savedObj.groups[0];
-      var group1 = $scope.savedObj.groups[1];
+      // here there is async action in the controller to fetch the saved searches so
+      // we have to wait a bit before they are ready
 
-      // console.log(">>>" + group0);
+      setTimeout(function () {
+        var group0 = $scope.savedObj.groups[0];
+        var group1 = $scope.savedObj.groups[1];
 
-      expect(group0.searchSource._id).to.be.equal('_kibi_timetable_ids_source_flagsavedSearchIdA');
-      // expect(group1.searchSource._id).to.be.equal('_kibi_timetable_ids_source_flagsavedSearchIdB');
-      done();
+        expect(group0.searchSource._id).to.equal('_kibi_timetable_ids_source_flagsavedSearchIdA');
+        expect(group1.searchSource._id).to.equal('_kibi_timetable_ids_source_flagsavedSearchIdB');
+        done();
+      }, 200);
     });
-
-
-    // sinon.stub($location, 'path').returns('/visualise/');
 
   });
 });
