@@ -20,7 +20,8 @@ define(function (require) {
         groups: '=',
         groupsOnSeparateLevels: '=',
         options: '=',
-        selectValue: '='
+        selectValue: '=',
+        notifyNull: '='
       },
       restrict: 'E',
       replace: true,
@@ -164,7 +165,9 @@ define(function (require) {
 
             _.each(searchResp.hits.hits, function (hit) {
               if (hit.fields[params.startField] === null || hit.fields[params.startField] === undefined) {
-                notify.error('Null start date not allowed! Check your indexes...');
+                if ($scope.notifyNull) {
+                  notify.error('Null start date not allowed! Check your indexes...');
+                }
                 return;
               } else {
                 startRawFieldValue = hit.fields[params.startField];
