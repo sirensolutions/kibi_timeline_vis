@@ -87,6 +87,7 @@ define(function (require) {
 
           $scope.savedObj.groups = groups;
           $scope.savedObj.groupsOnSeparateLevels = savedVis.vis.params.groupsOnSeparateLevels;
+          $scope.savedObj.selectValue = savedVis.vis.params.selectValue;
         });
       }
 
@@ -157,4 +158,3 @@ define(function (require) {
 
     });
 });
-
