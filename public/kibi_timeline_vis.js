@@ -21,7 +21,8 @@ define(function (require) {
       params: {
         defaults: {
           groups: [],
-          groupsOnSeparateLevels: false
+          groupsOnSeparateLevels: false,
+          selectValue: 'id'
         },
         editor: '<kibi-timeline-vis-params></kibi-timeline-vis-params>'
       },

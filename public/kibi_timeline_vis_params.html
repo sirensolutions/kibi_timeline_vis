@@ -74,6 +74,17 @@
           <input type="checkbox" ng-model="vis.params.groupsOnSeparateLevels"/> Groups rendered on separate levels
         </label>
       </div>
+      <div class="form-group">
+        <label>On select:</label>
+        <div class="radio">
+          <label>
+            <input type="radio" ng-model="vis.params.selectValue" value="id" /> Select and filter object ID
+          </label>
+          <label>
+            <input type="radio" ng-model="vis.params.selectValue" value="date" /> Select and filter date/range associated with object
+          </label>
+        </div>
+      </div>
     </form>
   </div>
 

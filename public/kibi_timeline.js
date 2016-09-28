@@ -20,6 +20,7 @@ define(function (require) {
         groups: '=',
         groupsOnSeparateLevels: '=',
         options: '=',
+        selectValue: '='
       },
       restrict: 'E',
       replace: true,
@@ -34,9 +35,54 @@ define(function (require) {
         // pass this to a scope variable
         var selected = data._data[properties.items];
         if (selected) {
-          if (selected.start && !selected.end) {
-            // single point - do query match query filter
-            var q = {
+          if ($scope.selectValue === 'date') {
+            if (selected.start && !selected.end) {
+              // single point - do query match query filter
+              var q1 = {
+                query: {
+                  match: {}
+                },
+                meta: {
+                  index: selected.index
+                }
+              };
+
+              q1.query.match[selected.startField.name] = {
+                query: selected.start.getTime(),
+                type: 'phrase'
+              };
+              queryFilter.addFilters([q1]);
+            } else if (selected.start && selected.end) {
+              // range - do 2 range filters
+              indexPatterns.get(selected.index).then(function (i) {
+                var startF = _.find(i.fields, function (f) {
+                  return f.name === selected.startField.name;
+                });
+                var endF = _.find(i.fields, function (f) {
+                  return f.name === selected.endField.name;
+                });
+
+                var rangeFilter1 = buildRangeFilter(startF, {
+                  gte: selected.startField.value
+                }, i);
+                rangeFilter1.meta.alias = selected.startField.name + ' >= ' + selected.start;
+
+                var rangeFilter2 = buildRangeFilter(endF, {
+                  lte: selected.endField.value
+                }, i);
+                rangeFilter2.meta.alias = selected.endField.name + ' <= ' + selected.end;
+
+                queryFilter.addFilters([rangeFilter1, rangeFilter2]);
+              });
+            }
+          } else if ($scope.selectValue === 'id') {
+            var searchField = undefined;
+            for (var i = 0; i < $scope.groups.length; i++) {
+              if (selected.groupId === $scope.groups[i].id) {
+                searchField = $scope.groups[i].params.labelField;
+              }
+            }
+            var q2 = {
               query: {
                 match: {}
               },
@@ -44,34 +90,11 @@ define(function (require) {
                 index: selected.index
               }
             };
-
-            q.query.match[selected.startField.name] = {
-              query: selected.start.getTime(),
+            q2.query.match[searchField] = {
+              query: selected.value,
               type: 'phrase'
             };
-            queryFilter.addFilters([q]);
-          } else if (selected.start && selected.end) {
-            // range - do 2 range filters
-            indexPatterns.get(selected.index).then(function (i) {
-              var startF = _.find(i.fields, function (f) {
-                return f.name === selected.startField.name;
-              });
-              var endF = _.find(i.fields, function (f) {
-                return f.name === selected.endField.name;
-              });
-
-              var rangeFilter1 = buildRangeFilter(startF, {
-                gte: selected.startField.value
-              }, i);
-              rangeFilter1.meta.alias = selected.startField.name + ' >= ' + selected.start;
-
-              var rangeFilter2 = buildRangeFilter(endF, {
-                lte: selected.endField.value
-              }, i);
-              rangeFilter2.meta.alias = selected.endField.name + ' <= ' + selected.end;
-
-              queryFilter.addFilters([rangeFilter1, rangeFilter2]);
-            });
+            queryFilter.addFilters([q2]);
           }
         }
       };
