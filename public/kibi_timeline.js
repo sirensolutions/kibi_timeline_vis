@@ -20,7 +20,8 @@ define(function (require) {
         groups: '=',
         groupsOnSeparateLevels: '=',
         options: '=',
-        selectValue: '='
+        selectValue: '=',
+        notifyNull: '='
       },
       restrict: 'E',
       replace: true,
@@ -163,9 +164,17 @@ define(function (require) {
             var endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
+              if (hit.fields[params.startField] === null || hit.fields[params.startField] === undefined) {
+                if ($scope.notifyNull) {
+                  notify.warning('Check your data - null start date not allowed.' +
+                  ' You can disable these errors in visualisation configuration');
+                }
+                return;
+              } else {
+                startRawFieldValue = hit.fields[params.startField];
+              }
               labelFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.labelField);
               startFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.startField);
-              startRawFieldValue = hit.fields[params.startField];
 
               var endFieldValue = null;
 
