@@ -166,7 +166,8 @@ define(function (require) {
             _.each(searchResp.hits.hits, function (hit) {
               if (hit.fields[params.startField] === null || hit.fields[params.startField] === undefined) {
                 if ($scope.notifyNull) {
-                  notify.error('Null start date not allowed! Check your indexes...');
+                  notify.warning('Check your data - null start date not allowed.' +
+                  ' You can disable these errors in visualisation configuration');
                 }
                 return;
               } else {
