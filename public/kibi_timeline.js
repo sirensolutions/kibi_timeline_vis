@@ -164,7 +164,8 @@ define(function (require) {
             var endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
-              if (hit.fields[params.startField] === null || hit.fields[params.startField] === undefined) {
+              if (hit.fields[params.startField] === null || hit.fields[params.startField] === undefined
+                 || isNaN(hit.fields[params.startField])) {
                 if ($scope.notifyNull) {
                   notify.warning('Check your data - null start date not allowed.' +
                   ' You can disable these errors in visualisation configuration');
