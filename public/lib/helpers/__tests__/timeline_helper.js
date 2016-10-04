@@ -4,6 +4,11 @@ var timelineHelper = require('../timeline_helper')();
 describe('TimelineHelper', function () {
 
   describe('getDescendantPropValue', function () {
+    it('no data', function () {
+      var o = {};
+      expect(timelineHelper.getDescendantPropValue(o, 'p1.p2')).to.be(undefined);
+    });
+
     it('one level', function () {
       var o = {
         p1: {
