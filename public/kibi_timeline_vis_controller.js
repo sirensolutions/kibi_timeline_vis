@@ -88,7 +88,7 @@ define(function (require) {
           $scope.savedObj.groups = groups;
           $scope.savedObj.groupsOnSeparateLevels = savedVis.vis.params.groupsOnSeparateLevels;
           $scope.savedObj.selectValue = savedVis.vis.params.selectValue;
-          $scope.savedObj.notifyNull = savedVis.vis.params.notifyNull;
+          $scope.savedObj.notifyDataErrors = savedVis.vis.params.notifyDataErrors;
         });
       }
 
