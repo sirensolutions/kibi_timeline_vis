@@ -4,6 +4,29 @@ var timelineHelper = require('../timeline_helper')();
 describe('TimelineHelper', function () {
 
   describe('getDescendantPropValue', function () {
+    it('no data', function () {
+      var o = {};
+      expect(timelineHelper.getDescendantPropValue(o, 'p1.p2')).to.be(undefined);
+    });
+
+    it('null', function () {
+      var o = {
+        p1: {
+          p2: null
+        }
+      };
+      expect(timelineHelper.getDescendantPropValue(o, 'p1.p2')).to.be(null);
+    });
+
+    it('empty string', function () {
+      var o = {
+        p1: {
+          p2: ''
+        }
+      };
+      expect(timelineHelper.getDescendantPropValue(o, 'p1.p2')).to.be('');
+    });
+
     it('one level', function () {
       var o = {
         p1: {
