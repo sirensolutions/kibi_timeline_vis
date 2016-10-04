@@ -23,7 +23,7 @@ define(function (require) {
           groups: [],
           groupsOnSeparateLevels: false,
           selectValue: 'id',
-          notifyDataErrors: true
+          notifyDataErrors: false
         },
         editor: '<kibi-timeline-vis-params></kibi-timeline-vis-params>'
       },

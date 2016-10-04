@@ -231,7 +231,7 @@ define(function (require) {
                 }
                 events.push(e);
               } else {
-                if ($scope.notifyDataErrors || $scope.notifyDataErrors === '') {
+                if ($scope.notifyDataErrors) {
                   notify.warning('Check your data - null start date not allowed.' +
                   ' You can disable these errors in visualisation configuration');
                 }
