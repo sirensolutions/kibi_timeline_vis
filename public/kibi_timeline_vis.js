@@ -14,7 +14,7 @@ define(function (require) {
     // Vis object of this type.
     return new TemplateVisType({
       name: 'kibi_timeline',
-      title: 'Kibi Timeline',
+      title: 'Kibi timeline',
       icon: 'fak-timeline',
       description: 'Timeline widget for visualization of events',
       template: require('plugins/kibi_timeline_vis/kibi_timeline_vis.html'),
