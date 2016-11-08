@@ -18,7 +18,7 @@ describe('Kibi Timeline', function () {
 
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('kibiDefaultDashboardTitle', '');
       $provide.constant('kibiEnterpriseEnabled', false);
       $provide.constant('elasticsearchPlugins', ['siren-join']);
 
