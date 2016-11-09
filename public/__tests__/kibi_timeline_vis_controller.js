@@ -97,7 +97,7 @@ describe('Kibi Timeline', function () {
       $scope.$emit('change:vis');
       $scope.$digest();
 
-      expect($scope.initOptions.calledTwice).to.be.true;
+      expect($scope.initOptions.calledTwice).to.be(true);
     });
 
     it('should init groups', function (done) {
