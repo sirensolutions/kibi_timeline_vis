@@ -7,16 +7,15 @@ define(function (require) {
   var module = require('ui/modules').get('kibi_timeline_vis/kibi_timeline_vis', ['kibana']);
   module.controller(
     'KbnTimelineVisController',
-    function (createNotifier, $location, $rootScope, $scope, $route, savedSearches, savedVisualizations, Private, $element, Promise) {
-
+    function (createNotifier, $location, $rootScope, $scope, $route, savedSearches, savedVisualizations, Private, $element, Promise,
+              indexPatterns) {
       var notify = createNotifier({
         location: 'Kibi Timeline'
       });
-
       var SearchSource = Private(require('ui/courier/data_source/search_source'));
       var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
 
-      function initOptions(savedVis) {
+      $scope.initOptions = function () {
         var height = $element[0].offsetHeight;
         // make sure that it is never too small
         // as the height might be reported wrongly when element is not yet fully rendered
@@ -36,62 +35,67 @@ define(function (require) {
           autoResize: false
         };
         $scope.options = options;
-      }
+      };
 
+      $scope.initSearchSources = function (savedVis) {
+        const getSavedSearches = Promise.all(
+          _(savedVis.vis.params.groups)
+          .filter(group => group.savedSearchId)
+          .groupBy('savedSearchId')
+          .map((groups, savedSearchId) => {
+            return savedSearches.get(savedSearchId)
+            .then(savedSearch => {
+              return { savedSearch, groups };
+            });
+          })
+          .value()
+        );
 
-      function initSearchSources(savedVis) {
-        // here iterate over groups from savedVis.vis.params.groups
-        var promises = [];
-        _.each(savedVis.vis.params.groups, function (group) {
-          if (group.savedSearchId) {
-            promises.push(
-              savedSearches.get(group.savedSearchId).then(function (savedSearch) {
-                return {
-                  savedSearch: savedSearch,
-                  group: group
-                };
-              })
-            );
-          }
+        const fields = getSavedSearches.then(results => {
+          return Promise.all(_.map(results, res => {
+            return indexPatterns.get(res.savedSearch.searchSource._state.index.id)
+            .then(indexPattern => indexPattern.fields);
+          }));
         });
 
-        Promise.all(promises).then(function (results) {
-          var groups = [];
+        return Promise.all([ getSavedSearches, fields ])
+        .then(function ([ savedSearchesRes, fields ]) {
+          $scope.savedObj.groups = [];
+          _.each(savedSearchesRes, function ({ savedSearch, groups }, i) {
+            for (let group of groups) {
+              var _id = `_kibi_timetable_ids_source_flag${group.id}${savedSearch.id}`; // used only by kibi
+              requestQueue.markAllRequestsWithSourceIdAsInactive(_id); // used only by kibi
 
-          _.each(results, function (result) {
-            var savedSearch = result.savedSearch;
-            var group = result.group;
+              const searchSource = new SearchSource();
 
-            var _id = '_kibi_timetable_ids_source_flag' + savedSearch.id; // used only by kibi
-            requestQueue.markAllRequestsWithSourceIdAsInactive(_id);      //
+              searchSource.inherits(savedSearch.searchSource);
+              searchSource._id = _id;
+              searchSource.index(savedSearch.searchSource._state.index);
+              searchSource.size(group.size || 100);
+              searchSource.source(_.compact([ group.labelField, group.startField, group.endField ]));
 
-            var searchSource = new SearchSource();
-            searchSource.inherits(savedSearch.searchSource);
-            searchSource._id = _id;
-            searchSource.index(savedSearch.searchSource._state.index);
-            searchSource.size(group.size || 100);
+              $scope.savedObj.groups.push({
+                id: group.id,
+                color: group.color,
+                label: group.groupLabel,
+                searchSource: searchSource,
+                params: {
+                  labelFieldSequence: fields[i].byName[group.labelField].path,
+                  startFieldSequence: fields[i].byName[group.startField].path,
+                  endFieldSequence: group.endField && fields[i].byName[group.endField].path || [],
 
-            groups.push({
-              id: group.id,
-              color: group.color,
-              label: group.groupLabel,
-              searchSource: searchSource,
-              params: {
-                labelField: group.labelField,
-                startField: group.startField,
-                endField: group.endField,
-                size: group.size
-              }
-            });
+                  labelField: group.labelField,
+                  startField: group.startField,
+                  endField: group.endField
+                }
+              });
+            }
           });
 
-          $scope.savedObj.groups = groups;
           $scope.savedObj.groupsOnSeparateLevels = savedVis.vis.params.groupsOnSeparateLevels;
-          $scope.savedObj.selectValue = savedVis.vis.params.selectValue;
-          $scope.savedObj.notifyDataErrors = savedVis.vis.params.notifyDataErrors;
-        });
-      }
-
+        })
+        .catch(notify.error);
+      };
 
       $scope.savedObj = {
         groups: []
@@ -127,13 +131,13 @@ define(function (require) {
       }
 
       $scope.$on('change:vis', function () {
-        initOptions($scope.savedVis);
+        $scope.initOptions();
       });
 
       $scope.$watch('savedVis', function () {
         if ($scope.savedVis) {
-          initOptions($scope.savedVis);
-          initSearchSources($scope.savedVis);
+          $scope.initOptions();
+          $scope.initSearchSources($scope.savedVis);
         }
       });
 
@@ -148,8 +152,8 @@ define(function (require) {
 
       if (configMode) {
         var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
-          initOptions($scope.savedVis);
-          initSearchSources($scope.savedVis);
+          $scope.initOptions();
+          $scope.initSearchSources($scope.savedVis);
         });
 
         $scope.$on('$destroy', function () {
@@ -159,3 +163,4 @@ define(function (require) {
 
     });
 });
+

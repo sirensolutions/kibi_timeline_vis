@@ -1,17 +1,16 @@
 define(function (require) {
+  let _ = require('lodash');
+  let vis = require('vis');
+  let buildRangeFilter = require('ui/filter_manager/lib/range');
 
-  var _ = require('lodash');
-  var vis = require('vis');
-  var buildRangeFilter = require('ui/filter_manager/lib/range');
+  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier, indexPatterns, config) {
+    const kibiUtils = require('kibiutils');
+    let requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
+    let timelineHelper = Private(require('./lib/helpers/timeline_helper'));
 
-  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier, es, indexPatterns, config) {
+    let queryFilter = Private(require('ui/filter_bar/query_filter'));
 
-    var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
-    var timelineHelper = Private(require('./lib/helpers/timeline_helper'));
-
-    var queryFilter = Private(require('ui/filter_bar/query_filter'));
-
-    var notify = createNotifier({
+    let notify = createNotifier({
       location: 'Kibi Timeline'
     });
 
@@ -29,17 +28,17 @@ define(function (require) {
     };
 
     function _link($scope, $element) {
-      var timeline;
-      var data;
+      let timeline;
+      let data;
 
-      var onSelect = function (properties) {
+      let onSelect = function (properties) {
         // pass this to a scope variable
-        var selected = data._data[properties.items];
+        let selected = data._data[properties.items];
         if (selected) {
           if ($scope.selectValue === 'date') {
             if (selected.start && !selected.end) {
               // single point - do query match query filter
-              var q1 = {
+              let q1 = {
                 query: {
                   match: {}
                 },
@@ -56,19 +55,19 @@ define(function (require) {
             } else if (selected.start && selected.end) {
               // range - do 2 range filters
               indexPatterns.get(selected.index).then(function (i) {
-                var startF = _.find(i.fields, function (f) {
+                let startF = _.find(i.fields, function (f) {
                   return f.name === selected.startField.name;
                 });
-                var endF = _.find(i.fields, function (f) {
+                let endF = _.find(i.fields, function (f) {
                   return f.name === selected.endField.name;
                 });
 
-                var rangeFilter1 = buildRangeFilter(startF, {
+                let rangeFilter1 = buildRangeFilter(startF, {
                   gte: selected.startField.value
                 }, i);
                 rangeFilter1.meta.alias = selected.startField.name + ' >= ' + selected.start;
 
-                var rangeFilter2 = buildRangeFilter(endF, {
+                let rangeFilter2 = buildRangeFilter(endF, {
                   lte: selected.endField.value
                 }, i);
                 rangeFilter2.meta.alias = selected.endField.name + ' <= ' + selected.end;
@@ -77,13 +76,13 @@ define(function (require) {
               });
             }
           } else if ($scope.selectValue === 'id') {
-            var searchField = undefined;
-            for (var i = 0; i < $scope.groups.length; i++) {
+            let searchField = undefined;
+            for (let i = 0; i < $scope.groups.length; i++) {
               if (selected.groupId === $scope.groups[i].id) {
                 searchField = $scope.groups[i].params.labelField;
               }
             }
-            var q2 = {
+            let q2 = {
               query: {
                 match: {}
               },
@@ -100,11 +99,11 @@ define(function (require) {
         }
       };
 
-      var initTimeline = function () {
+      let initTimeline = function () {
         if (!timeline) {
           // create a new one
           timeline = new vis.Timeline($element[0]);
-          var utcOffset = null;
+          let utcOffset = null;
           utcOffset = timelineHelper.changeTimezone(config.get('dateFormat:tz'));
           if (utcOffset !== 'Browser') {
             $scope.options.moment = function (date) {
@@ -118,11 +117,10 @@ define(function (require) {
         }
       };
 
-      var groupEvents = [];
+      let groupEvents = [];
 
-      var updateTimeline = function (groupIndex, events) {
-        initTimeline();
-        var existingGroupIds = _.map($scope.groups, function (g) {
+      let updateTimeline = function (groupIndex, events) {
+        let existingGroupIds = _.map($scope.groups, function (g) {
           return g.id;
         });
 
@@ -130,7 +128,7 @@ define(function (require) {
 
         // make sure all events have correct group index
         // add only events from groups which still exists
-        var points = [];
+        let points = [];
         _.each(groupEvents, function (events, index) {
           _.each(events, function (e) {
             e.group = $scope.groupsOnSeparateLevels === true ? index : 0;
@@ -145,30 +143,31 @@ define(function (require) {
         timeline.fit();
       };
 
-      var initSingleGroup = function (group, index) {
-        var searchSource = group.searchSource;
-        var params = group.params;
-        var groupId = group.id;
+      let initSingleGroup = function (group, index) {
+        const searchSource = group.searchSource;
+        const params = group.params;
+        const groupId = group.id;
         const groupColor = group.color;
+
         searchSource.onResults().then(function onResults(searchResp) {
-          var events = [];
+          let events = [];
 
           if (params.startField) {
-            var detectedMultivaluedLabel;
-            var detectedMultivaluedStart;
-            var detectedMultivaluedEnd;
-            var labelFieldValue;
-            var startFieldValue;
-            var startRawFieldValue;
-            var endFieldValue;
-            var endRawFieldValue;
+            let detectedMultivaluedLabel;
+            let detectedMultivaluedStart;
+            let detectedMultivaluedEnd;
+            let labelFieldValue;
+            let startFieldValue;
+            let startRawFieldValue;
+            let endFieldValue;
+            let endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
+              labelFieldValue = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
+              startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
               startRawFieldValue = hit.fields[params.startField];
-              labelFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.labelField);
-              startFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.startField);
 
-              var endFieldValue = null;
+              let endFieldValue = null;
 
               if (startFieldValue) {
 
@@ -178,17 +177,17 @@ define(function (require) {
                 if (timelineHelper.isMultivalued(labelFieldValue)) {
                   detectedMultivaluedLabel = true;
                 }
-                var indexId = searchSource.get('index').id;
-                var startValue = timelineHelper.pickFirstIfMultivalued(startFieldValue);
-                var startRawValue = timelineHelper.pickFirstIfMultivalued(startRawFieldValue);
-                var labelValue = timelineHelper.pickFirstIfMultivalued(labelFieldValue, '');
-                var content =
+                let indexId = searchSource.get('index').id;
+                let startValue = timelineHelper.pickFirstIfMultivalued(startFieldValue);
+                let startRawValue = timelineHelper.pickFirstIfMultivalued(startRawFieldValue);
+                let labelValue = timelineHelper.pickFirstIfMultivalued(labelFieldValue, '');
+                let content =
                   '<div title="index: ' + indexId +
                   ', startField: ' + params.startField +
                   (params.endField ? ', endField: ' + params.endField : '') +
                   '">' + labelValue + '</div>';
 
-                var e =  {
+                let e =  {
                   index: indexId,
                   content: content,
                   value: labelValue,
@@ -204,7 +203,7 @@ define(function (require) {
                 };
 
                 if (params.endField) {
-                  endFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.endField);
+                  endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
                   endRawFieldValue = hit.fields[params.endField];
                   if (timelineHelper.isMultivalued(endFieldValue)) {
                     detectedMultivaluedEnd = true;
@@ -214,8 +213,8 @@ define(function (require) {
                     // force the event to be of type point
                     e.type = 'point';
                   } else {
-                    var endValue = timelineHelper.pickFirstIfMultivalued(endFieldValue);
-                    var endRawValue = timelineHelper.pickFirstIfMultivalued(endRawFieldValue);
+                    let endValue = timelineHelper.pickFirstIfMultivalued(endFieldValue);
+                    let endRawValue = timelineHelper.pickFirstIfMultivalued(endRawFieldValue);
                     if (startValue === endValue) {
                       // also force it to be a point
                       e.type = 'point';
@@ -253,15 +252,13 @@ define(function (require) {
 
           updateTimeline(index, events);
 
-          return searchSource.onResults().then(onResults);
+          return searchSource.onResults().then(onResults.bind(this));
 
         }).catch(notify.error);
       };
 
-      var initGroups = function () {
-        initTimeline();
-
-        var groups = [];
+      let initGroups = function () {
+        let groups = [];
         if ($scope.groupsOnSeparateLevels === true) {
           _.each($scope.groups, function (group, index) {
             groups.push({
@@ -279,7 +276,7 @@ define(function (require) {
             style: 'background-color: none;'
           });
         }
-        var dataGroups = new vis.DataSet(groups);
+        let dataGroups = new vis.DataSet(groups);
         timeline.setGroups(dataGroups);
       };
 
@@ -297,7 +294,7 @@ define(function (require) {
         function ($scope) {
           // here to make a comparison use all properties except a searchSource as it was causing angular to
           // enter an infinite loop when trying to determine the object equality
-          var arr =  _.map($scope.groups, function (g) {
+          let arr =  _.map($scope.groups, function (g) {
             return _.omit(g, 'searchSource');
           });
 
@@ -330,7 +327,5 @@ define(function (require) {
         }
       });
     } // end of link function
-
-
   });
 });

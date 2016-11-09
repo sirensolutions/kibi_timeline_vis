@@ -1,20 +1,12 @@
 define(function (require) {
-
-  var moment = require('moment');
+  const moment = require('moment');
 
   return function TimelineHelperFactory() {
-
     function TimelineHelper() {
     }
 
-    TimelineHelper.prototype.getDescendantPropValue = function (obj, propertyPath) {
-      var arr = propertyPath.split('.');
-      while (arr.length && (obj = obj[arr.shift()]));
-      return obj;
-    };
-
     TimelineHelper.prototype.isMultivalued = function (value) {
-      return value instanceof Array;
+      return value instanceof Array && value.length > 1;
     };
 
     TimelineHelper.prototype.pickFirstIfMultivalued  = function (value, defaultValue) {
