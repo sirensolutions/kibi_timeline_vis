@@ -4,8 +4,8 @@ define(function (require) {
   var vis = require('vis');
   var buildRangeFilter = require('ui/filter_manager/lib/range');
 
-  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier, es, indexPatterns, config) {
-
+  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier, indexPatterns, config) {
+    const kibiUtils = require('kibiutils');
     var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
     var timelineHelper = Private(require('./lib/helpers/timeline_helper'));
 
@@ -121,7 +121,6 @@ define(function (require) {
       var groupEvents = [];
 
       var updateTimeline = function (groupIndex, events) {
-        initTimeline();
         var existingGroupIds = _.map($scope.groups, function (g) {
           return g.id;
         });
@@ -146,10 +145,11 @@ define(function (require) {
       };
 
       var initSingleGroup = function (group, index) {
-        var searchSource = group.searchSource;
-        var params = group.params;
-        var groupId = group.id;
+        const searchSource = group.searchSource;
+        const params = group.params;
+        const groupId = group.id;
         const groupColor = group.color;
+
         searchSource.onResults().then(function onResults(searchResp) {
           var events = [];
 
@@ -164,9 +164,9 @@ define(function (require) {
             var endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
+              labelFieldValue = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
+              startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
               startRawFieldValue = hit.fields[params.startField];
-              labelFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.labelField);
-              startFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.startField);
 
               var endFieldValue = null;
 
@@ -204,7 +204,7 @@ define(function (require) {
                 };
 
                 if (params.endField) {
-                  endFieldValue = timelineHelper.getDescendantPropValue(hit._source, params.endField);
+                  endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
                   endRawFieldValue = hit.fields[params.endField];
                   if (timelineHelper.isMultivalued(endFieldValue)) {
                     detectedMultivaluedEnd = true;
@@ -253,14 +253,12 @@ define(function (require) {
 
           updateTimeline(index, events);
 
-          return searchSource.onResults().then(onResults);
+          return searchSource.onResults().then(onResults.bind(this));
 
         }).catch(notify.error);
       };
 
       var initGroups = function () {
-        initTimeline();
-
         var groups = [];
         if ($scope.groupsOnSeparateLevels === true) {
           _.each($scope.groups, function (group, index) {
@@ -334,3 +332,4 @@ define(function (require) {
 
   });
 });
+
