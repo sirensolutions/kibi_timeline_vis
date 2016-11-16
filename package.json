@@ -17,6 +17,7 @@
     "build": "gulp build"
   },
   "dependencies": {
+    "kibiutils": "sirensolutions/kibiutils#1.4.0",
     "kibi-icons": "sirensolutions/kibi-icons#1.0.0"
   },
   "devDependencies": {
