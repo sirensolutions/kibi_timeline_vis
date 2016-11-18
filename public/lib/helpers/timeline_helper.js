@@ -31,13 +31,20 @@ define(function (require) {
       }
     };
 
-    TimelineHelper.prototype.pluckLabel = function (hit, params) {
+    TimelineHelper.prototype.pluckLabel = function (hit, params, notify) {
       let label = '';
 
+      let field;
       if (params.labelFieldSequence) { // in kibi, we have the path property of a field
-        label = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
+        field = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
       } else {
-        label = _.get(hit._source, params.labelField);
+        field = _.get(hit._source, params.labelField);
+      }
+      if (field) {
+        if (this.isMultivalued(field)) {
+          notify.warning('Label field [' + params.labelField + '] is multivalued - the first value will be used.');
+        }
+        label = this.pickFirstIfMultivalued(field, '');
       }
 
       if (params.useHighlight) {

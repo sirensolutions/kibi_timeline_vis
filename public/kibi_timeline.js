@@ -163,17 +163,15 @@ define(function (require) {
           let events = [];
 
           if (params.startField) {
-            let detectedMultivaluedLabel;
             let detectedMultivaluedStart;
             let detectedMultivaluedEnd;
-            let labelFieldValue;
             let startFieldValue;
             let startRawFieldValue;
             let endFieldValue;
             let endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
-              labelFieldValue = timelineHelper.pluckLabel(hit, params);
+              let labelValue = timelineHelper.pluckLabel(hit, params, notify);
               if (params.startFieldSequence) { // in kibi, we have the path property of a field
                 startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
               } else {
@@ -187,13 +185,9 @@ define(function (require) {
                 if (timelineHelper.isMultivalued(startFieldValue)) {
                   detectedMultivaluedStart = true;
                 }
-                if (timelineHelper.isMultivalued(labelFieldValue)) {
-                  detectedMultivaluedLabel = true;
-                }
                 let indexId = searchSource.get('index').id;
                 let startValue = timelineHelper.pickFirstIfMultivalued(startFieldValue);
                 let startRawValue = timelineHelper.pickFirstIfMultivalued(startRawFieldValue);
-                let labelValue = timelineHelper.pickFirstIfMultivalued(labelFieldValue, 'N/A');
                 let content =
                   '<div title="index: ' + indexId +
                   ', startField: ' + params.startField +
@@ -255,9 +249,6 @@ define(function (require) {
               }
             });
 
-            if (detectedMultivaluedLabel) {
-              notify.warning('Label field [' + params.labelField + '] is multivalued - the first value will be used.');
-            }
             if (detectedMultivaluedStart) {
               notify.warning('Start Date field [' + params.startField + '] is multivalued - the first date will be used.');
             }
