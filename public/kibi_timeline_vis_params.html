@@ -26,6 +26,15 @@
 
           <div class="form-group">
             <label>Event label</label>
+            <div>
+             <label>
+              <input type="checkbox"
+                name="useHighlight"
+                ng-model="group.useHighlight">
+                Show highlighted terms
+                <kbn-info info="Show highlighted terms in event label."></kbn-info>
+             </label>
+            </div>
             <kibi-select-port required object-type="field" index-pattern-id="group.indexPatternId" ng-model="group.labelField">
             </kibi-select-port>
           </div>

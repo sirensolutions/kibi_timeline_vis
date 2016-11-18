@@ -80,13 +80,16 @@ define(function (require) {
                 label: group.groupLabel,
                 searchSource: searchSource,
                 params: {
+                  //kibi params
                   labelFieldSequence: fields[i].byName[group.labelField].path,
                   startFieldSequence: fields[i].byName[group.startField].path,
                   endFieldSequence: group.endField && fields[i].byName[group.endField].path || [],
-
+                  //kibana params
                   labelField: group.labelField,
                   startField: group.startField,
-                  endField: group.endField
+                  endField: group.endField,
+                  //params for both
+                  useHighlight: group.useHighlight
                 }
               });
             }

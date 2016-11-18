@@ -149,6 +149,16 @@ define(function (require) {
         const groupId = group.id;
         const groupColor = group.color;
 
+        searchSource.highlight({
+          fields: {
+            '*': {
+              fragment_size: 0,
+              number_of_fragments: 100
+            }
+          },
+          require_field_match: false
+        });
+
         searchSource.onResults().then(function onResults(searchResp) {
           let events = [];
 
@@ -163,11 +173,7 @@ define(function (require) {
             let endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
-              if (params.labelFieldSequence) { // in kibi, we have the path property of a field
-                labelFieldValue = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
-              } else {
-                labelFieldValue = _.get(hit._source, params.labelField);
-              }
+              labelFieldValue = timelineHelper.pluckLabel(hit, params);
               if (params.startFieldSequence) { // in kibi, we have the path property of a field
                 startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
               } else {
