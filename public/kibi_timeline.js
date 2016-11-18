@@ -181,6 +181,7 @@ define(function (require) {
             require_field_match: false
           });
         }
+        searchSource.sort(timelineHelper.sortObj(params));
 
         searchSource.onResults().then(function onResults(searchResp) {
           let events = [];
@@ -192,6 +193,7 @@ define(function (require) {
             let startRawFieldValue;
             let endFieldValue;
             let endRawFieldValue;
+            const uniqueLabels = [];
 
             _.each(searchResp.hits.hits, function (hit) {
               let labelValue = timelineHelper.pluckLabel(hit, params, notify);
@@ -219,6 +221,13 @@ define(function (require) {
                   (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) + '</p>' : '') +
                   '</div>';
 
+                let style = 'background-color: ' + groupColor + '; color: #fff;';
+                if (params.highlightFirstLabelInstance &&
+                  !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
+                  style = 'background-color: #fff; color: ' + groupColor + ';';
+                  uniqueLabels.push(labelValue.toLowerCase().trim());
+                }
+
                 let e =  {
                   index: indexId,
                   content: content,
@@ -230,7 +239,7 @@ define(function (require) {
                   },
                   type: 'box',
                   group: $scope.groupsOnSeparateLevels === true ? index : 0,
-                  style: 'background-color: ' + groupColor + '; color: #fff;',
+                  style: style,
                   groupId: groupId
                 };
 

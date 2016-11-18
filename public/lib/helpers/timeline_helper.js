@@ -102,6 +102,16 @@ define(function (require) {
       return highlightedElement.substring(openIndex + openTag.length, closeIndex).toLowerCase().trim();
     }
 
+    TimelineHelper.prototype.sortObj = function (params) {
+      const sortObj = {};
+      if (params.startFieldSequence) {
+        sortObj[params.startFieldSequence] = { 'order': 'asc' };
+      } else {
+        sortObj[params.startField] = { 'order': 'asc' };
+      }
+      return sortObj;
+    };
+
     return new TimelineHelper();
   };
 });
