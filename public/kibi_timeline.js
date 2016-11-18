@@ -163,8 +163,16 @@ define(function (require) {
             let endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
-              labelFieldValue = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
-              startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
+              if (params.labelFieldSequence) { // in kibi, we have the path property of a field
+                labelFieldValue = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
+              } else {
+                labelFieldValue = _.get(hit._source, params.labelField);
+              }
+              if (params.startFieldSequence) { // in kibi, we have the path property of a field
+                startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
+              } else {
+                startFieldValue = _.get(hit._source, params.startField);
+              }
               startRawFieldValue = hit.fields[params.startField];
 
               let endFieldValue = null;
@@ -203,7 +211,11 @@ define(function (require) {
                 };
 
                 if (params.endField) {
-                  endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
+                  if (params.endFieldSequence) { // in kibi, we have the path property of a field
+                    endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
+                  } else {
+                    endFieldValue = _.get(hit._source, params.endField);
+                  }
                   endRawFieldValue = hit.fields[params.endField];
                   if (timelineHelper.isMultivalued(endFieldValue)) {
                     detectedMultivaluedEnd = true;
