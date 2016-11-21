@@ -46,37 +46,36 @@ define(function (require) {
         }
         label = this.pickFirstIfMultivalued(field, '');
       }
-
-      if (params.useHighlight) {
-        const fragmentCounts = {}; //key is fragment tag, value is count
-        Object.keys(hit.highlight).forEach(function (key) {
-          hit.highlight[key].forEach(function (it) {
-            const fragment = extractFragment(it, '<em>', '</em>');
-            if (fragmentCounts[fragment]) {
-              fragmentCounts[fragment] = fragmentCounts[fragment] + 1;
-            } else {
-              fragmentCounts[fragment] = 1;
-            }
-          });
-        });
-
-        let highlighted = '';
-        Object.keys(fragmentCounts).sort(function (a, b) {
-          //same count, return alphabetic order
-          if (fragmentCounts[a] === fragmentCounts[b]) {
-            return a > b;
-          }
-
-          //return count order
-          return fragmentCounts[a] < fragmentCounts[b];
-
-        }).forEach(function (key, index) {
-          if (index > 0) highlighted += ', ';
-          highlighted += key + ':' + fragmentCounts[key];
-        });
-        label += '<div style="font-size: small">' + highlighted + '</div>';
-      }
       return label;
+    };
+
+    TimelineHelper.prototype.pluckHighlights = function (hit) {
+      //Track unique highlights, count number of times highlight occurs.
+      const counts = {}; //key is highlight tag, value is count
+      Object.keys(hit.highlight).forEach(function (key) {
+        hit.highlight[key].forEach(function (it) {
+          const fragment = extractFragment(it, '<em>', '</em>');
+          if (counts[fragment]) {
+            counts[fragment] = counts[fragment] + 1;
+          } else {
+            counts[fragment] = 1;
+          }
+        });
+      });
+
+      let highlighted = '';
+      Object.keys(counts).sort(function (a, b) {
+        //same count, return alphabetic order
+        if (counts[a] === counts[b]) {
+          return a > b;
+        }
+        //return count order
+        return counts[a] < counts[b];
+      }).forEach(function (key, index) {
+        if (index > 0) highlighted += ', ';
+        highlighted += key + ':' + counts[key];
+      });
+      return highlighted;
     };
 
     function extractFragment(s, openTag, closeTag) {

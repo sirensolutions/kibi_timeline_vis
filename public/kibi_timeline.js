@@ -192,7 +192,9 @@ define(function (require) {
                   '<div title="index: ' + indexId +
                   ', startField: ' + params.startField +
                   (params.endField ? ', endField: ' + params.endField : '') +
-                  '">' + labelValue + '</div>';
+                  '">' + labelValue +
+                  (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit) + '</p>' : '') +
+                  '</div>';
 
                 let e =  {
                   index: indexId,
