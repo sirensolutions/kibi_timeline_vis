@@ -102,7 +102,7 @@ define(function (require) {
       let initTimeline = function () {
         if (!timeline) {
           // create a new one
-          timeline = new vis.Timeline($element[0]);
+          $scope.timeline = timeline = new vis.Timeline($element[0]);
           let utcOffset = null;
           utcOffset = timelineHelper.changeTimezone(config.get('dateFormat:tz'));
           if (utcOffset !== 'Browser') {
@@ -177,8 +177,7 @@ define(function (require) {
 
               let endFieldValue = null;
 
-              if (startFieldValue) {
-
+              if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
                 if (timelineHelper.isMultivalued(startFieldValue)) {
                   detectedMultivaluedStart = true;
                 }
@@ -188,7 +187,7 @@ define(function (require) {
                 let indexId = searchSource.get('index').id;
                 let startValue = timelineHelper.pickFirstIfMultivalued(startFieldValue);
                 let startRawValue = timelineHelper.pickFirstIfMultivalued(startRawFieldValue);
-                let labelValue = timelineHelper.pickFirstIfMultivalued(labelFieldValue, '');
+                let labelValue = timelineHelper.pickFirstIfMultivalued(labelFieldValue, 'N/A');
                 let content =
                   '<div title="index: ' + indexId +
                   ', startField: ' + params.startField +
