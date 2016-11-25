@@ -1,9 +1,6 @@
 const angular = require('angular');
 const expect = require('expect.js');
-const $ = require('jquery');
 const _ = require('lodash');
-const sinon = require('auto-release-sinon');
-const searchResponse = require('fixtures/search_response');
 const ngMock = require('ngMock');
 const moment = require('moment');
 
