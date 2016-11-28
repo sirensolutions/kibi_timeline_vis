@@ -50,6 +50,8 @@ define(function (require) {
     };
 
     TimelineHelper.prototype.pluckHighlights = function (hit, highlightTags) {
+      if (!hit.highlight) return '';
+
       //Track unique highlights, count number of times highlight occurs.
       const counts = {}; //key is highlight tag, value is count
       Object.keys(hit.highlight).forEach(function (key) {
