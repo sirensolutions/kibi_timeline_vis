@@ -7,6 +7,8 @@ define(function (require) {
   require('ui/modules').get('kibana').directive('kibiTimeline',
   function (Private, createNotifier, courier, indexPatterns, config, highlightTags) {
     const kibiUtils = require('kibiutils');
+    const NUM_FRAGS_CONFIG = 'kibi:timeline:highlight:number_of_fragments';
+    const DEFAULT_NUM_FRAGS = 25;
     let requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
     let timelineHelper = Private(require('./lib/helpers/timeline_helper'));
 
@@ -151,13 +153,20 @@ define(function (require) {
         const groupId = group.id;
         const groupColor = group.color;
 
+        let numFrags = parseInt(config.get(NUM_FRAGS_CONFIG, NaN), 10);
+        //(numFrags !== numFrags) is required instead of (numFrags === NaN) because NaN does not equals itself!
+        if (numFrags !== numFrags || numFrags < 0) {
+          numFrags = DEFAULT_NUM_FRAGS;
+          config.set(NUM_FRAGS_CONFIG, DEFAULT_NUM_FRAGS);
+        }
+
         searchSource.highlight({
           pre_tags: [highlightTags.pre],
           post_tags: [highlightTags.post],
           fields: {
             '*': {
               fragment_size: 0,
-              number_of_fragments: 100
+              number_of_fragments: numFrags
             }
           },
           require_field_match: false
