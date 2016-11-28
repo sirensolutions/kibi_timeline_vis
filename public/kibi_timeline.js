@@ -1,9 +1,11 @@
 define(function (require) {
+  require('ui/highlight/highlight_tags');
   let _ = require('lodash');
   let vis = require('vis');
   let buildRangeFilter = require('ui/filter_manager/lib/range');
 
-  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier, indexPatterns, config) {
+  require('ui/modules').get('kibana').directive('kibiTimeline',
+  function (Private, createNotifier, courier, indexPatterns, config, highlightTags) {
     const kibiUtils = require('kibiutils');
     let requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
     let timelineHelper = Private(require('./lib/helpers/timeline_helper'));
@@ -150,6 +152,8 @@ define(function (require) {
         const groupColor = group.color;
 
         searchSource.highlight({
+          pre_tags: [highlightTags.pre],
+          post_tags: [highlightTags.post],
           fields: {
             '*': {
               fragment_size: 0,
@@ -193,7 +197,7 @@ define(function (require) {
                   ', startField: ' + params.startField +
                   (params.endField ? ', endField: ' + params.endField : '') +
                   '">' + labelValue +
-                  (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit) + '</p>' : '') +
+                  (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) + '</p>' : '') +
                   '</div>';
 
                 let e =  {

@@ -49,12 +49,12 @@ define(function (require) {
       return label;
     };
 
-    TimelineHelper.prototype.pluckHighlights = function (hit) {
+    TimelineHelper.prototype.pluckHighlights = function (hit, highlightTags) {
       //Track unique highlights, count number of times highlight occurs.
       const counts = {}; //key is highlight tag, value is count
       Object.keys(hit.highlight).forEach(function (key) {
         hit.highlight[key].forEach(function (it) {
-          const fragment = extractFragment(it, '<em>', '</em>');
+          const fragment = extractFragment(it, highlightTags.pre, highlightTags.post);
           if (counts[fragment]) {
             counts[fragment] = counts[fragment] + 1;
           } else {
