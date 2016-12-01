@@ -32,7 +32,7 @@ define(function (require) {
     };
 
     TimelineHelper.prototype.pluckLabel = function (hit, params, notify) {
-      let label = '';
+      let label = 'N/A';
 
       let field;
       if (params.labelFieldSequence) { // in kibi, we have the path property of a field
@@ -40,11 +40,11 @@ define(function (require) {
       } else {
         field = _.get(hit._source, params.labelField);
       }
-      if (field) {
+      if (field && (!_.isArray(field) || field.length)) {
         if (this.isMultivalued(field)) {
           notify.warning('Label field [' + params.labelField + '] is multivalued - the first value will be used.');
         }
-        label = this.pickFirstIfMultivalued(field, '');
+        label = this.pickFirstIfMultivalued(field, 'N/A');
       }
       return label;
     };
@@ -75,7 +75,7 @@ define(function (require) {
         return counts[a] < counts[b];
       }).forEach(function (key, index) {
         if (index > 0) highlighted += ', ';
-        highlighted += key + ':' + counts[key];
+        highlighted += `${key}: ${counts[key]}`;
       });
       return highlighted;
     };
