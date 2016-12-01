@@ -1,3 +1,4 @@
+const sinon = require('auto-release-sinon');
 const angular = require('angular');
 const expect = require('expect.js');
 const _ = require('lodash');
@@ -45,6 +46,7 @@ describe('KibiTimeline Directive', function () {
     $elem = angular.element(directive);
     ngMock.inject(function (Private) {
       searchSource = Private(require('fixtures/stubbed_search_source'));
+      searchSource.highlight = sinon.stub();
     });
 
     const params = { endField, labelField, startField };
