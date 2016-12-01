@@ -53,26 +53,26 @@ define(function (require) {
       if (!hit.highlight) return '';
 
       //Track unique highlights, count number of times highlight occurs.
-      const counts = {}; //key is highlight tag, value is count
+      const counts = new Map(); //key is highlight tag, value is count
       Object.keys(hit.highlight).forEach(function (key) {
         hit.highlight[key].forEach(function (it) {
           const fragment = extractFragment(it, highlightTags.pre, highlightTags.post);
-          if (counts[fragment]) {
-            counts[fragment] = counts[fragment] + 1;
+          if (counts.has(fragment)) {
+            counts.set(fragment, counts.get(fragment) + 1);
           } else {
-            counts[fragment] = 1;
+            counts.set(fragment, 1);
           }
         });
       });
 
       let highlighted = '';
-      Object.keys(counts).sort(function (a, b) {
+      Array.from(counts.keys()).sort(function (a, b) {
         //same count, return alphabetic order
-        if (counts[a] === counts[b]) {
+        if (counts.get(a) === counts.get(b)) {
           return a > b;
         }
         //return count order
-        return counts[a] < counts[b];
+        return counts.get(a) < counts.get(b);
       }).forEach(function (key, index) {
         if (index > 0) highlighted += ', ';
         highlighted += `${key}: ${counts[key]}`;
