@@ -75,7 +75,7 @@ define(function (require) {
         return counts.get(a) < counts.get(b);
       }).forEach(function (key, index) {
         if (index > 0) highlighted += ', ';
-        highlighted += `${key}: ${counts[key]}`;
+        highlighted += `${key}: ${counts.get(key)}`;
       });
       return highlighted;
     };
