@@ -1,9 +1,130 @@
 const expect = require('expect.js');
 const timelineHelper = require('../timeline_helper')();
 const moment = require('moment');
+const sinon = require('auto-release-sinon');
 
 describe('Kibi Timeline', function () {
   describe('TimelineHelper', function () {
+    describe('isMultivalued', function () {
+      it('should return true if value is an array and mutlivalued', function () {
+        expect(timelineHelper.isMultivalued([ 1, 2 ])).to.be(true);
+      });
+
+      it('should return false if value is an array but has only one value', function () {
+        expect(timelineHelper.isMultivalued([ 1 ])).to.be(false);
+      });
+
+      it('should return false if value is not an array', function () {
+        expect(timelineHelper.isMultivalued(1)).to.be(false);
+      });
+    });
+
+    describe('pluckLabel', function () {
+      let notify;
+
+      beforeEach(function () {
+        notify = {
+          warning: sinon.spy()
+        };
+      });
+
+      it('should return the label of an event kibana-style', function () {
+        const hit = {
+          _source: {
+            aaa: 'bbb'
+          }
+        };
+        const params = {
+          labelField: 'aaa'
+        };
+
+        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
+        sinon.assert.notCalled(notify.warning);
+      });
+
+      it('should return the label of an event kibi-style', function () {
+        const hit = {
+          _source: {
+            aaa: 'bbb'
+          }
+        };
+        const params = {
+          labelField: 'aaa',
+          labelFieldSequence: [ 'aaa' ]
+        };
+
+        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
+        sinon.assert.notCalled(notify.warning);
+      });
+
+      it('should return N/A if the event does not a value for the labelField', function () {
+        const hit = {
+          _source: {
+            ccc: 'ddd'
+          }
+        };
+        const params = {
+          labelField: 'aaa',
+          labelFieldSequence: [ 'aaa' ]
+        };
+
+        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('N/A');
+        sinon.assert.notCalled(notify.warning);
+      });
+
+      it('should display a warning if the label field is multivalued', function () {
+        const hit = {
+          _source: {
+            aaa: [ 'bbb', 'ccc' ]
+          }
+        };
+        const params = {
+          labelField: 'aaa',
+          labelFieldSequence: [ 'aaa' ]
+        };
+
+        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
+        sinon.assert.called(notify.warning);
+      });
+    });
+
+    describe('pluckHighlights', function () {
+      const highlightTags = {
+        pre: '<em>',
+        post: '</em>'
+      };
+
+      it('should return an empty string if the hit has no highlight object', function () {
+        const hit = {
+          _source: {
+            aaa: 'bbb'
+          }
+        };
+
+        expect(timelineHelper.pluckHighlights(hit, highlightTags)).to.be('');
+      });
+
+      it('should return the highlighted terms in the event', function () {
+        const hit = {
+          _source: {
+            field1: 'bbb'
+          },
+          highlight: {
+            field1: [
+              '<em>ddd</em>nope',
+              'nope<em>bbb</em>nope',
+              'nope<em>ccc</em>'
+            ],
+            field2: [
+              'nope<em>bbb</em>nope'
+            ]
+          }
+        };
+
+        expect(timelineHelper.pluckHighlights(hit, highlightTags)).to.be('bbb: 2, ccc: 1, ddd: 1');
+      });
+    });
+
     describe('changeTimezone', function () {
       it('should return Browser for default Kibana timezone ', function () {
         expect(timelineHelper.changeTimezone('Browser')).to.be('Browser');
