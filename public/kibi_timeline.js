@@ -160,17 +160,19 @@ define(function (require) {
           config.set(NUM_FRAGS_CONFIG, DEFAULT_NUM_FRAGS);
         }
 
-        searchSource.highlight({
-          pre_tags: [highlightTags.pre],
-          post_tags: [highlightTags.post],
-          fields: {
-            '*': {
-              fragment_size: 0,
-              number_of_fragments: numFrags
-            }
-          },
-          require_field_match: false
-        });
+        if (params.useHighlight) {
+          searchSource.highlight({
+            pre_tags: [highlightTags.pre],
+            post_tags: [highlightTags.post],
+            fields: {
+              '*': {
+                fragment_size: 0,
+                number_of_fragments: numFrags
+              }
+            },
+            require_field_match: false
+          });
+        }
 
         searchSource.onResults().then(function onResults(searchResp) {
           let events = [];

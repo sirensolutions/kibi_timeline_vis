@@ -31,6 +31,14 @@ define(function (require) {
       }
     };
 
+    /**
+     * pluckLabel returns the label of an event
+     *
+     * @param hit the document of the event
+     * @param params configuration parameters for the event
+     * @param notify object for user notification
+     * @returns the label as a string
+     */
     TimelineHelper.prototype.pluckLabel = function (hit, params, notify) {
       let label = 'N/A';
 
@@ -49,8 +57,18 @@ define(function (require) {
       return label;
     };
 
+    /**
+     * pluckHighlights returns the highlighted terms for the event.
+     * The terms are sorted first on the number of occurrences of a term, and then alphabetically.
+     *
+     * @param hit the event
+     * @param highlightTags the tags that wrap the term
+     * @returns a comma-separated string of the highlighted terms and their number of occurrences
+     */
     TimelineHelper.prototype.pluckHighlights = function (hit, highlightTags) {
-      if (!hit.highlight) return '';
+      if (!hit.highlight) {
+        return '';
+      }
 
       //Track unique highlights, count number of times highlight occurs.
       const counts = new Map(); //key is highlight tag, value is count
@@ -65,25 +83,23 @@ define(function (require) {
         });
       });
 
-      let highlighted = '';
-      Array.from(counts.keys()).sort(function (a, b) {
+      return Array.from(counts.keys())
+      .sort(function (a, b) {
         //same count, return alphabetic order
         if (counts.get(a) === counts.get(b)) {
           return a > b;
         }
         //return count order
         return counts.get(a) < counts.get(b);
-      }).forEach(function (key, index) {
-        if (index > 0) highlighted += ', ';
-        highlighted += `${key}: ${counts.get(key)}`;
-      });
-      return highlighted;
+      })
+      .map(key => `${key}: ${counts.get(key)}`)
+      .join(', ');
     };
 
-    function extractFragment(s, openTag, closeTag) {
-      const openIndex = s.indexOf(openTag);
-      const closeIndex = s.indexOf(closeTag);
-      return s.substring(openIndex + openTag.length, closeIndex).toLowerCase().trim();
+    function extractFragment(highlightedElement, openTag, closeTag) {
+      const openIndex = highlightedElement.indexOf(openTag);
+      const closeIndex = highlightedElement.indexOf(closeTag);
+      return highlightedElement.substring(openIndex + openTag.length, closeIndex).toLowerCase().trim();
     }
 
     return new TimelineHelper();
