@@ -30,11 +30,8 @@ describe('Kibi Timeline', function () {
       $provide.service('indexPatterns', (Promise, Private) => mockSavedObjects(Promise, Private)('indexPatterns', indexPatterns));
     });
 
-    ngMock.inject(function (_$rootScope_, $controller) {
-      $scope = _$rootScope_;
-      $scope.vis = {
-        id: 'a'
-      };
+    ngMock.inject(function ($rootScope, $controller) {
+      $scope = $rootScope;
       $element = $('<div></div>');
       $controller('KbnTimelineVisController', {
         $scope: $scope,
@@ -353,6 +350,35 @@ describe('Kibi Timeline', function () {
         _.assign(expectedB, groups[1]);
         assertGroup($scope.savedObj.groups[1], expectedB);
 
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should pass along the parameters of the visualization', function (done) {
+      const savedVis = {
+        vis: {
+          params: {
+            groupsOnSeparateLevels: 'sep',
+            notifyDataErrors: 'notify',
+            selectValue: 'date',
+            groups: []
+          }
+        }
+      };
+
+      init({
+        stubs: {
+          initSearchSources: false,
+          initOptions: true
+        }
+      });
+
+      $scope.initSearchSources(savedVis)
+      .then(() => {
+        expect($scope.savedObj.groupsOnSeparateLevels).to.be('sep');
+        expect($scope.savedObj.notifyDataErrors).to.be('notify');
+        expect($scope.savedObj.selectValue).to.be('date');
         done();
       })
       .catch(done);

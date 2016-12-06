@@ -96,6 +96,8 @@ define(function (require) {
           });
 
           $scope.savedObj.groupsOnSeparateLevels = savedVis.vis.params.groupsOnSeparateLevels;
+          $scope.savedObj.selectValue = savedVis.vis.params.selectValue;
+          $scope.savedObj.notifyDataErrors = savedVis.vis.params.notifyDataErrors;
         })
         .catch(notify.error);
       };
