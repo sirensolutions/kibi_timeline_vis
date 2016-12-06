@@ -1,10 +1,14 @@
 define(function (require) {
+  require('ui/highlight/highlight_tags');
   let _ = require('lodash');
   let vis = require('vis');
   let buildRangeFilter = require('ui/filter_manager/lib/range');
 
-  require('ui/modules').get('kibana').directive('kibiTimeline', function (Private, createNotifier, courier, indexPatterns, config) {
+  require('ui/modules').get('kibana').directive('kibiTimeline',
+  function (Private, createNotifier, courier, indexPatterns, config, highlightTags) {
     const kibiUtils = require('kibiutils');
+    const NUM_FRAGS_CONFIG = 'kibi:timeline:highlight:number_of_fragments';
+    const DEFAULT_NUM_FRAGS = 25;
     let requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
     let timelineHelper = Private(require('./lib/helpers/timeline_helper'));
 
@@ -149,25 +153,40 @@ define(function (require) {
         const groupId = group.id;
         const groupColor = group.color;
 
+        let numFrags = parseInt(config.get(NUM_FRAGS_CONFIG, NaN), 10);
+        //(numFrags !== numFrags) is required instead of (numFrags === NaN) because NaN does not equals itself!
+        if (numFrags !== numFrags || numFrags < 0) {
+          numFrags = DEFAULT_NUM_FRAGS;
+          config.set(NUM_FRAGS_CONFIG, DEFAULT_NUM_FRAGS);
+        }
+
+        if (params.useHighlight) {
+          searchSource.highlight({
+            pre_tags: [highlightTags.pre],
+            post_tags: [highlightTags.post],
+            fields: {
+              '*': {
+                fragment_size: 0,
+                number_of_fragments: numFrags
+              }
+            },
+            require_field_match: false
+          });
+        }
+
         searchSource.onResults().then(function onResults(searchResp) {
           let events = [];
 
           if (params.startField) {
-            let detectedMultivaluedLabel;
             let detectedMultivaluedStart;
             let detectedMultivaluedEnd;
-            let labelFieldValue;
             let startFieldValue;
             let startRawFieldValue;
             let endFieldValue;
             let endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
-              if (params.labelFieldSequence) { // in kibi, we have the path property of a field
-                labelFieldValue = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
-              } else {
-                labelFieldValue = _.get(hit._source, params.labelField);
-              }
+              let labelValue = timelineHelper.pluckLabel(hit, params, notify);
               if (params.startFieldSequence) { // in kibi, we have the path property of a field
                 startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
               } else {
@@ -181,18 +200,16 @@ define(function (require) {
                 if (timelineHelper.isMultivalued(startFieldValue)) {
                   detectedMultivaluedStart = true;
                 }
-                if (timelineHelper.isMultivalued(labelFieldValue)) {
-                  detectedMultivaluedLabel = true;
-                }
                 let indexId = searchSource.get('index').id;
                 let startValue = timelineHelper.pickFirstIfMultivalued(startFieldValue);
                 let startRawValue = timelineHelper.pickFirstIfMultivalued(startRawFieldValue);
-                let labelValue = timelineHelper.pickFirstIfMultivalued(labelFieldValue, 'N/A');
                 let content =
                   '<div title="index: ' + indexId +
                   ', startField: ' + params.startField +
                   (params.endField ? ', endField: ' + params.endField : '') +
-                  '">' + labelValue + '</div>';
+                  '">' + labelValue +
+                  (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) + '</p>' : '') +
+                  '</div>';
 
                 let e =  {
                   index: indexId,
@@ -249,9 +266,6 @@ define(function (require) {
               }
             });
 
-            if (detectedMultivaluedLabel) {
-              notify.warning('Label field [' + params.labelField + '] is multivalued - the first value will be used.');
-            }
             if (detectedMultivaluedStart) {
               notify.warning('Start Date field [' + params.startField + '] is multivalued - the first date will be used.');
             }

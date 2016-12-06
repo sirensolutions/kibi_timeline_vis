@@ -1,3 +1,4 @@
+const sinon = require('auto-release-sinon');
 const angular = require('angular');
 const expect = require('expect.js');
 const _ = require('lodash');
@@ -9,6 +10,7 @@ require('plugins/kibi_timeline_vis/kibi_timeline_vis_controller');
 let $rootScope;
 let $scope;
 let searchSource;
+let highlightTags;
 
 let init = function ($elem, props) {
   ngMock.inject(function (_$rootScope_, $compile, _$timeout_) {
@@ -29,7 +31,7 @@ let destroy = function () {
 describe('KibiTimeline Directive', function () {
   let $elem;
 
-  function initTimeline({ withFieldSequence, endField, startField, labelField }) {
+  function initTimeline({ useHighlight = false, withFieldSequence, endField, startField, labelField }) {
     ngMock.module('kibana', $provide => {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
@@ -43,11 +45,13 @@ describe('KibiTimeline Directive', function () {
                         options="options">
                       </kibi-timeline>`;
     $elem = angular.element(directive);
-    ngMock.inject(function (Private) {
+    ngMock.inject(function (_highlightTags_, Private) {
+      highlightTags = _highlightTags_;
       searchSource = Private(require('fixtures/stubbed_search_source'));
+      searchSource.highlight = sinon.stub();
     });
 
-    const params = { endField, labelField, startField };
+    const params = { useHighlight, endField, labelField, startField };
     if (withFieldSequence) {
       params.startFieldSequence = startField.split('.');
       params.endFieldSequence = endField.split('.');
@@ -80,7 +84,7 @@ describe('KibiTimeline Directive', function () {
     expect($elem.text()).to.not.be.empty();
   });
 
-  it('should correcty return a timeline', function () {
+  it('should correctly return a timeline', function () {
     initTimeline({
       startField: '@timestamp',
       endField: '',
@@ -123,6 +127,63 @@ describe('KibiTimeline Directive', function () {
     $scope.$digest();
     expect($scope.timeline.itemsData.length).to.be(1);
     $scope.timeline.itemsData.forEach(data => {
+      sinon.assert.notCalled(searchSource.highlight);
+      expect(data.value).to.be('linux');
+      expect(data.start.valueOf()).to.be(dateObj.valueOf());
+    });
+  });
+
+  it('should get the highlighted terms of events if useHighlight is true', function () {
+    initTimeline({
+      useHighlight: true,
+      startField: '@timestamp',
+      endField: '',
+      labelField: 'machine.os'
+    });
+
+    const date = '25-01-1995';
+    const dateObj = moment(date, 'DD-MM-YYYY');
+    const results = {
+      took: 73,
+      timed_out: false,
+      _shards: {
+        total: 144,
+        successful: 144,
+        failed: 0
+      },
+      hits: {
+        total : 49487,
+        max_score : 1.0,
+        hits: [
+          {
+            _index: 'logstash-2014.09.09',
+            _type: 'apache',
+            _id: '61',
+            _score: 1,
+            _source: {
+              '@timestamp': date,
+              machine: {
+                os: 'linux'
+              }
+            },
+            fields: {
+              '@timestamp': [ dateObj ]
+            },
+            highlight: {
+              'machine.os': [
+                `${highlightTags.pre}BEST BEST${highlightTags.post}`
+              ]
+            }
+          }
+        ]
+      }
+    };
+    searchSource.crankResults(results);
+    $scope.$digest();
+    expect($scope.timeline.itemsData.length).to.be(1);
+    $scope.timeline.itemsData.forEach(data => {
+      sinon.assert.called(searchSource.highlight);
+      expect(data.content).to.match(/best best/);
       expect(data.value).to.be('linux');
       expect(data.start.valueOf()).to.be(dateObj.valueOf());
     });
@@ -169,6 +230,7 @@ describe('KibiTimeline Directive', function () {
       $scope.$digest();
       expect($scope.timeline.itemsData.length).to.be(1);
       $scope.timeline.itemsData.forEach(data => {
+        sinon.assert.notCalled(searchSource.highlight);
         expect(data.value).to.be('N/A');
         expect(data.start.valueOf()).to.be(dateObj.valueOf());
       });
