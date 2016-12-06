@@ -35,9 +35,9 @@ define(function (require) {
       let timeline;
       let data;
 
-      let onSelect = function (properties) {
+      const onSelect = function (properties) {
         // pass this to a scope variable
-        let selected = data._data[properties.items];
+        const selected = data._data[properties.items];
         if (selected) {
           if ($scope.selectValue === 'date') {
             if (selected.start && !selected.end) {
