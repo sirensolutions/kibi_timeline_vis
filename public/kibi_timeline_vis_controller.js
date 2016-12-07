@@ -90,7 +90,7 @@ define(function (require) {
                   endField: group.endField,
                   //params for both
                   useHighlight: group.useHighlight,
-                  highlightFirstLabelInstance: group.highlightFirstLabelInstance
+                  invertFirstLabelInstance: group.invertFirstLabelInstance
                 }
               });
             }

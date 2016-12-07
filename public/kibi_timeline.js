@@ -181,7 +181,9 @@ define(function (require) {
             require_field_match: false
           });
         }
-        searchSource.sort(timelineHelper.sortObj(params));
+        if (params.invertFirstLabelInstance) {
+          searchSource.sort(timelineHelper.sortObj(params));
+        }
 
         searchSource.onResults().then(function onResults(searchResp) {
           let events = [];
@@ -222,7 +224,7 @@ define(function (require) {
                   '</div>';
 
                 let style = 'background-color: ' + groupColor + '; color: #fff;';
-                if (params.highlightFirstLabelInstance &&
+                if (params.invertFirstLabelInstance &&
                   !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
                   style = 'background-color: #fff; color: ' + groupColor + ';';
                   uniqueLabels.push(labelValue.toLowerCase().trim());

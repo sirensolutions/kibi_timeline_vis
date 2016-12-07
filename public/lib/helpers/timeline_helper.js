@@ -102,6 +102,12 @@ define(function (require) {
       return highlightedElement.substring(openIndex + openTag.length, closeIndex).toLowerCase().trim();
     }
 
+    /**
+     * Create an Elasticsearch sort object to sort in chronological order
+     *
+     * @param params group configuraton parameters
+     * @returns Elasticsearch sort object
+     */
     TimelineHelper.prototype.sortObj = function (params) {
       const sortObj = {};
       if (params.startFieldSequence) {
