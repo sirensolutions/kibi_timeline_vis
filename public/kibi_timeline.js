@@ -5,7 +5,7 @@ define(function (require) {
   let buildRangeFilter = require('ui/filter_manager/lib/range');
 
   require('ui/modules').get('kibana').directive('kibiTimeline',
-  function (Private, createNotifier, courier, indexPatterns, config, highlightTags) {
+  function (Private, createNotifier, courier, indexPatterns, config, highlightTags, timefilter) {
     const kibiUtils = require('kibiutils');
     const NUM_FRAGS_CONFIG = 'kibi:timeline:highlight:number_of_fragments';
     const DEFAULT_NUM_FRAGS = 25;
@@ -24,7 +24,8 @@ define(function (require) {
         groupsOnSeparateLevels: '=',
         options: '=',
         selectValue: '=',
-        notifyDataErrors: '='
+        notifyDataErrors: '=',
+        syncTime: '='
       },
       restrict: 'E',
       replace: true,
@@ -118,6 +119,13 @@ define(function (require) {
             timeline.setOptions($scope.options);
           }
           timeline.on('select', onSelect);
+          timeline.on('rangechanged', function (props) {
+            if ($scope.syncTime && props.byUser) {
+              timefilter.time.mode = 'absolute';
+              timefilter.time.from = props.start.toISOString();
+              timefilter.time.to = props.end.toISOString();
+            }
+          });
         }
       };
 

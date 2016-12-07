@@ -98,6 +98,7 @@ define(function (require) {
           $scope.savedObj.groupsOnSeparateLevels = savedVis.vis.params.groupsOnSeparateLevels;
           $scope.savedObj.selectValue = savedVis.vis.params.selectValue;
           $scope.savedObj.notifyDataErrors = savedVis.vis.params.notifyDataErrors;
+          $scope.savedObj.syncTime = savedVis.vis.params.syncTime;
         })
         .catch(notify.error);
       };

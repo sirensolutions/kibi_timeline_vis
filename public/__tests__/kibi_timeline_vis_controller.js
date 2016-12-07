@@ -359,6 +359,7 @@ describe('Kibi Timeline', function () {
       const savedVis = {
         vis: {
           params: {
+            syncTime: 'sync',
             groupsOnSeparateLevels: 'sep',
             notifyDataErrors: 'notify',
             selectValue: 'date',
@@ -376,6 +377,7 @@ describe('Kibi Timeline', function () {
 
       $scope.initSearchSources(savedVis)
       .then(() => {
+        expect($scope.savedObj.syncTime).to.be('sync');
         expect($scope.savedObj.groupsOnSeparateLevels).to.be('sep');
         expect($scope.savedObj.notifyDataErrors).to.be('notify');
         expect($scope.savedObj.selectValue).to.be('date');
