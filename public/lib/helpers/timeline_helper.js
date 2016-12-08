@@ -111,9 +111,9 @@ define(function (require) {
     TimelineHelper.prototype.sortObj = function (params) {
       const sortObj = {};
       if (params.startFieldSequence) {
-        sortObj[params.startFieldSequence] = { 'order': 'asc' };
+        sortObj[params.startFieldSequence.join('.')] = { order: 'asc' };
       } else {
-        sortObj[params.startField] = { 'order': 'asc' };
+        sortObj[params.startField] = { order: 'asc' };
       }
       return sortObj;
     };
