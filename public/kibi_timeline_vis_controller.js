@@ -8,12 +8,13 @@ define(function (require) {
   module.controller(
     'KbnTimelineVisController',
     function (createNotifier, $location, $rootScope, $scope, $route, savedSearches, savedVisualizations, Private, $element, Promise,
-              indexPatterns) {
+              courier, timefilter, indexPatterns) {
       var notify = createNotifier({
         location: 'Kibi Timeline'
       });
       var SearchSource = Private(require('ui/courier/data_source/search_source'));
       var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
+      const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
       $scope.initOptions = function () {
         var height = $element[0].offsetHeight;
@@ -148,11 +149,9 @@ define(function (require) {
       });
 
       // used also in autorefresh mode
-      $scope.$watch('esResponse', function () {
-        if ($scope.savedObj && $scope.savedObj.searchSources) {
-          _.each($scope.savedObj.searchSources, function (ss) {
-            ss.fetchQueued();
-          });
+      $scope.$watch('esResponse', function (resp) {
+        if (resp) {
+          _.each($scope.savedObj.groups, group => group.searchSource.fetchQueued());
         }
       });
 
@@ -160,6 +159,28 @@ define(function (require) {
         var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
           $scope.initOptions();
           $scope.initSearchSources($scope.savedVis);
+        });
+
+        // It is necessary to listen to those two events because the timeline visualization does not have
+        // requiresSearch set to true since it needs more that one search.
+
+        // on kibi, the editors.js file is updated to support requiresMultiSearch so that a courier.fetch call is executed
+        const chrome = require('ui/chrome');
+        const isKibi = chrome.getAppTitle() === 'Kibi';
+
+        // update the searchSource when filters update
+        $scope.$listen(queryFilter, 'update', function () {
+          _.each($scope.savedObj.groups, group => group.searchSource.set('filter', queryFilter.getFilters()));
+          if (!isKibi) {
+            courier.fetch();
+          }
+        });
+        // fetch when the time changes
+        $scope.$listen(timefilter, 'fetch', () => {
+          _.each($scope.savedObj.groups, group => group.searchSource.fetchQueued());
+          if (!isKibi) {
+            courier.fetch();
+          }
         });
 
         $scope.$on('$destroy', function () {

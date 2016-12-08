@@ -313,7 +313,6 @@ define(function (require) {
         timeline.setGroups(dataGroups);
       };
 
-
       $scope.$watch('options', function (newOptions, oldOptions) {
         if (!newOptions || newOptions === oldOptions) {
           return;
@@ -322,34 +321,51 @@ define(function (require) {
         timeline.redraw();
       }, true); // has to be true in other way the change in height is not detected
 
+      const prereq = (function () {
+        const fns = [];
 
-      $scope.$watch(
-        function ($scope) {
-          // here to make a comparison use all properties except a searchSource as it was causing angular to
-          // enter an infinite loop when trying to determine the object equality
-          let arr =  _.map($scope.groups, function (g) {
-            return _.omit(g, 'searchSource');
+        return function register(fn) {
+          fns.push(fn);
+
+          return function () {
+            fn.apply(this, arguments);
+
+            if (fns.length) {
+              _.pull(fns, fn);
+              if (!fns.length) {
+                $scope.$root.$broadcast('ready:vis');
+              }
+            }
+          };
+        };
+      }());
+
+      const update = prereq(function update(newValue, oldValue) {
+        if (newValue === oldValue) {
+          return;
+        }
+        initTimeline();
+        if ($scope.groups) {
+          initGroups();
+          _.each($scope.groups, (group, index) => {
+            initSingleGroup(group, index);
           });
+          courier.fetch();
+        }
+      });
 
-          arr.push($scope.groupsOnSeparateLevels);
-          return arr;
-        },
-        function (newValue, oldValue) {
-          if (newValue === oldValue) {
-            return;
-          }
-          initTimeline();
-          if ($scope.groups) {
-            initGroups();
-            _.each($scope.groups, (group, index) => {
-              initSingleGroup(group, index);
-            });
-            courier.fetch();
-          }
-        },
-        true
-      );
+      $scope.$watch(function ($scope) {
+        // here to make a comparison use all properties except a searchSource as it was causing angular to
+        // enter an infinite loop when trying to determine the object equality
+        let arr =  _.map($scope.groups, function (g) {
+          return _.omit(g, 'searchSource');
+        });
 
+        arr.push($scope.groupsOnSeparateLevels);
+        return arr;
+      }, update, true);
+
+      $scope.$watch('_.pluck(groups, "searchSource")', update);
 
       $element.on('$destroy', function () {
         _.each($scope.groups, (group) => {
