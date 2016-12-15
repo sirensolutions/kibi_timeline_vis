@@ -207,8 +207,8 @@ define(function (require) {
                 endRawFieldValue = hit.fields[params.endField];
 
                 if (endFieldValue.length !== startFieldValue.length) {
-                  notify.warning('Check your data - the number of values of the \'Event end date\'' +
-                  ' must be equal to the number of values of the \'Event start date\'');
+                  notify.warning('Check your data - the number of values in the \'Event end date\'' +
+                  ' must be equal to the number of values in the \'Event start date\'');
                   return;
                 }
               }
