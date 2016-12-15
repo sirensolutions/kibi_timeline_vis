@@ -29,7 +29,9 @@ define(function (require) {
         editor: '<kibi-timeline-vis-params></kibi-timeline-vis-params>'
       },
       defaultSection: 'options',
-      requiresSearch: false
+      requiresSearch: false,
+      requiresMultiSearch: true,
+      delegateSearch: true
     });
   };
 });

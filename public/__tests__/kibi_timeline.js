@@ -12,8 +12,8 @@ let $scope;
 let searchSource;
 let highlightTags;
 
-let init = function ($elem, props) {
-  ngMock.inject(function (_$rootScope_, $compile, _$timeout_) {
+const init = function ($elem, props) {
+  ngMock.inject(function (_$rootScope_, $compile) {
     $rootScope = _$rootScope_;
     $compile($elem)($rootScope);
     $elem.scope().$digest();
@@ -23,7 +23,7 @@ let init = function ($elem, props) {
   });
 };
 
-let destroy = function () {
+const destroy = function () {
   $scope.$destroy();
   $rootScope.$destroy();
 };
@@ -38,11 +38,8 @@ describe('KibiTimeline Directive', function () {
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
     const directive = `<kibi-timeline
-                        groups="groups"
-                        groups-on-separate-levels="groupsOnSeparateLevels"
-                        select-value="selectValue"
-                        notify-data-errors="notifyDataErrors"
-                        options="options">
+                        vis-options="visOptions"
+                        timeline-options="timelineOptions">
                       </kibi-timeline>`;
     $elem = angular.element(directive);
     ngMock.inject(function (_highlightTags_, Private) {
@@ -59,18 +56,20 @@ describe('KibiTimeline Directive', function () {
     }
 
     init($elem, {
-      groups: [
-        {
-          id: 1,
-          color: '#ff0000',
-          label: 'logs',
-          params,
-          searchSource
-        }
-      ],
-      groupsOnSeparateLevels: false,
-      selectValue: 'id',
-      notifyDataErrors: false
+      visOptions: {
+        groups: [
+          {
+            id: 1,
+            color: '#ff0000',
+            label: 'logs',
+            params,
+            searchSource
+          }
+        ],
+        groupsOnSeparateLevels: false,
+        selectValue: 'id',
+        notifyDataErrors: false
+      }
     });
     $scope.$digest();
   }
