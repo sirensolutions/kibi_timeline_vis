@@ -177,18 +177,18 @@ define(function (require) {
           });
         }
 
+
         searchSource.onResults().then(function onResults(searchResp) {
           let events = [];
 
           if (params.startField) {
-            let detectedMultivaluedStart;
-            let detectedMultivaluedEnd;
             let startFieldValue;
             let startRawFieldValue;
             let endFieldValue;
             let endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
+
               let labelValue = timelineHelper.pluckLabel(hit, params, notify);
               if (params.startFieldSequence) { // in kibi, we have the path property of a field
                 startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
@@ -198,68 +198,87 @@ define(function (require) {
               startRawFieldValue = hit.fields[params.startField];
 
               let endFieldValue = null;
+              if (params.endField) {
+                if (params.endFieldSequence) { // in kibi, we have the path property of a field
+                  endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
+                } else {
+                  endFieldValue = _.get(hit._source, params.endField);
+                }
+                endRawFieldValue = hit.fields[params.endField];
+
+                if (endFieldValue.length !== startFieldValue.length) {
+                  notify.warning('Check your data - the number of values of the \'Event end date\'' +
+                  ' must be equal to the number of values of the \'Event start date\'');
+                  return;
+                }
+              }
 
               if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
-                if (timelineHelper.isMultivalued(startFieldValue)) {
-                  detectedMultivaluedStart = true;
-                }
                 let indexId = searchSource.get('index').id;
-                let startValue = timelineHelper.pickFirstIfMultivalued(startFieldValue);
-                let startRawValue = timelineHelper.pickFirstIfMultivalued(startRawFieldValue);
-                let content =
-                  '<div title="index: ' + indexId +
-                  ', startField: ' + params.startField +
-                  (params.endField ? ', endField: ' + params.endField : '') +
-                  '">' + labelValue +
-                  (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) + '</p>' : '') +
-                  '</div>';
 
-                let e =  {
-                  index: indexId,
-                  content: content,
-                  value: labelValue,
-                  start: new Date(startRawValue),
-                  startField: {
-                    name: params.startField,
-                    value: startValue
-                  },
-                  type: 'box',
-                  group: $scope.visOptions.groupsOnSeparateLevels === true ? index : 0,
-                  style: 'background-color: ' + groupColor + '; color: #fff;',
-                  groupId: groupId
-                };
+                startFieldValue.forEach(function (value, i) {
+                  let startValue = value;
+                  let startRawValue = startRawFieldValue[i];
 
-                if (params.endField) {
-                  if (params.endFieldSequence) { // in kibi, we have the path property of a field
-                    endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
+                  var content;
+                  if (labelValue.length === startFieldValue.length) {
+                    content =
+                      '<div title="index: ' + indexId +
+                      ', startField: ' + params.startField +
+                      (params.endField ? ', endField: ' + params.endField : '') +
+                      '">' + labelValue[i] +
+                      (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) + '</p>' : '') +
+                      '</div>';
                   } else {
-                    endFieldValue = _.get(hit._source, params.endField);
+                    content =
+                      '<div title="index: ' + indexId +
+                      ', startField: ' + params.startField +
+                      (params.endField ? ', endField: ' + params.endField : '') +
+                      '">' + labelValue.join() +
+                      (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) + '</p>' : '') +
+                      '</div>';
                   }
-                  endRawFieldValue = hit.fields[params.endField];
-                  if (timelineHelper.isMultivalued(endFieldValue)) {
-                    detectedMultivaluedEnd = true;
-                  }
-                  if (!endFieldValue) {
-                    // here the end field value missing but expected
-                    // force the event to be of type point
-                    e.type = 'point';
-                  } else {
-                    let endValue = timelineHelper.pickFirstIfMultivalued(endFieldValue);
-                    let endRawValue = timelineHelper.pickFirstIfMultivalued(endRawFieldValue);
-                    if (startValue === endValue) {
-                      // also force it to be a point
+
+                  let e =  {
+                    index: indexId,
+                    content: content,
+                    value: labelValue[i],
+                    start: new Date(startRawValue),
+                    startField: {
+                      name: params.startField,
+                      value: startValue
+                    },
+                    type: 'box',
+                    group: $scope.groupsOnSeparateLevels === true ? index : 0,
+                    style: 'background-color: ' + groupColor + '; color: #fff;',
+                    groupId: groupId
+                  };
+
+                  if (params.endField) {
+                    if (!endFieldValue) {
+                      // here the end field value missing but expected
+                      // force the event to be of type point
                       e.type = 'point';
                     } else {
-                      e.type = 'range';
-                      e.end =  new Date(endRawValue);
-                      e.endField = {
-                        name: params.endField,
-                        value: endValue
-                      };
+                      let endValue = endFieldValue[i];
+                      let endRawValue = endRawFieldValue[i];
+                      if (startValue === endValue) {
+                        // also force it to be a point
+                        e.type = 'point';
+                      } else {
+                        e.type = 'range';
+                        e.end =  new Date(endRawValue);
+                        e.endField = {
+                          name: params.endField,
+                          value: endValue
+                        };
+                      }
                     }
                   }
-                }
-                events.push(e);
+
+                  events.push(e);
+
+                });
               } else {
                 if ($scope.visOptions.notifyDataErrors) {
                   notify.warning('Check your data - null start date not allowed.' +
@@ -268,14 +287,6 @@ define(function (require) {
                 return;
               }
             });
-
-            if (detectedMultivaluedStart) {
-              notify.warning('Start Date field [' + params.startField + '] is multivalued - the first date will be used.');
-            }
-            if (detectedMultivaluedEnd) {
-              notify.warning('End Date field [' + params.endField + '] is multivalued - the first date will be used.');
-            }
-
           }
 
           updateTimeline(index, events);

@@ -49,10 +49,7 @@ define(function (require) {
         field = _.get(hit._source, params.labelField);
       }
       if (field && (!_.isArray(field) || field.length)) {
-        if (this.isMultivalued(field)) {
-          notify.warning('Label field [' + params.labelField + '] is multivalued - the first value will be used.');
-        }
-        label = this.pickFirstIfMultivalued(field, 'N/A');
+        return field;
       }
       return label;
     };
