@@ -2,22 +2,22 @@ define(function (require) {
   require('./kibi_timeline');
   require('ui/modules');
 
-  var _ = require('lodash');
+  const _ = require('lodash');
 
-  var module = require('ui/modules').get('kibi_timeline_vis/kibi_timeline_vis', ['kibana']);
+  const module = require('ui/modules').get('kibi_timeline_vis/kibi_timeline_vis', ['kibana']);
   module.controller(
     'KbnTimelineVisController',
     function (createNotifier, $location, $rootScope, $scope, $route, savedSearches, savedVisualizations, Private, $element, Promise,
               courier, timefilter, indexPatterns) {
-      var notify = createNotifier({
+      const notify = createNotifier({
         location: 'Kibi Timeline'
       });
-      var SearchSource = Private(require('ui/courier/data_source/search_source'));
-      var requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
+      const SearchSource = Private(require('ui/courier/data_source/search_source'));
+      const requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
       const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
       $scope.initOptions = function () {
-        var height = $element[0].offsetHeight;
+        let height = $element[0].offsetHeight;
         // make sure that it is never too small
         // as the height might be reported wrongly when element is not yet fully rendered
         if (height >= 20) {
@@ -26,7 +26,7 @@ define(function (require) {
         if (height < 175) {
           height = 175;
         }
-        var options = {
+        $scope.options = {
           width: '100%',
           height: height + 'px',
           selectable: true,
@@ -35,7 +35,6 @@ define(function (require) {
           // on change timeline directive should call redraw()
           autoResize: false
         };
-        $scope.options = options;
       };
 
       $scope.initSearchSources = function (savedVis) {
@@ -61,10 +60,17 @@ define(function (require) {
 
         return Promise.all([ getSavedSearches, fields ])
         .then(function ([ savedSearchesRes, fields ]) {
-          $scope.savedObj.groups = [];
+          // delete any searchSource that was previously created
+          _.each($scope.visOptions.groups, group => {
+            if (group.searchSource) {
+              group.searchSource.destroy();
+            }
+          });
+
+          $scope.visOptions.groups = [];
           _.each(savedSearchesRes, function ({ savedSearch, groups }, i) {
             for (let group of groups) {
-              var _id = `_kibi_timetable_ids_source_flag${group.id}${savedSearch.id}`; // used only by kibi
+              const _id = `_kibi_timetable_ids_source_flag${group.id}${savedSearch.id}`; // used only by kibi
               requestQueue.markAllRequestsWithSourceIdAsInactive(_id); // used only by kibi
 
               const searchSource = new SearchSource();
@@ -74,8 +80,9 @@ define(function (require) {
               searchSource.index(savedSearch.searchSource._state.index);
               searchSource.size(group.size || 100);
               searchSource.source(_.compact([ group.labelField, group.startField, group.endField ]));
+              searchSource.set('filter', queryFilter.getFilters());
 
-              $scope.savedObj.groups.push({
+              $scope.visOptions.groups.push({
                 id: group.id,
                 color: group.color,
                 label: group.groupLabel,
@@ -96,19 +103,16 @@ define(function (require) {
             }
           });
 
-          $scope.savedObj.groupsOnSeparateLevels = savedVis.vis.params.groupsOnSeparateLevels;
-          $scope.savedObj.selectValue = savedVis.vis.params.selectValue;
-          $scope.savedObj.notifyDataErrors = savedVis.vis.params.notifyDataErrors;
-          $scope.savedObj.syncTime = savedVis.vis.params.syncTime;
+          _.assign($scope.visOptions, _.omit(savedVis.vis.params, 'groups'));
         })
         .catch(notify.error);
       };
 
-      $scope.savedObj = {
+      $scope.visOptions = {
         groups: []
       };
       // Set to true in editing mode
-      var configMode = $location.path().indexOf('/visualize/') !== -1;
+      const configMode = $location.path().indexOf('/visualize/') !== -1;
 
       $scope.savedVis = $route.current.locals.savedVis;
       if (!$scope.savedVis) {
@@ -151,12 +155,14 @@ define(function (require) {
       // used also in autorefresh mode
       $scope.$watch('esResponse', function (resp) {
         if (resp) {
-          _.each($scope.savedObj.groups, group => group.searchSource.fetchQueued());
+          _.each($scope.visOptions.groups, group => {
+            group.searchSource.fetchQueued();
+          });
         }
       });
 
       if (configMode) {
-        var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
+        const removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
           $scope.initOptions();
           $scope.initSearchSources($scope.savedVis);
         });
@@ -170,14 +176,16 @@ define(function (require) {
 
         // update the searchSource when filters update
         $scope.$listen(queryFilter, 'update', function () {
-          _.each($scope.savedObj.groups, group => group.searchSource.set('filter', queryFilter.getFilters()));
+          _.each($scope.visOptions.groups, group => group.searchSource.set('filter', queryFilter.getFilters()));
           if (!isKibi) {
             courier.fetch();
           }
         });
         // fetch when the time changes
         $scope.$listen(timefilter, 'fetch', () => {
-          _.each($scope.savedObj.groups, group => group.searchSource.fetchQueued());
+          _.each($scope.visOptions.groups, group => {
+            group.searchSource.fetchQueued();
+          });
           if (!isKibi) {
             courier.fetch();
           }
