@@ -187,6 +187,7 @@ define(function (require) {
             let endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
+              $scope.visOptions.notifyDataErrors = false;
               let labelValue = timelineHelper.pluckLabel(hit, params, notify);
               if (params.startFieldSequence) { // in kibi, we have the path property of a field
                 startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
@@ -205,10 +206,16 @@ define(function (require) {
                 endRawFieldValue = hit.fields[params.endField];
 
                 if (endFieldValue.length !== startFieldValue.length) {
-                  notify.warning('Check your data - the number of values in the \'Event end date\'' +
-                  ' must be equal to the number of values in the \'Event start date\'');
-                  return;
+                  $scope.visOptions.notifyDataErrors = true;
                 }
+              }
+
+              if ($scope.visOptions.notifyDataErrors) {
+                notify.warning('Check your data - the number of values in the \'Event end date\' - ' +
+                '\'' + params.endField + '\' ' +
+                'must be equal to the number of values in the \'Event start date\' - \'' + params.startField +
+                '\'. Document id ' + hit._id);
+                return;
               }
 
               if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
