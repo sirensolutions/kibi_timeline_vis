@@ -211,9 +211,8 @@ define(function (require) {
               }
 
               if ($scope.visOptions.notifyDataErrors) {
-                notify.warning('Check your data - the number of values in the \'Event end date\' - ' +
-                '\'' + params.endField + '\' ' +
-                'must be equal to the number of values in the \'Event start date\' - \'' + params.startField +
+                notify.warning('Check your data - the number of values in the \'' + params.endField + '\' ' +
+                'must be equal to the number of values in the \'' + params.startField +
                 '\'. Document id ' + hit._id);
                 return;
               }
@@ -225,24 +224,13 @@ define(function (require) {
                   let startValue = value;
                   let startRawValue = startRawFieldValue[i];
 
-                  var content;
-                  if (labelValue.length === startFieldValue.length) {
-                    content =
-                      '<div title="index: ' + indexId +
-                      ', startField: ' + params.startField +
-                      (params.endField ? ', endField: ' + params.endField : '') +
-                      '">' + labelValue[i] +
-                      (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) + '</p>' : '') +
-                      '</div>';
-                  } else {
-                    content =
+                  var content =
                       '<div title="index: ' + indexId +
                       ', startField: ' + params.startField +
                       (params.endField ? ', endField: ' + params.endField : '') +
                       '">' + labelValue.join(', ') +
-                      (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) + '</p>' : '') +
-                      '</div>';
-                  }
+                      (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
+                      '</p>' : '') + '</div>';
 
                   let e =  {
                     index: indexId,
