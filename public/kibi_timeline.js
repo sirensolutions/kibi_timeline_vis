@@ -189,10 +189,15 @@ define(function (require) {
             _.each(searchResp.hits.hits, function (hit) {
               $scope.visOptions.notifyDataErrors = false;
               let labelValue = timelineHelper.pluckLabel(hit, params, notify);
+              labelValue = (labelValue.constructor === Array) ? labelValue.join(', ') : labelValue;
+
               if (params.startFieldSequence) { // in kibi, we have the path property of a field
                 startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
               } else {
                 startFieldValue = _.get(hit._source, params.startField);
+                if (startFieldValue !== undefined && startFieldValue !== null) {
+                  startFieldValue = (startFieldValue.constructor !== Array) ? [startFieldValue] : startFieldValue;
+                }
               }
               startRawFieldValue = hit.fields[params.startField];
 
@@ -202,6 +207,9 @@ define(function (require) {
                   endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
                 } else {
                   endFieldValue = _.get(hit._source, params.endField);
+                  if (endFieldValue !== undefined && endFieldValue !== null) {
+                    endFieldValue = (endFieldValue.constructor !== Array) ? [endFieldValue] : endFieldValue;
+                  }
                 }
                 endRawFieldValue = hit.fields[params.endField];
 
@@ -220,7 +228,7 @@ define(function (require) {
               if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
                 let indexId = searchSource.get('index').id;
 
-                startFieldValue.forEach(function (value, i) {
+                _.each(startFieldValue, function (value, i) {
                   let startValue = value;
                   let startRawValue = startRawFieldValue[i];
 
@@ -228,14 +236,14 @@ define(function (require) {
                       '<div title="index: ' + indexId +
                       ', startField: ' + params.startField +
                       (params.endField ? ', endField: ' + params.endField : '') +
-                      '">' + labelValue.join(', ') +
+                      '">' + labelValue +
                       (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
                       '</p>' : '') + '</div>';
 
                   let e =  {
                     index: indexId,
                     content: content,
-                    value: labelValue[i],
+                    value: labelValue,
                     start: new Date(startRawValue),
                     startField: {
                       name: params.startField,
