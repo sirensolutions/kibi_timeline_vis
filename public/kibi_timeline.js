@@ -177,7 +177,6 @@ define(function (require) {
           });
         }
 
-
         searchSource.onResults().then(function onResults(searchResp) {
           let events = [];
 
@@ -188,7 +187,6 @@ define(function (require) {
             let endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
-
               let labelValue = timelineHelper.pluckLabel(hit, params, notify);
               if (params.startFieldSequence) { // in kibi, we have the path property of a field
                 startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
