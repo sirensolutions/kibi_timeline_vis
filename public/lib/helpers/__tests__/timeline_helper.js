@@ -53,7 +53,7 @@ describe('Kibi Timeline', function () {
           labelFieldSequence: [ 'aaa' ]
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
+        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql(['bbb']);
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -70,21 +70,6 @@ describe('Kibi Timeline', function () {
 
         expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('N/A');
         sinon.assert.notCalled(notify.warning);
-      });
-
-      it('should display a warning if the label field is multivalued', function () {
-        const hit = {
-          _source: {
-            aaa: [ 'bbb', 'ccc' ]
-          }
-        };
-        const params = {
-          labelField: 'aaa',
-          labelFieldSequence: [ 'aaa' ]
-        };
-
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
-        sinon.assert.called(notify.warning);
       });
     });
 
