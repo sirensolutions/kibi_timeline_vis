@@ -201,7 +201,7 @@ describe('Kibi Timeline', function () {
 
       $scope.initSearchSources(savedVis)
       .then(() => {
-        expect($scope.savedObj.groups).to.have.length(2);
+        expect($scope.visOptions.groups).to.have.length(2);
 
         const expectedA = {
           labelFieldSequence: [ 'labelFieldA' ],
@@ -210,7 +210,7 @@ describe('Kibi Timeline', function () {
           searchSourceId: '_kibi_timetable_ids_source_flagidAsavedSearchIdA'
         };
         _.assign(expectedA, groups[0]);
-        assertGroup($scope.savedObj.groups[0], expectedA);
+        assertGroup($scope.visOptions.groups[0], expectedA);
 
         const expectedB = {
           labelFieldSequence: [ 'labelFieldB' ],
@@ -219,7 +219,7 @@ describe('Kibi Timeline', function () {
           searchSourceId: '_kibi_timetable_ids_source_flagidBsavedSearchIdB'
         };
         _.assign(expectedB, groups[1]);
-        assertGroup($scope.savedObj.groups[1], expectedB);
+        assertGroup($scope.visOptions.groups[1], expectedB);
 
         done();
       })
@@ -330,7 +330,7 @@ describe('Kibi Timeline', function () {
 
       $scope.initSearchSources(savedVis)
       .then(() => {
-        expect($scope.savedObj.groups).to.have.length(2);
+        expect($scope.visOptions.groups).to.have.length(2);
 
         const expectedA = {
           labelFieldSequence: [ 'd.o', 't.labelFieldA' ],
@@ -339,7 +339,7 @@ describe('Kibi Timeline', function () {
           searchSourceId: '_kibi_timetable_ids_source_flagidAsavedSearchIdA'
         };
         _.assign(expectedA, groups[0]);
-        assertGroup($scope.savedObj.groups[0], expectedA);
+        assertGroup($scope.visOptions.groups[0], expectedA);
 
         const expectedB = {
           labelFieldSequence: [ 'd.o', 't.labelFieldB' ],
@@ -348,7 +348,7 @@ describe('Kibi Timeline', function () {
           searchSourceId: '_kibi_timetable_ids_source_flagidBsavedSearchIdB'
         };
         _.assign(expectedB, groups[1]);
-        assertGroup($scope.savedObj.groups[1], expectedB);
+        assertGroup($scope.visOptions.groups[1], expectedB);
 
         done();
       })
@@ -377,10 +377,10 @@ describe('Kibi Timeline', function () {
 
       $scope.initSearchSources(savedVis)
       .then(() => {
-        expect($scope.savedObj.syncTime).to.be('sync');
-        expect($scope.savedObj.groupsOnSeparateLevels).to.be('sep');
-        expect($scope.savedObj.notifyDataErrors).to.be('notify');
-        expect($scope.savedObj.selectValue).to.be('date');
+        expect($scope.visOptions.syncTime).to.be('sync');
+        expect($scope.visOptions.groupsOnSeparateLevels).to.be('sep');
+        expect($scope.visOptions.notifyDataErrors).to.be('notify');
+        expect($scope.visOptions.selectValue).to.be('date');
         done();
       })
       .catch(done);

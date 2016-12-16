@@ -103,12 +103,12 @@ define(function (require) {
     }
 
     /**
-     * Create an Elasticsearch sort object to sort in chronological order
+     * Creates an Elasticsearch sort object to sort in chronological order
      *
      * @param params group configuraton parameters
      * @returns Elasticsearch sort object
      */
-    TimelineHelper.prototype.sortObj = function (params) {
+    TimelineHelper.prototype.getSortOnStartFieldObject = function (params) {
       const sortObj = {};
       if (params.startFieldSequence) {
         sortObj[params.startFieldSequence.join('.')] = { order: 'asc' };

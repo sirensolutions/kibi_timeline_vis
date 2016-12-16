@@ -20,12 +20,8 @@ define(function (require) {
 
     return {
       scope: {
-        groups: '=',
-        groupsOnSeparateLevels: '=',
-        options: '=',
-        selectValue: '=',
-        notifyDataErrors: '=',
-        syncTime: '='
+        timelineOptions: '=',
+        visOptions: '='
       },
       restrict: 'E',
       replace: true,
@@ -40,7 +36,7 @@ define(function (require) {
         // pass this to a scope variable
         const selected = data._data[properties.items];
         if (selected) {
-          if ($scope.selectValue === 'date') {
+          if ($scope.visOptions.selectValue === 'date') {
             if (selected.start && !selected.end) {
               // single point - do query match query filter
               let q1 = {
@@ -80,11 +76,11 @@ define(function (require) {
                 queryFilter.addFilters([rangeFilter1, rangeFilter2]);
               });
             }
-          } else if ($scope.selectValue === 'id') {
+          } else if ($scope.visOptions.selectValue === 'id') {
             let searchField = undefined;
-            for (let i = 0; i < $scope.groups.length; i++) {
-              if (selected.groupId === $scope.groups[i].id) {
-                searchField = $scope.groups[i].params.labelField;
+            for (let i = 0; i < $scope.visOptions.groups.length; i++) {
+              if (selected.groupId === $scope.visOptions.groups[i].id) {
+                searchField = $scope.visOptions.groups[i].params.labelField;
               }
             }
             let q2 = {
@@ -108,19 +104,18 @@ define(function (require) {
         if (!timeline) {
           // create a new one
           $scope.timeline = timeline = new vis.Timeline($element[0]);
-          let utcOffset = null;
-          utcOffset = timelineHelper.changeTimezone(config.get('dateFormat:tz'));
-          if (utcOffset !== 'Browser') {
-            $scope.options.moment = function (date) {
-              return vis.moment(date).utcOffset(utcOffset);
-            };
-          }
-          if ($scope.options) {
-            timeline.setOptions($scope.options);
+          if ($scope.timelineOptions) {
+            const utcOffset = timelineHelper.changeTimezone(config.get('dateFormat:tz'));
+            if (utcOffset !== 'Browser') {
+              $scope.timelineOptions.moment = function (date) {
+                return vis.moment(date).utcOffset(utcOffset);
+              };
+            }
+            timeline.setOptions($scope.timelineOptions);
           }
           timeline.on('select', onSelect);
           timeline.on('rangechanged', function (props) {
-            if ($scope.syncTime && props.byUser) {
+            if ($scope.visOptions.syncTime && props.byUser) {
               timefilter.time.mode = 'absolute';
               timefilter.time.from = props.start.toISOString();
               timefilter.time.to = props.end.toISOString();
@@ -132,7 +127,7 @@ define(function (require) {
       let groupEvents = [];
 
       let updateTimeline = function (groupIndex, events) {
-        let existingGroupIds = _.map($scope.groups, function (g) {
+        let existingGroupIds = _.map($scope.visOptions.groups, function (g) {
           return g.id;
         });
 
@@ -143,7 +138,7 @@ define(function (require) {
         let points = [];
         _.each(groupEvents, function (events, index) {
           _.each(events, function (e) {
-            e.group = $scope.groupsOnSeparateLevels === true ? index : 0;
+            e.group = $scope.visOptions.groupsOnSeparateLevels === true ? index : 0;
             if (existingGroupIds.indexOf(e.groupId) !== -1) {
               points.push(e);
             }
@@ -182,7 +177,7 @@ define(function (require) {
           });
         }
         if (params.invertFirstLabelInstance) {
-          searchSource.sort(timelineHelper.sortObj(params));
+          searchSource.sort(timelineHelper.getSortOnStartFieldObject(params));
         }
 
         searchSource.onResults().then(function onResults(searchResp) {
@@ -240,7 +235,7 @@ define(function (require) {
                     value: startValue
                   },
                   type: 'box',
-                  group: $scope.groupsOnSeparateLevels === true ? index : 0,
+                  group: $scope.visOptions.groupsOnSeparateLevels === true ? index : 0,
                   style: style,
                   groupId: groupId
                 };
@@ -277,7 +272,7 @@ define(function (require) {
                 }
                 events.push(e);
               } else {
-                if ($scope.notifyDataErrors) {
+                if ($scope.visOptions.notifyDataErrors) {
                   notify.warning('Check your data - null start date not allowed.' +
                   ' You can disable these errors in visualisation configuration');
                 }
@@ -301,10 +296,10 @@ define(function (require) {
         }).catch(notify.error);
       };
 
-      let initGroups = function () {
-        let groups = [];
-        if ($scope.groupsOnSeparateLevels === true) {
-          _.each($scope.groups, function (group, index) {
+      const initGroups = function () {
+        const groups = [];
+        if ($scope.visOptions.groupsOnSeparateLevels === true) {
+          _.each($scope.visOptions.groups, function (group, index) {
             groups.push({
               id: index,
               content: group.label,
@@ -320,12 +315,11 @@ define(function (require) {
             style: 'background-color: none;'
           });
         }
-        let dataGroups = new vis.DataSet(groups);
+        const dataGroups = new vis.DataSet(groups);
         timeline.setGroups(dataGroups);
       };
 
-
-      $scope.$watch('options', function (newOptions, oldOptions) {
+      $scope.$watch('timelineOptions', function (newOptions, oldOptions) {
         if (!newOptions || newOptions === oldOptions) {
           return;
         }
@@ -333,37 +327,53 @@ define(function (require) {
         timeline.redraw();
       }, true); // has to be true in other way the change in height is not detected
 
+      const prereq = (function () {
+        const fns = [];
 
-      $scope.$watch(
-        function ($scope) {
-          // here to make a comparison use all properties except a searchSource as it was causing angular to
-          // enter an infinite loop when trying to determine the object equality
-          let arr =  _.map($scope.groups, function (g) {
-            return _.omit(g, 'searchSource');
+        return function register(fn) {
+          fns.push(fn);
+
+          return function () {
+            fn.apply(this, arguments);
+
+            if (fns.length) {
+              _.pull(fns, fn);
+              if (!fns.length) {
+                $scope.$root.$broadcast('ready:vis');
+              }
+            }
+          };
+        };
+      }());
+
+      const update = prereq(function update(newValue, oldValue) {
+        if (newValue === oldValue) {
+          return;
+        }
+        initTimeline();
+        if ($scope.visOptions.groups) {
+          initGroups();
+          _.each($scope.visOptions.groups, (group, index) => {
+            initSingleGroup(group, index);
           });
+          courier.fetch();
+        }
+      });
 
-          arr.push($scope.groupsOnSeparateLevels);
-          return arr;
-        },
-        function (newValue, oldValue) {
-          if (newValue === oldValue) {
-            return;
-          }
-          initTimeline();
-          if ($scope.groups) {
-            initGroups();
-            _.each($scope.groups, (group, index) => {
-              initSingleGroup(group, index);
-            });
-            courier.fetch();
-          }
-        },
-        true
-      );
+      $scope.$watch(function ($scope) {
+        // here to make a comparison use all properties except a searchSource as it was causing angular to
+        // enter an infinite loop when trying to determine the object equality
+        if (!$scope.visOptions) {
+          return;
+        }
+        const groupsWithoutSearchSource = _.map($scope.visOptions.groups, g => _.omit(g, 'searchSource'));
+        return _.assign({}, $scope.visOptions, { groups: groupsWithoutSearchSource });
+      }, update, true);
 
+      $scope.$watch('_.pluck(visOptions.groups, "searchSource")', update);
 
       $element.on('$destroy', function () {
-        _.each($scope.groups, (group) => {
+        _.each($scope.visOptions.groups, (group) => {
           requestQueue.markAllRequestsWithSourceIdAsInactive(group.searchSource._id);
         });
         if (timeline) {
