@@ -132,6 +132,57 @@ describe('KibiTimeline Directive', function () {
     });
   });
 
+  it('should correctly return a timeline if multivalued fields', function () {
+    initTimeline({
+      startField: '@timestamp',
+      endField: '',
+      labelField: 'machine.os'
+    });
+
+    var dates = [ '25-01-2015', '16-12-2016' ];
+    var dateObjs = [ moment(dates[0], 'DD-MM-YYYY'), moment(dates[1], 'DD-MM-YYYY') ];
+    const results = {
+      took: 73,
+      timed_out: false,
+      _shards: {
+        total: 144,
+        successful: 144,
+        failed: 0
+      },
+      hits: {
+        total : 49487,
+        max_score : 1.0,
+        hits: [
+          {
+            _index: 'logstash-2014.09.09',
+            _type: 'apache',
+            _id: '61',
+            _score: 1,
+            _source: {
+              '@timestamp': [ dates[0], dates[1] ],
+              machine: {
+                os: 'linux'
+              }
+            },
+            fields: {
+              '@timestamp': [ dateObjs[0], dateObjs[1] ]
+            }
+          }
+        ]
+      }
+    };
+    searchSource.crankResults(results);
+    $scope.$digest();
+    expect($scope.timeline.itemsData.length).to.be(2);
+    var i = 0;
+    $scope.timeline.itemsData.forEach(data => {
+      sinon.assert.notCalled(searchSource.highlight);
+      expect(data.value).to.be('linux');
+      expect(data.start.valueOf()).to.be(dateObjs[i].valueOf());
+      i++;
+    });
+  });
+
   it('should get the highlighted terms of events if useHighlight is true', function () {
     initTimeline({
       useHighlight: true,
