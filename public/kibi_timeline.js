@@ -234,7 +234,7 @@ define(function (require) {
                       '<div title="index: ' + indexId +
                       ', startField: ' + params.startField +
                       (params.endField ? ', endField: ' + params.endField : '') +
-                      '">' + labelValue.join() +
+                      '">' + labelValue.join(', ') +
                       (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) + '</p>' : '') +
                       '</div>';
                   }
