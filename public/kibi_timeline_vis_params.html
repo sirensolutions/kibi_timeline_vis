@@ -34,6 +34,13 @@
                 Show highlighted terms
                 <kbn-info info="Show highlighted terms in event label."></kbn-info>
              </label>
+            <label>
+              <input type="checkbox"
+                name="highlightFirstLabelInstance"
+                ng-model="group.invertFirstLabelInstance">
+              Emphasize first label instance
+              <kbn-info info="Cut through the clutter and make unique label values standout. When checked, the first instance of a label will be displayed with inverted colors."></kbn-info>
+              </label>
             </div>
             <kibi-select-port required object-type="field" index-pattern-id="group.indexPatternId" ng-model="group.labelField">
             </kibi-select-port>

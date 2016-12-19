@@ -102,6 +102,22 @@ define(function (require) {
       return highlightedElement.substring(openIndex + openTag.length, closeIndex).toLowerCase().trim();
     }
 
+    /**
+     * Creates an Elasticsearch sort object to sort in chronological order
+     *
+     * @param params group configuraton parameters
+     * @returns Elasticsearch sort object
+     */
+    TimelineHelper.prototype.getSortOnStartFieldObject = function (params) {
+      const sortObj = {};
+      if (params.startFieldSequence) {
+        sortObj[params.startFieldSequence.join('.')] = { order: 'asc' };
+      } else {
+        sortObj[params.startField] = { order: 'asc' };
+      }
+      return sortObj;
+    };
+
     return new TimelineHelper();
   };
 });

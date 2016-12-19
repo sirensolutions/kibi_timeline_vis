@@ -97,7 +97,8 @@ define(function (require) {
                   startField: group.startField,
                   endField: group.endField,
                   //params for both
-                  useHighlight: group.useHighlight
+                  useHighlight: group.useHighlight,
+                  invertFirstLabelInstance: group.invertFirstLabelInstance
                 }
               });
             }
