@@ -238,8 +238,7 @@ define(function (require) {
                   const content =
                       '<div title="index: ' + indexId +
                       ', startField: ' + params.startField +
-                      (params.endField ? ', endField: ' + params.endField : '') +
-                      '">' + labelValue +
+                      (params.endField ? ', endField: ' + params.endField : '') + '">' + labelValue +
                       (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
                       '</p>' : '') + '</div>';
 
@@ -265,11 +264,28 @@ define(function (require) {
                     groupId: groupId
                   };
 
-                  if (params.endField) {
-                    if (!endFieldValue) {
-                      // here the end field value missing but expected
-                      // force the event to be of type point
-                      e.type = 'point';
+                  //debugger;
+                  //if (params.endField) {
+                  if (!endFieldValue) {
+                    // here the end field value missing but expected
+                    // force the event to be of type point
+                    e.style = 'border-style: none; background-color: #fff; color: #000;';
+                    let divregex = /(<div.*>)(.*)(<\/div>)/g;
+                    let contentParts = divregex.exec(e.content);
+                    let dot = '<div class="vis-item vis-dot vis-readonly" style="top: 10px; left: 4px;"></div>';
+                    let newContent = '<div style="margin-left: 15px">' + contentParts[2]  + '</div>';
+                    e.content = contentParts[1] + dot + newContent + contentParts[3];
+                  } else {
+                    let endValue = endFieldValue[i];
+                    let endRawValue = endRawFieldValue[i];
+                    if (startValue === endValue) {
+                      // also force it to be a point
+                      e.style = 'border-style: none; background-color: #fff; color: #000;';
+                      let divregex = /(<div.*>)(.*)(<\/div>)/g;
+                      let contentParts = divregex.exec(e.content);
+                      let dot = '<div class="vis-item vis-dot vis-readonly" style="top: 10px; left: 4px;"></div>';
+                      let newContent = '<div style="margin-left: 15px">' + contentParts[2]  + '</div>';
+                      e.content = contentParts[1] + dot + newContent + contentParts[3];
                     } else {
                       const endValue = endFieldValue[i];
                       const endRawValue = endRawFieldValue[i];
@@ -286,6 +302,7 @@ define(function (require) {
                       }
                     }
                   }
+                  //}
 
                   events.push(e);
 
