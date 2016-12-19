@@ -187,7 +187,6 @@ define(function (require) {
             let endRawFieldValue;
 
             _.each(searchResp.hits.hits, function (hit) {
-              $scope.visOptions.notifyDataErrors = false;
               let labelValue = timelineHelper.pluckLabel(hit, params, notify);
               labelValue = (labelValue.constructor === Array) ? labelValue.join(', ') : labelValue;
 
@@ -214,15 +213,13 @@ define(function (require) {
                 endRawFieldValue = hit.fields[params.endField];
 
                 if (endFieldValue.length !== startFieldValue.length) {
-                  $scope.visOptions.notifyDataErrors = true;
+                  if ($scope.visOptions.notifyDataErrors) {
+                    notify.warning('Check your data - the number of values in the field \'' + params.endField + '\' ' +
+                                   'must be equal to the number of values in the field \'' + params.startField +
+                                   '\': document ID=' + hit._id);
+                  }
+                  return; // break
                 }
-              }
-
-              if ($scope.visOptions.notifyDataErrors) {
-                notify.warning('Check your data - the number of values in the \'' + params.endField + '\' ' +
-                'must be equal to the number of values in the \'' + params.startField +
-                '\'. Document id ' + hit._id);
-                return;
               }
 
               if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
