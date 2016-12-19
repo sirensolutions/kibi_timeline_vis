@@ -195,7 +195,7 @@ define(function (require) {
                 startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
               } else {
                 startFieldValue = _.get(hit._source, params.startField);
-                if (startFieldValue !== undefined && startFieldValue !== null) {
+                if (startFieldValue) {
                   startFieldValue = (startFieldValue.constructor !== Array) ? [startFieldValue] : startFieldValue;
                 }
               }
@@ -207,7 +207,7 @@ define(function (require) {
                   endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
                 } else {
                   endFieldValue = _.get(hit._source, params.endField);
-                  if (endFieldValue !== undefined && endFieldValue !== null) {
+                  if (endFieldValue) {
                     endFieldValue = (endFieldValue.constructor !== Array) ? [endFieldValue] : endFieldValue;
                   }
                 }
