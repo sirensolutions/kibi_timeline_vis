@@ -11,18 +11,6 @@ define(function (require) {
       return value instanceof Array && value.length > 1;
     };
 
-    TimelineHelper.prototype.pickFirstIfMultivalued  = function (value, defaultValue) {
-      if (!value) {
-        return defaultValue || '';
-      } else {
-        if (value instanceof Array && value.length > 0) {
-          return value[0];
-        } else {
-          return value;
-        }
-      }
-    };
-
     TimelineHelper.prototype.changeTimezone  = function (timezone) {
       if (timezone !== 'Browser') {
         return moment().tz(timezone).format('Z');
@@ -49,10 +37,7 @@ define(function (require) {
         field = _.get(hit._source, params.labelField);
       }
       if (field && (!_.isArray(field) || field.length)) {
-        if (this.isMultivalued(field)) {
-          notify.warning('Label field [' + params.labelField + '] is multivalued - the first value will be used.');
-        }
-        label = this.pickFirstIfMultivalued(field, 'N/A');
+        return field;
       }
       return label;
     };
