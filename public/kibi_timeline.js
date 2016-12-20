@@ -1,20 +1,20 @@
 define(function (require) {
   require('ui/highlight/highlight_tags');
-  let _ = require('lodash');
-  let vis = require('vis');
-  let buildRangeFilter = require('ui/filter_manager/lib/range');
+  const _ = require('lodash');
+  const vis = require('vis');
+  const buildRangeFilter = require('ui/filter_manager/lib/range');
 
   require('ui/modules').get('kibana').directive('kibiTimeline',
   function (Private, createNotifier, courier, indexPatterns, config, highlightTags, timefilter) {
     const kibiUtils = require('kibiutils');
     const NUM_FRAGS_CONFIG = 'kibi:timeline:highlight:number_of_fragments';
     const DEFAULT_NUM_FRAGS = 25;
-    let requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
-    let timelineHelper = Private(require('./lib/helpers/timeline_helper'));
+    const requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
+    const timelineHelper = Private(require('./lib/helpers/timeline_helper'));
 
-    let queryFilter = Private(require('ui/filter_bar/query_filter'));
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
-    let notify = createNotifier({
+    const notify = createNotifier({
       location: 'Kibi Timeline'
     });
 
@@ -39,7 +39,7 @@ define(function (require) {
           if ($scope.visOptions.selectValue === 'date') {
             if (selected.start && !selected.end) {
               // single point - do query match query filter
-              let q1 = {
+              const q1 = {
                 query: {
                   match: {}
                 },
@@ -56,19 +56,19 @@ define(function (require) {
             } else if (selected.start && selected.end) {
               // range - do 2 range filters
               indexPatterns.get(selected.index).then(function (i) {
-                let startF = _.find(i.fields, function (f) {
+                const startF = _.find(i.fields, function (f) {
                   return f.name === selected.startField.name;
                 });
-                let endF = _.find(i.fields, function (f) {
+                const endF = _.find(i.fields, function (f) {
                   return f.name === selected.endField.name;
                 });
 
-                let rangeFilter1 = buildRangeFilter(startF, {
+                const rangeFilter1 = buildRangeFilter(startF, {
                   gte: selected.startField.value
                 }, i);
                 rangeFilter1.meta.alias = selected.startField.name + ' >= ' + selected.start;
 
-                let rangeFilter2 = buildRangeFilter(endF, {
+                const rangeFilter2 = buildRangeFilter(endF, {
                   lte: selected.endField.value
                 }, i);
                 rangeFilter2.meta.alias = selected.endField.name + ' <= ' + selected.end;
@@ -83,7 +83,7 @@ define(function (require) {
                 searchField = $scope.visOptions.groups[i].params.labelField;
               }
             }
-            let q2 = {
+            const q2 = {
               query: {
                 match: {}
               },
@@ -100,7 +100,7 @@ define(function (require) {
         }
       };
 
-      let initTimeline = function () {
+      const initTimeline = function () {
         if (!timeline) {
           // create a new one
           $scope.timeline = timeline = new vis.Timeline($element[0]);
@@ -124,10 +124,10 @@ define(function (require) {
         }
       };
 
-      let groupEvents = [];
+      const groupEvents = [];
 
-      let updateTimeline = function (groupIndex, events) {
-        let existingGroupIds = _.map($scope.visOptions.groups, function (g) {
+      const updateTimeline = function (groupIndex, events) {
+        const existingGroupIds = _.map($scope.visOptions.groups, function (g) {
           return g.id;
         });
 
@@ -135,7 +135,7 @@ define(function (require) {
 
         // make sure all events have correct group index
         // add only events from groups which still exists
-        let points = [];
+        const points = [];
         _.each(groupEvents, function (events, index) {
           _.each(events, function (e) {
             e.group = $scope.visOptions.groupsOnSeparateLevels === true ? index : 0;
@@ -150,7 +150,7 @@ define(function (require) {
         timeline.fit();
       };
 
-      let initSingleGroup = function (group, index) {
+      const initSingleGroup = function (group, index) {
         const searchSource = group.searchSource;
         const params = group.params;
         const groupId = group.id;
@@ -181,7 +181,7 @@ define(function (require) {
         }
 
         searchSource.onResults().then(function onResults(searchResp) {
-          let events = [];
+          const events = [];
 
           if (params.startField) {
             let startFieldValue;
@@ -227,13 +227,13 @@ define(function (require) {
               }
 
               if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
-                let indexId = searchSource.get('index').id;
+                const indexId = searchSource.get('index').id;
 
                 _.each(startFieldValue, function (value, i) {
-                  let startValue = value;
-                  let startRawValue = startRawFieldValue[i];
+                  const startValue = value;
+                  const startRawValue = startRawFieldValue[i];
 
-                  var content =
+                  const content =
                       '<div title="index: ' + indexId +
                       ', startField: ' + params.startField +
                       (params.endField ? ', endField: ' + params.endField : '') +
@@ -241,7 +241,7 @@ define(function (require) {
                       (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
                       '</p>' : '') + '</div>';
 
-                  let e =  {
+                  const e =  {
                     index: indexId,
                     content: content,
                     value: labelValue,
@@ -262,8 +262,8 @@ define(function (require) {
                       // force the event to be of type point
                       e.type = 'point';
                     } else {
-                      let endValue = endFieldValue[i];
-                      let endRawValue = endRawFieldValue[i];
+                      const endValue = endFieldValue[i];
+                      const endRawValue = endRawFieldValue[i];
                       if (startValue === endValue) {
                         // also force it to be a point
                         e.type = 'point';
