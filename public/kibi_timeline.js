@@ -192,14 +192,16 @@ define(function (require) {
 
             _.each(searchResp.hits.hits, function (hit) {
               let labelValue = timelineHelper.pluckLabel(hit, params, notify);
-              labelValue = (labelValue.constructor === Array) ? labelValue.join(', ') : labelValue;
+              if (labelValue.constructor === Array) {
+                labelValue = labelValue.join(', ');
+              }
 
               if (params.startFieldSequence) { // in kibi, we have the path property of a field
                 startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
               } else {
                 startFieldValue = _.get(hit._source, params.startField);
-                if (startFieldValue) {
-                  startFieldValue = (startFieldValue.constructor !== Array) ? [startFieldValue] : startFieldValue;
+                if (startFieldValue && startFieldValue.constructor !== Array) {
+                  startFieldValue =  [ startFieldValue ];
                 }
               }
               startRawFieldValue = hit.fields[params.startField];
