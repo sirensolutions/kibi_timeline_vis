@@ -1,20 +1,20 @@
 define(function (require) {
   require('ui/highlight/highlight_tags');
-  let _ = require('lodash');
-  let vis = require('vis');
-  let buildRangeFilter = require('ui/filter_manager/lib/range');
+  const _ = require('lodash');
+  const vis = require('vis');
+  const buildRangeFilter = require('ui/filter_manager/lib/range');
 
   require('ui/modules').get('kibana').directive('kibiTimeline',
   function (Private, createNotifier, courier, indexPatterns, config, highlightTags, timefilter) {
     const kibiUtils = require('kibiutils');
     const NUM_FRAGS_CONFIG = 'kibi:timeline:highlight:number_of_fragments';
     const DEFAULT_NUM_FRAGS = 25;
-    let requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
-    let timelineHelper = Private(require('./lib/helpers/timeline_helper'));
+    const requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
+    const timelineHelper = Private(require('./lib/helpers/timeline_helper'));
 
-    let queryFilter = Private(require('ui/filter_bar/query_filter'));
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
-    let notify = createNotifier({
+    const notify = createNotifier({
       location: 'Kibi Timeline'
     });
 
@@ -39,7 +39,7 @@ define(function (require) {
           if ($scope.visOptions.selectValue === 'date') {
             if (selected.start && !selected.end) {
               // single point - do query match query filter
-              let q1 = {
+              const q1 = {
                 query: {
                   match: {}
                 },
@@ -56,19 +56,19 @@ define(function (require) {
             } else if (selected.start && selected.end) {
               // range - do 2 range filters
               indexPatterns.get(selected.index).then(function (i) {
-                let startF = _.find(i.fields, function (f) {
+                const startF = _.find(i.fields, function (f) {
                   return f.name === selected.startField.name;
                 });
-                let endF = _.find(i.fields, function (f) {
+                const endF = _.find(i.fields, function (f) {
                   return f.name === selected.endField.name;
                 });
 
-                let rangeFilter1 = buildRangeFilter(startF, {
+                const rangeFilter1 = buildRangeFilter(startF, {
                   gte: selected.startField.value
                 }, i);
                 rangeFilter1.meta.alias = selected.startField.name + ' >= ' + selected.start;
 
-                let rangeFilter2 = buildRangeFilter(endF, {
+                const rangeFilter2 = buildRangeFilter(endF, {
                   lte: selected.endField.value
                 }, i);
                 rangeFilter2.meta.alias = selected.endField.name + ' <= ' + selected.end;
@@ -83,7 +83,7 @@ define(function (require) {
                 searchField = $scope.visOptions.groups[i].params.labelField;
               }
             }
-            let q2 = {
+            const q2 = {
               query: {
                 match: {}
               },
@@ -100,7 +100,7 @@ define(function (require) {
         }
       };
 
-      let initTimeline = function () {
+      const initTimeline = function () {
         if (!timeline) {
           // create a new one
           $scope.timeline = timeline = new vis.Timeline($element[0]);
@@ -124,10 +124,10 @@ define(function (require) {
         }
       };
 
-      let groupEvents = [];
+      const groupEvents = [];
 
-      let updateTimeline = function (groupIndex, events) {
-        let existingGroupIds = _.map($scope.visOptions.groups, function (g) {
+      const updateTimeline = function (groupIndex, events) {
+        const existingGroupIds = _.map($scope.visOptions.groups, function (g) {
           return g.id;
         });
 
@@ -135,7 +135,7 @@ define(function (require) {
 
         // make sure all events have correct group index
         // add only events from groups which still exists
-        let points = [];
+        const points = [];
         _.each(groupEvents, function (events, index) {
           _.each(events, function (e) {
             e.group = $scope.visOptions.groupsOnSeparateLevels === true ? index : 0;
@@ -150,7 +150,7 @@ define(function (require) {
         timeline.fit();
       };
 
-      let initSingleGroup = function (group, index) {
+      const initSingleGroup = function (group, index) {
         const searchSource = group.searchSource;
         const params = group.params;
         const groupId = group.id;
@@ -181,11 +181,9 @@ define(function (require) {
         }
 
         searchSource.onResults().then(function onResults(searchResp) {
-          let events = [];
+          const events = [];
 
           if (params.startField) {
-            let detectedMultivaluedStart;
-            let detectedMultivaluedEnd;
             let startFieldValue;
             let startRawFieldValue;
             let endFieldValue;
@@ -194,83 +192,104 @@ define(function (require) {
 
             _.each(searchResp.hits.hits, function (hit) {
               let labelValue = timelineHelper.pluckLabel(hit, params, notify);
+              if (labelValue.constructor === Array) {
+                labelValue = labelValue.join(', ');
+              }
+
               if (params.startFieldSequence) { // in kibi, we have the path property of a field
                 startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
               } else {
                 startFieldValue = _.get(hit._source, params.startField);
+                if (startFieldValue && startFieldValue.constructor !== Array) {
+                  startFieldValue =  [ startFieldValue ];
+                }
               }
               startRawFieldValue = hit.fields[params.startField];
 
               let endFieldValue = null;
+              if (params.endField) {
+                if (params.endFieldSequence) { // in kibi, we have the path property of a field
+                  endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
+                } else {
+                  endFieldValue = _.get(hit._source, params.endField);
+                  if (endFieldValue) {
+                    endFieldValue = (endFieldValue.constructor !== Array) ? [endFieldValue] : endFieldValue;
+                  }
+                }
+                endRawFieldValue = hit.fields[params.endField];
+
+                if (endFieldValue.length !== startFieldValue.length) {
+                  if ($scope.visOptions.notifyDataErrors) {
+                    notify.warning('Check your data - the number of values in the field \'' + params.endField + '\' ' +
+                                   'must be equal to the number of values in the field \'' + params.startField +
+                                   '\': document ID=' + hit._id);
+                  }
+                  return; // break
+                }
+              }
 
               if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
-                if (timelineHelper.isMultivalued(startFieldValue)) {
-                  detectedMultivaluedStart = true;
-                }
-                let indexId = searchSource.get('index').id;
-                let startValue = timelineHelper.pickFirstIfMultivalued(startFieldValue);
-                let startRawValue = timelineHelper.pickFirstIfMultivalued(startRawFieldValue);
-                let content =
-                  '<div title="index: ' + indexId +
-                  ', startField: ' + params.startField +
-                  (params.endField ? ', endField: ' + params.endField : '') +
-                  '">' + labelValue +
-                  (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) + '</p>' : '') +
-                  '</div>';
+                const indexId = searchSource.get('index').id;
 
-                let style = 'background-color: ' + groupColor + '; color: #fff;';
-                if (params.invertFirstLabelInstance &&
-                  !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
-                  style = 'background-color: #fff; color: ' + groupColor + ';';
-                  uniqueLabels.push(labelValue.toLowerCase().trim());
-                }
+                _.each(startFieldValue, function (value, i) {
+                  const startValue = value;
+                  const startRawValue = startRawFieldValue[i];
 
-                let e =  {
-                  index: indexId,
-                  content: content,
-                  value: labelValue,
-                  start: new Date(startRawValue),
-                  startField: {
-                    name: params.startField,
-                    value: startValue
-                  },
-                  type: 'box',
-                  group: $scope.visOptions.groupsOnSeparateLevels === true ? index : 0,
-                  style: style,
-                  groupId: groupId
-                };
+                  const content =
+                      '<div title="index: ' + indexId +
+                      ', startField: ' + params.startField +
+                      (params.endField ? ', endField: ' + params.endField : '') +
+                      '">' + labelValue +
+                      (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
+                      '</p>' : '') + '</div>';
 
-                if (params.endField) {
-                  if (params.endFieldSequence) { // in kibi, we have the path property of a field
-                    endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
-                  } else {
-                    endFieldValue = _.get(hit._source, params.endField);
+                  let style = 'background-color: ' + groupColor + '; color: #fff;';
+                  if (params.invertFirstLabelInstance &&
+                    !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
+                    style = 'background-color: #fff; color: ' + groupColor + ';';
+                    uniqueLabels.push(labelValue.toLowerCase().trim());
                   }
-                  endRawFieldValue = hit.fields[params.endField];
-                  if (timelineHelper.isMultivalued(endFieldValue)) {
-                    detectedMultivaluedEnd = true;
-                  }
-                  if (!endFieldValue) {
-                    // here the end field value missing but expected
-                    // force the event to be of type point
-                    e.type = 'point';
-                  } else {
-                    let endValue = timelineHelper.pickFirstIfMultivalued(endFieldValue);
-                    let endRawValue = timelineHelper.pickFirstIfMultivalued(endRawFieldValue);
-                    if (startValue === endValue) {
-                      // also force it to be a point
+
+                  const e =  {
+                    index: indexId,
+                    content: content,
+                    value: labelValue,
+                    start: new Date(startRawValue),
+                    startField: {
+                      name: params.startField,
+                      value: startValue
+                    },
+                    type: 'box',
+                    group: $scope.groupsOnSeparateLevels === true ? index : 0,
+                    style: style,
+                    groupId: groupId
+                  };
+
+                  if (params.endField) {
+                    if (!endFieldValue) {
+                      // here the end field value missing but expected
+                      // force the event to be of type point
                       e.type = 'point';
                     } else {
-                      e.type = 'range';
-                      e.end =  new Date(endRawValue);
-                      e.endField = {
-                        name: params.endField,
-                        value: endValue
-                      };
+                      const endValue = endFieldValue[i];
+                      const endRawValue = endRawFieldValue[i];
+                      if (startValue === endValue) {
+                        // also force it to be a point
+                        e.type = 'point';
+                      } else {
+                        e.type = 'range';
+                        e.end =  new Date(endRawValue);
+                        e.endField = {
+                          name: params.endField,
+                          value: endValue
+                        };
+                      }
                     }
                   }
-                }
-                events.push(e);
+
+                  events.push(e);
+
+                });
               } else {
                 if ($scope.visOptions.notifyDataErrors) {
                   notify.warning('Check your data - null start date not allowed.' +
@@ -279,14 +298,6 @@ define(function (require) {
                 return;
               }
             });
-
-            if (detectedMultivaluedStart) {
-              notify.warning('Start Date field [' + params.startField + '] is multivalued - the first date will be used.');
-            }
-            if (detectedMultivaluedEnd) {
-              notify.warning('End Date field [' + params.endField + '] is multivalued - the first date will be used.');
-            }
-
           }
 
           updateTimeline(index, events);

@@ -23,20 +23,6 @@ describe('Kibi Timeline', function () {
       });
     });
 
-    describe('isMultivalued', function () {
-      it('should return true if value is an array and mutlivalued', function () {
-        expect(timelineHelper.isMultivalued([ 1, 2 ])).to.be(true);
-      });
-
-      it('should return false if value is an array but has only one value', function () {
-        expect(timelineHelper.isMultivalued([ 1 ])).to.be(false);
-      });
-
-      it('should return false if value is not an array', function () {
-        expect(timelineHelper.isMultivalued(1)).to.be(false);
-      });
-    });
-
     describe('pluckLabel', function () {
       let notify;
 
@@ -71,7 +57,7 @@ describe('Kibi Timeline', function () {
           labelFieldSequence: [ 'aaa' ]
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
+        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql(['bbb']);
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -88,21 +74,6 @@ describe('Kibi Timeline', function () {
 
         expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('N/A');
         sinon.assert.notCalled(notify.warning);
-      });
-
-      it('should display a warning if the label field is multivalued', function () {
-        const hit = {
-          _source: {
-            aaa: [ 'bbb', 'ccc' ]
-          }
-        };
-        const params = {
-          labelField: 'aaa',
-          labelFieldSequence: [ 'aaa' ]
-        };
-
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
-        sinon.assert.called(notify.warning);
       });
     });
 
