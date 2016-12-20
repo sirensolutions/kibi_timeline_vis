@@ -241,6 +241,13 @@ define(function (require) {
                       (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
                       '</p>' : '') + '</div>';
 
+                  let style = 'background-color: ' + groupColor + '; color: #fff;';
+                  if (params.invertFirstLabelInstance &&
+                    !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
+                    style = 'background-color: #fff; color: ' + groupColor + ';';
+                    uniqueLabels.push(labelValue.toLowerCase().trim());
+                  }
+
                   const e =  {
                     index: indexId,
                     content: content,
@@ -252,7 +259,7 @@ define(function (require) {
                     },
                     type: 'box',
                     group: $scope.groupsOnSeparateLevels === true ? index : 0,
-                    style: 'background-color: ' + groupColor + '; color: #fff;',
+                    style: style,
                     groupId: groupId
                   };
 
