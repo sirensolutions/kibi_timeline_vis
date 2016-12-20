@@ -176,6 +176,9 @@ define(function (require) {
             require_field_match: false
           });
         }
+        if (params.invertFirstLabelInstance) {
+          searchSource.sort(timelineHelper.getSortOnStartFieldObject(params));
+        }
 
         searchSource.onResults().then(function onResults(searchResp) {
           let events = [];
@@ -185,6 +188,7 @@ define(function (require) {
             let startRawFieldValue;
             let endFieldValue;
             let endRawFieldValue;
+            const uniqueLabels = [];
 
             _.each(searchResp.hits.hits, function (hit) {
               let labelValue = timelineHelper.pluckLabel(hit, params, notify);

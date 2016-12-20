@@ -5,6 +5,24 @@ const sinon = require('auto-release-sinon');
 
 describe('Kibi Timeline', function () {
   describe('TimelineHelper', function () {
+    describe('getSortOnStartFieldObject', function () {
+      it('should return a sort ES object from startField', function () {
+        expect(timelineHelper.getSortOnStartFieldObject({ startField: 'date' })).to.eql({
+          date: {
+            order: 'asc'
+          }
+        });
+      });
+
+      it('should return a sort ES object from startFieldSequence', function () {
+        expect(timelineHelper.getSortOnStartFieldObject({ startFieldSequence: [ 'my.other', 'date' ] })).to.eql({
+          'my.other.date': {
+            order: 'asc'
+          }
+        });
+      });
+    });
+
     describe('isMultivalued', function () {
       it('should return true if value is an array and mutlivalued', function () {
         expect(timelineHelper.isMultivalued([ 1, 2 ])).to.be(true);
