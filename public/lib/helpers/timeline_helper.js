@@ -7,10 +7,6 @@ define(function (require) {
     function TimelineHelper() {
     }
 
-    TimelineHelper.prototype.isMultivalued = function (value) {
-      return value instanceof Array && value.length > 1;
-    };
-
     TimelineHelper.prototype.changeTimezone  = function (timezone) {
       if (timezone !== 'Browser') {
         return moment().tz(timezone).format('Z');

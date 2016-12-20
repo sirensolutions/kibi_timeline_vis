@@ -23,20 +23,6 @@ describe('Kibi Timeline', function () {
       });
     });
 
-    describe('isMultivalued', function () {
-      it('should return true if value is an array and mutlivalued', function () {
-        expect(timelineHelper.isMultivalued([ 1, 2 ])).to.be(true);
-      });
-
-      it('should return false if value is an array but has only one value', function () {
-        expect(timelineHelper.isMultivalued([ 1 ])).to.be(false);
-      });
-
-      it('should return false if value is not an array', function () {
-        expect(timelineHelper.isMultivalued(1)).to.be(false);
-      });
-    });
-
     describe('pluckLabel', function () {
       let notify;
 
