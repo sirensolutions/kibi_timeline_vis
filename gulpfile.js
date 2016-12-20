@@ -84,6 +84,17 @@ gulp.task('lint', function (done) {
     .pipe(eslint.failOnError());
 });
 
+gulp.task('lintFix', function (done) {
+  return gulp.src([
+    'public/**/*.js',
+    '!**/webpackShims/**'
+  ]).pipe(eslint({
+    fix: true
+  }))
+  .pipe(eslint.formatEach())
+  .pipe(eslint.failOnError());
+});
+
 gulp.task('clean', function (done) {
   Promise.each([buildDir, targetDir], function (dir) {
     return new Promise(function (resolve, reject) {

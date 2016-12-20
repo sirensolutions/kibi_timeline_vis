@@ -5,13 +5,13 @@ define(function (require) {
   require('./lib/directives/kibi_select');
   // === ported kibi directives ===
 
-  var _ = require('lodash');
-  var vis = require('vis');
+  const _ = require('lodash');
+  const vis = require('vis');
 
   require('ui/modules').get('kibi_timeline_vis/kibi_timeline_vis')
   .directive('kibiTimelineVisParams', function ($rootScope, savedSearches, Private) {
 
-    var color = Private(require('ui/vislib/components/color/color'));
+    const color = Private(require('ui/vislib/components/color/color'));
 
     return {
       restrict: 'E',
@@ -26,7 +26,7 @@ define(function (require) {
           }
         });
 
-        var _pickNextFreeId = function (takenIds) {
+        const _pickNextFreeId = function (takenIds) {
           // we start from 5000 to avoid confusion with index
           // index can not be used as user can move elements up and down
           // and if we use index that would affect colors
@@ -38,7 +38,7 @@ define(function (require) {
 
         $scope.$watch('vis.params.groups', function (groups) {
 
-          var existingGroupIds = [];
+          const existingGroupIds = [];
           _.each($scope.vis.params.groups, function (group) {
             if (group.id) {
               existingGroupIds.push(group.id);

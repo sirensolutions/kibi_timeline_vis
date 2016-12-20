@@ -9,6 +9,7 @@
   "license": "Apache-2.0",
   "homepage": "http://siren.solutions/kibi",
   "scripts": {
+    "lintFix": "gulp lintFix",
     "test": "gulp test",
     "test:coverage": "gulp coverage",
     "start": "gulp dev",

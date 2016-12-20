@@ -1,9 +1,9 @@
 define(function (require) {
-  var module = require('ui/modules').get('kibana');
+  const module = require('ui/modules').get('kibana');
 
   module.directive('arrayParamAddPort', function (createNotifier, Private, arrayParamServicePort) {
-    var arrayHelper = Private(require('../helpers/array_helper'));
-    var notify = createNotifier({
+    const arrayHelper = Private(require('../helpers/array_helper'));
+    const notify = createNotifier({
       location: 'Array Param Directive'
     });
 
@@ -30,9 +30,9 @@ define(function (require) {
         }
 
         $scope.addParam = function () {
-          var el = {};
+          let el = {};
           if ($scope.default) {
-            var json;
+            let json;
             try {
               json = JSON.parse($scope.default);
               el = json;
@@ -50,7 +50,7 @@ define(function (require) {
       }
     };
   }).directive('arrayParamUpPort', function (Private) {
-    var arrayHelper = Private(require('../helpers/array_helper'));
+    const arrayHelper = Private(require('../helpers/array_helper'));
 
     return {
       restrict: 'E',
@@ -68,7 +68,7 @@ define(function (require) {
       }
     };
   }).directive('arrayParamDownPort', function (Private) {
-    var arrayHelper = Private(require('../helpers/array_helper'));
+    const arrayHelper = Private(require('../helpers/array_helper'));
 
     return {
       restrict: 'E',
@@ -86,8 +86,8 @@ define(function (require) {
       }
     };
   }).directive('arrayParamRemovePort', function (Private, createNotifier, arrayParamServicePort) {
-    var arrayHelper = Private(require('../helpers/array_helper'));
-    var notify = createNotifier({
+    const arrayHelper = Private(require('../helpers/array_helper'));
+    const notify = createNotifier({
       location: 'Array Param Directive'
     });
 

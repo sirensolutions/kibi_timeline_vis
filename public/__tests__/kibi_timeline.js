@@ -44,7 +44,7 @@ describe('KibiTimeline Directive', function () {
                       </kibi-timeline>`;
     $elem = angular.element(directive);
     ngMock.inject(function (_highlightTags_, Private) {
-      let timelineHelper = Private(require('../lib/helpers/timeline_helper'));
+      const timelineHelper = Private(require('../lib/helpers/timeline_helper'));
       getSortOnStartFieldObjectSpy = sinon.spy(timelineHelper, 'getSortOnStartFieldObject');
 
       highlightTags = _highlightTags_;

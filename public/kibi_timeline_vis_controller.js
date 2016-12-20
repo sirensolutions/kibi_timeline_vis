@@ -69,7 +69,7 @@ define(function (require) {
 
           $scope.visOptions.groups = [];
           _.each(savedSearchesRes, function ({ savedSearch, groups }, i) {
-            for (let group of groups) {
+            for (const group of groups) {
               const _id = `_kibi_timetable_ids_source_flag${group.id}${savedSearch.id}`; // used only by kibi
               requestQueue.markAllRequestsWithSourceIdAsInactive(_id); // used only by kibi
 

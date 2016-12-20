@@ -1,6 +1,6 @@
 define(function (require) {
 
-  var chrome = require('ui/chrome');
+  const chrome = require('ui/chrome');
 
   return function KibiSelectHelperFactory(
     config, $http, courier, indexPatterns, timefilter, Private, Promise, kbnIndex
@@ -9,16 +9,16 @@ define(function (require) {
     function KibiSelectHelper() {
     }
 
-    var _ = require('lodash');
+    const _ = require('lodash');
 
-    var searchRequest = function (type) {
+    const searchRequest = function (type) {
       return $http.get(chrome.getBasePath() + '/elasticsearch/' + kbnIndex + '/' + type + '/_search?size=100');
     };
 
     KibiSelectHelper.prototype.getObjects = function (type) {
       return searchRequest(type).then(function (objects) {
         if (objects.data.hits && objects.data.hits.hits) {
-          var items = _.map(objects.data.hits.hits, function (hit) {
+          const items = _.map(objects.data.hits.hits, function (hit) {
             return {
               label: hit._source.title,
               value: hit._id
@@ -31,7 +31,7 @@ define(function (require) {
 
 
     KibiSelectHelper.prototype.getFields = function (indexPatternId, fieldTypes) {
-      var defId;
+      let defId;
       if (indexPatternId) {
         defId = indexPatternId;
       } else {
@@ -39,7 +39,7 @@ define(function (require) {
       }
 
       return indexPatterns.get(defId).then(function (index) {
-        var fields = _.chain(index.fields)
+        const fields = _.chain(index.fields)
         .filter(function (field) {
           // filter some fields
           if (fieldTypes instanceof Array && fieldTypes.length > 0) {
