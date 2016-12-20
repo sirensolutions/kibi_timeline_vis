@@ -1,10 +1,10 @@
 define(function (require) {
 
-  var _ = require('lodash');
-  var module = require('ui/modules').get('kibana');
+  const _ = require('lodash');
+  const module = require('ui/modules').get('kibana');
 
   module.directive('kibiSelectPort', function (Private) {
-    var selectHelper = Private(require('./kibi_select_helper'));
+    const selectHelper = Private(require('./kibi_select_helper'));
 
     return {
       require: 'ngModel',
@@ -53,7 +53,7 @@ define(function (require) {
           }
         );
 
-        var _setViewValue = function () {
+        const _setViewValue = function () {
           if (scope.modelObject) {
             ngModelCtrl.$setViewValue(scope.modelObject);
           } else {
@@ -82,7 +82,7 @@ define(function (require) {
 
         ngModelCtrl.$formatters.push(function (modelValue) {
           // here what is passed to a formatter is just a string
-          var formatted;
+          let formatted;
           if (scope.items.length) {
             formatted = _.find(scope.items, function (item) {
               return item.value === modelValue;
@@ -99,7 +99,7 @@ define(function (require) {
         });
 
         ngModelCtrl.$parsers.push(function (viewValue) {
-          var ret = viewValue ? viewValue.value : null;
+          const ret = viewValue ? viewValue.value : null;
           scope.isValid = scope.required ? !!ret : true;
           ngModelCtrl.$setValidity('stSelect', scope.required ? !!ret : true);
           return ret;
@@ -112,7 +112,7 @@ define(function (require) {
           return false;
         }
 
-        var _renderSelect = function (items) {
+        const _renderSelect = function (items) {
           scope.analyzedField = false;
           scope.items = items;
           if (scope.items) {
@@ -130,9 +130,9 @@ define(function (require) {
 
             if (scope.filter && _.isFunction(scope.filter())) {
               _.remove(scope.items, function (item) {
-                var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
+                const selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
                   ngModelCtrl.$viewValue.value === item.value;
-                var toRemove = scope.filter()(scope.id, item.value);
+                const toRemove = scope.filter()(scope.id, item.value);
                 return toRemove && !selected;
               });
             }
@@ -145,7 +145,7 @@ define(function (require) {
             }
           }
 
-          var item = _.find(scope.items, function (item) {
+          const item = _.find(scope.items, function (item) {
             return ngModelCtrl.$viewValue && item.value === ngModelCtrl.$viewValue.value;
           });
 
@@ -163,8 +163,8 @@ define(function (require) {
           }
         };
 
-        var _render = function () {
-          var promise;
+        const _render = function () {
+          let promise;
 
           switch (scope.objectType) {
             case 'search':

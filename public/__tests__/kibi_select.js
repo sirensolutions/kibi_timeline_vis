@@ -1,15 +1,15 @@
-var sinon = require('auto-release-sinon');
-var angular = require('angular');
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+const sinon = require('auto-release-sinon');
+const angular = require('angular');
+const _ = require('lodash');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
 
 require('../lib/directives/kibi_select');
 
-var $rootScope;
-var $elem;
+let $rootScope;
+let $elem;
 
-var init = function (initValue,items, objectType,include) {
+const init = function (initValue,items, objectType,include) {
   // Load the application
   ngMock.module('kibana');
 
@@ -18,10 +18,10 @@ var init = function (initValue,items, objectType,include) {
     $rootScope = _$rootScope_;
     $rootScope.model = initValue;
 
-    var selectHelper = Private(require('../lib/directives/kibi_select_helper'));
+    const selectHelper = Private(require('../lib/directives/kibi_select_helper'));
     $rootScope.action = sinon.stub(selectHelper, 'getObjects').returns(Promise.resolve(items));
 
-    var select = '<kibi-select-port ng-model="model" object-type="' + objectType + '"';
+    let select = '<kibi-select-port ng-model="model" object-type="' + objectType + '"';
 
     if (include !== null && include !== undefined) {
       $rootScope.include = include;
@@ -49,7 +49,7 @@ describe('Kibi Timeline', function () {
       }
 
       it('should sort the items by label', function () {
-        var items = [
+        const items = [
           { value: 1, label: 'bbb' },
           { value: 2, label: 'aaa' }
         ];
@@ -58,7 +58,7 @@ describe('Kibi Timeline', function () {
 
         expect($rootScope.action.called).to.be.ok();
 
-        var options = $elem.find('option');
+        const options = $elem.find('option');
         expect(options).to.have.length(3); // the joe element plus the null one
 
         firstElementIsEmpty(options);
@@ -72,13 +72,13 @@ describe('Kibi Timeline', function () {
       });
 
       it('should sort the included items too', function () {
-        var items = [ { value: 2, label: 'aaa' } ];
-        var include = [ { value: 1, label: 'bbb' } ];
+        const items = [ { value: 2, label: 'aaa' } ];
+        const include = [ { value: 1, label: 'bbb' } ];
 
         init(null,items, 'search', include);
 
         expect($rootScope.action.called).to.be.ok();
-        var options = $elem.find('option');
+        const options = $elem.find('option');
         expect(options).to.have.length(3);
 
         firstElementIsEmpty(options);

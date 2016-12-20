@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  const _ = require('lodash');
   const kibiUtils = require('kibiutils');
   const moment = require('moment');
 
@@ -24,8 +24,6 @@ define(function (require) {
      * @returns the label as a string
      */
     TimelineHelper.prototype.pluckLabel = function (hit, params, notify) {
-      let label = 'N/A';
-
       let field;
       if (params.labelFieldSequence) { // in kibi, we have the path property of a field
         field = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
@@ -35,7 +33,7 @@ define(function (require) {
       if (field && (!_.isArray(field) || field.length)) {
         return field;
       }
-      return label;
+      return 'N/A';
     };
 
     /**
