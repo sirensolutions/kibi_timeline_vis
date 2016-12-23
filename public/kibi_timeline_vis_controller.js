@@ -58,6 +58,10 @@ define(function (require) {
           $scope.visOptions.groups = [];
           _.each(savedSearchesRes, function ({ savedSearch, groups }, i) {
             for (const group of groups) {
+              // get parent field if multifield
+              // because doc_values feature is not applied to string fields
+              group.labelField = group.labelField.length > 0 ? group.labelField.split('.')[0] : group.labelField;
+
               const _id = `_kibi_timetable_ids_source_flag${group.id}${savedSearch.id}`; // used only by kibi
               requestQueue.markAllRequestsWithSourceIdAsInactive(_id); // used only by kibi
 
