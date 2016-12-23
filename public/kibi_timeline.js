@@ -205,6 +205,13 @@ define(function (require) {
                 }
               }
               startRawFieldValue = hit.fields[params.startField];
+              // multifield case
+              // if there is date in fields but not in source, get from fields
+              if (startRawFieldValue.length > 0 && startFieldValue.length === 0) {
+                const aDate = new Date(startRawFieldValue[0]);
+                startFieldValue.push(`${aDate.getFullYear()}-${aDate.getMonth() + 1}-${aDate.getDate()}`);
+              }
+
 
               let endFieldValue = null;
               if (params.endField) {
@@ -217,6 +224,13 @@ define(function (require) {
                   }
                 }
                 endRawFieldValue = hit.fields[params.endField];
+                // multifield case
+                // if there is date in fields but not in source, get from fields
+                if (endRawFieldValue.length > 0 && endFieldValue.length === 0) {
+                  const aDate = new Date(endRawFieldValue[0]);
+                  endFieldValue.push(`${aDate.getFullYear()}-${aDate.getMonth() + 1}-${aDate.getDate()}`);
+                }
+
 
                 if (endFieldValue.length !== startFieldValue.length) {
                   if ($scope.visOptions.notifyDataErrors) {
