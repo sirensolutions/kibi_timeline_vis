@@ -7,6 +7,14 @@ define(function (require) {
     function TimelineHelper() {
     }
 
+    TimelineHelper.prototype.isMultifield  = function (str) {
+      if (str.indexOf('.') > -1) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
     TimelineHelper.prototype.changeTimezone  = function (timezone) {
       if (timezone !== 'Browser') {
         return moment().tz(timezone).format('Z');
@@ -26,10 +34,15 @@ define(function (require) {
     TimelineHelper.prototype.pluckLabel = function (hit, params, notify) {
       let field;
       if (params.labelFieldSequence) { // in kibi, we have the path property of a field
-        field = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
+        if (this.isMultifield(params.labelFieldSequence[0])) {
+          field = kibiUtils.getValuesAtPath(hit.fields, params.labelFieldSequence);
+        } else {
+          field = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
+        }
       } else {
         field = _.get(hit._source, params.labelField);
       }
+
       if (field && (!_.isArray(field) || field.length)) {
         return field;
       }
