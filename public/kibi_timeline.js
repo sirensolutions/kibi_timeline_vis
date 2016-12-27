@@ -207,7 +207,7 @@ define(function (require) {
               startRawFieldValue = hit.fields[params.startField];
               // multifield case
               // if there is date in fields but not in source, get from fields
-              if (startRawFieldValue.length > 0 && startFieldValue.length === 0) {
+              if (startRawFieldValue && startRawFieldValue.length > 0 && startFieldValue.length === 0) {
                 const aDate = new Date(startRawFieldValue[0]);
                 startFieldValue.push(`${aDate.getFullYear()}-${aDate.getMonth() + 1}-${aDate.getDate()}`);
               }
