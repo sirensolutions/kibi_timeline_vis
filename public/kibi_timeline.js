@@ -235,17 +235,34 @@ define(function (require) {
                   const startValue = value;
                   const startRawValue = startRawFieldValue[i];
 
-                  const content =
+                  let content =
                       '<div title="index: ' + indexId +
                       ', startField: ' + params.startField +
                       (params.endField ? ', endField: ' + params.endField : '') + '">' + labelValue +
                       (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
                       '</p>' : '') + '</div>';
 
-                  let style = 'background-color: ' + groupColor + '; color: #fff;';
+                  let style = `background-color: ${groupColor}; color: #fff;`;
+                  if (!endFieldValue || startValue === endFieldValue[i]) {
+                    // here the end field value missing but expected
+                    // or start field value === end field value
+                    // force vis box look like vis point
+                    style = `border-style: none; background-color: #fff; color: ${groupColor};`;
+                    const divregex = /(<div.*>)(.*)(<\/div>)/g;
+                    const contentDivParts = divregex.exec(content);
+                    const pointDot = '<div style="position:relative;padding:0;border-width:4px;border-style:solid;' +
+                    'border-radius:4px;float:left;margin-top:6px;margin-right:4px;border-color:' + groupColor + '"></div>';
+                    const labelDiv = '<div style="margin-left: 15px">' + contentDivParts[2]  + '</div>';
+                    content = contentDivParts[1] + pointDot + labelDiv + contentDivParts[3];
+                  }
+
                   if (params.invertFirstLabelInstance &&
                     !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
-                    style = 'background-color: #fff; color: ' + groupColor + ';';
+                    if (!endFieldValue || startValue === endFieldValue[i]) {
+                      style = `border-style: solid; background-color: #fff; color: ${groupColor};`;
+                    } else {
+                      style = `background-color: #fff; color: ${groupColor};`;
+                    }
                     uniqueLabels.push(labelValue.toLowerCase().trim());
                   }
 
@@ -264,37 +281,16 @@ define(function (require) {
                     groupId: groupId
                   };
 
-                  if (!endFieldValue) {
-                    // here the end field value missing but expected
-                    // force the event to be of type point
-                    e.style = 'border-style: none; background-color: #fff; color: #000;';
-                    const divregex = /(<div.*>)(.*)(<\/div>)/g;
-                    const contentParts = divregex.exec(e.content);
-                    const dot = '<div class="vis-item vis-dot vis-readonly" style="top: 10px; left: 4px;"></div>';
-                    const newContent = '<div style="margin-left: 15px">' + contentParts[2]  + '</div>';
-                    e.content = contentParts[1] + dot + newContent + contentParts[3];
-                  } else {
+                  if (endFieldValue && startValue !== endFieldValue[i]) {
                     const endValue = endFieldValue[i];
                     const endRawValue = endRawFieldValue[i];
-                    if (startValue === endValue) {
-                      // also force it to be a point
-                      e.style = 'border-style: none; background-color: #fff; color: #000;';
-                      const divregex = /(<div.*>)(.*)(<\/div>)/g;
-                      const contentParts = divregex.exec(e.content);
-                      const dot = '<div class="vis-item vis-dot vis-readonly" style="top: 10px; left: 4px;"></div>';
-                      const newContent = '<div style="margin-left: 15px">' + contentParts[2]  + '</div>';
-                      e.content = contentParts[1] + dot + newContent + contentParts[3];
-                    } else {
-                      const endValue = endFieldValue[i];
-                      const endRawValue = endRawFieldValue[i];
-                      if (startValue !== endValue) {
-                        e.type = 'range';
-                        e.end =  new Date(endRawValue);
-                        e.endField = {
-                          name: params.endField,
-                          value: endValue
-                        };
-                      }
+                    if (startValue !== endValue) {
+                      e.type = 'range';
+                      e.end =  new Date(endRawValue);
+                      e.endField = {
+                        name: params.endField,
+                        value: endValue
+                      };
                     }
                   }
 
