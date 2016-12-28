@@ -247,7 +247,7 @@ define(function (require) {
                     // here the end field value missing but expected
                     // or start field value === end field value
                     // force vis box look like vis point
-                    style = `border-style: none; background-color: #fff; color: ${groupColor};`;
+                    style = `border-style: none; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
                     const divregex = /(<div.*>)(.*)(<\/div>)/g;
                     const contentDivParts = divregex.exec(content);
                     const pointDot = '<div style="position:relative;padding:0;border-width:4px;border-style:solid;' +
@@ -259,7 +259,7 @@ define(function (require) {
                   if (params.invertFirstLabelInstance &&
                     !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
                     if (!endFieldValue || startValue === endFieldValue[i]) {
-                      style = `border-style: solid; background-color: #fff; color: ${groupColor};`;
+                      style = `border-style: solid; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
                     } else {
                       style = `background-color: #fff; color: ${groupColor};`;
                     }
