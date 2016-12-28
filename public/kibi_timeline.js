@@ -264,35 +264,30 @@ define(function (require) {
                     groupId: groupId
                   };
 
-                  //debugger;
-                  //if (params.endField) {
                   if (!endFieldValue) {
                     // here the end field value missing but expected
                     // force the event to be of type point
                     e.style = 'border-style: none; background-color: #fff; color: #000;';
-                    let divregex = /(<div.*>)(.*)(<\/div>)/g;
-                    let contentParts = divregex.exec(e.content);
-                    let dot = '<div class="vis-item vis-dot vis-readonly" style="top: 10px; left: 4px;"></div>';
-                    let newContent = '<div style="margin-left: 15px">' + contentParts[2]  + '</div>';
+                    const divregex = /(<div.*>)(.*)(<\/div>)/g;
+                    const contentParts = divregex.exec(e.content);
+                    const dot = '<div class="vis-item vis-dot vis-readonly" style="top: 10px; left: 4px;"></div>';
+                    const newContent = '<div style="margin-left: 15px">' + contentParts[2]  + '</div>';
                     e.content = contentParts[1] + dot + newContent + contentParts[3];
                   } else {
-                    let endValue = endFieldValue[i];
-                    let endRawValue = endRawFieldValue[i];
+                    const endValue = endFieldValue[i];
+                    const endRawValue = endRawFieldValue[i];
                     if (startValue === endValue) {
                       // also force it to be a point
                       e.style = 'border-style: none; background-color: #fff; color: #000;';
-                      let divregex = /(<div.*>)(.*)(<\/div>)/g;
-                      let contentParts = divregex.exec(e.content);
-                      let dot = '<div class="vis-item vis-dot vis-readonly" style="top: 10px; left: 4px;"></div>';
-                      let newContent = '<div style="margin-left: 15px">' + contentParts[2]  + '</div>';
+                      const divregex = /(<div.*>)(.*)(<\/div>)/g;
+                      const contentParts = divregex.exec(e.content);
+                      const dot = '<div class="vis-item vis-dot vis-readonly" style="top: 10px; left: 4px;"></div>';
+                      const newContent = '<div style="margin-left: 15px">' + contentParts[2]  + '</div>';
                       e.content = contentParts[1] + dot + newContent + contentParts[3];
                     } else {
                       const endValue = endFieldValue[i];
                       const endRawValue = endRawFieldValue[i];
-                      if (startValue === endValue) {
-                        // also force it to be a point
-                        e.type = 'point';
-                      } else {
+                      if (startValue !== endValue) {
                         e.type = 'range';
                         e.end =  new Date(endRawValue);
                         e.endField = {
@@ -302,7 +297,6 @@ define(function (require) {
                       }
                     }
                   }
-                  //}
 
                   events.push(e);
 
