@@ -6,6 +6,8 @@ define(function (require) {
     config, $http, courier, indexPatterns, timefilter, Private, Promise, kbnIndex
     ) {
 
+    const searchService = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName.searches;
+
     function KibiSelectHelper() {
     }
 
@@ -15,17 +17,15 @@ define(function (require) {
       return $http.get(chrome.getBasePath() + '/elasticsearch/' + kbnIndex + '/' + type + '/_search?size=100');
     };
 
-    KibiSelectHelper.prototype.getObjects = function (type) {
-      return searchRequest(type).then(function (objects) {
-        if (objects.data.hits && objects.data.hits.hits) {
-          const items = _.map(objects.data.hits.hits, function (hit) {
-            return {
-              label: hit._source.title,
-              value: hit._id
-            };
-          });
-          return items;
-        }
+    KibiSelectHelper.prototype.getObjects = function (type, filter) {
+      return searchService.find(filter).then(function (resp) {
+        const items = _.map(resp.hits, function (hit) {
+          return {
+            label: hit.title,
+            value: hit.id
+          };
+        });
+        return items;
       });
     };
 
