@@ -73,9 +73,9 @@ describe('Kibi Timeline', function () {
 
       const expectedOptions = {
         width: '100%',
-        height: '175px',
+        height: '100%',
         selectable: true,
-        autoResize: false
+        autoResize: true
       };
 
       $scope.initOptions();
