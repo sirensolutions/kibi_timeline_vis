@@ -17,23 +17,11 @@ define(function (require) {
       const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
       $scope.initOptions = function () {
-        let height = $element[0].offsetHeight;
-        // make sure that it is never too small
-        // as the height might be reported wrongly when element is not yet fully rendered
-        if (height >= 20) {
-          height -= 20;
-        }
-        if (height < 175) {
-          height = 175;
-        }
         $scope.options = {
           width: '100%',
-          height: height + 'px',
+          height: '100%',
           selectable: true,
-          // ! does not work correctly inside the panel
-          // instead we would have to calculate the proper height on panel resize and change it
-          // on change timeline directive should call redraw()
-          autoResize: false
+          autoResize: true
         };
       };
 
@@ -199,4 +187,3 @@ define(function (require) {
 
     });
 });
-
