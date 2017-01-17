@@ -86,6 +86,7 @@ define(function (require) {
                   endField: group.endField,
                   //params for both
                   useHighlight: group.useHighlight,
+                  splitOnArray: group.splitOnArray,
                   invertFirstLabelInstance: group.invertFirstLabelInstance
                 }
               });
