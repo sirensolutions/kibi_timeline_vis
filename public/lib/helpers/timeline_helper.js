@@ -28,7 +28,9 @@ define(function (require) {
       if (params.labelFieldSequence) { // in kibi, we have the path property of a field
         field = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
       } else { // create kibi path property from ES path by splitting on .
-        field = kibiUtils.getValuesAtPath(hit._source, Array.of(params.labelField.split('.')));
+        const kibanaSplit = params.labelField.split('.');
+        const kibanaSequence = Array.isArray(kibanaSplit) ? kibanaSplit : Array.of(kibanaSplit);
+        field = kibiUtils.getValuesAtPath(hit._source, kibanaSequence);
       }
       if (field && (!_.isArray(field) || field.length)) {
         return field;
