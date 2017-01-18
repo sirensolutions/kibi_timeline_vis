@@ -150,34 +150,34 @@ define(function (require) {
         }
       });
 
+      // It is necessary to listen to those two events because the timeline visualization does not have
+      // requiresSearch set to true since it needs more that one search.
+
+      // on kibi, the editors.js file is updated to support requiresMultiSearch so that a courier.fetch call is executed
+      const chrome = require('ui/chrome');
+      const isKibi = chrome.getAppTitle() === 'Kibi';
+
+      // update the searchSource when filters update
+      $scope.$listen(queryFilter, 'update', function () {
+        _.each($scope.visOptions.groups, group => group.searchSource.set('filter', queryFilter.getFilters()));
+        if (!isKibi) {
+          courier.fetch();
+        }
+      });
+      // fetch when the time changes
+      $scope.$listen(timefilter, 'fetch', () => {
+        _.each($scope.visOptions.groups, group => {
+          group.searchSource.fetchQueued();
+        });
+        if (!isKibi) {
+          courier.fetch();
+        }
+      });
+
       if (configMode) {
         const removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
           $scope.initOptions();
           $scope.initSearchSources($scope.savedVis);
-        });
-
-        // It is necessary to listen to those two events because the timeline visualization does not have
-        // requiresSearch set to true since it needs more that one search.
-
-        // on kibi, the editors.js file is updated to support requiresMultiSearch so that a courier.fetch call is executed
-        const chrome = require('ui/chrome');
-        const isKibi = chrome.getAppTitle() === 'Kibi';
-
-        // update the searchSource when filters update
-        $scope.$listen(queryFilter, 'update', function () {
-          _.each($scope.visOptions.groups, group => group.searchSource.set('filter', queryFilter.getFilters()));
-          if (!isKibi) {
-            courier.fetch();
-          }
-        });
-        // fetch when the time changes
-        $scope.$listen(timefilter, 'fetch', () => {
-          _.each($scope.visOptions.groups, group => {
-            group.searchSource.fetchQueued();
-          });
-          if (!isKibi) {
-            courier.fetch();
-          }
         });
 
         $scope.$on('$destroy', function () {
