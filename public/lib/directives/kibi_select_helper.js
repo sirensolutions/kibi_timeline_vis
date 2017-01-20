@@ -3,10 +3,8 @@ define(function (require) {
   const chrome = require('ui/chrome');
 
   return function KibiSelectHelperFactory(
-    config, $http, courier, indexPatterns, timefilter, Private, Promise, kbnIndex
+    config, $http, courier, indexPatterns, timefilter, Private, Promise, kbnIndex, savedSearches
     ) {
-
-    const searchService = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName.searches;
 
     function KibiSelectHelper() {
     }
@@ -18,7 +16,7 @@ define(function (require) {
     };
 
     KibiSelectHelper.prototype.getObjects = function (type, filter) {
-      return searchService.find(filter).then(function (resp) {
+      return savedSearches.find(filter).then(function (resp) {
         const items = _.map(resp.hits, function (hit) {
           return {
             label: hit.title,
