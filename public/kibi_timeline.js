@@ -250,9 +250,8 @@ define(function (require) {
                     style = `border-style: none; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
                     const divregex = /(<div.*>)(.*)(<\/div>)/g;
                     const contentDivParts = divregex.exec(content);
-                    const pointDot = '<div style="position:relative;padding:0;border-width:4px;border-style:solid;' +
-                    'border-radius:4px;float:left;margin-top:6px;margin-right:4px;border-color:' + groupColor + '"></div>';
-                    const labelDiv = '<div style="margin-left: 15px">' + contentDivParts[2]  + '</div>';
+                    const pointDot = `<div class="dot-item" style="border-color:${groupColor}"></div>`;
+                    const labelDiv = `<div class="label-item">${contentDivParts[2]}</div>`;
                     content = contentDivParts[1] + pointDot + labelDiv + contentDivParts[3];
                   }
 
