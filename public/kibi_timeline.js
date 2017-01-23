@@ -1,11 +1,13 @@
+/* global angular */
 define(function (require) {
   require('ui/highlight/highlight_tags');
+  const itemTemplate = require('./kibi_timeline_item.html');
   const _ = require('lodash');
   const vis = require('vis');
   const buildRangeFilter = require('ui/filter_manager/lib/range');
 
   require('ui/modules').get('kibana').directive('kibiTimeline',
-  function (Private, createNotifier, courier, indexPatterns, config, highlightTags, timefilter) {
+  function (Private, createNotifier, courier, indexPatterns, config, highlightTags, timefilter, $compile, $interpolate) {
     const kibiUtils = require('kibiutils');
     const NUM_FRAGS_CONFIG = 'kibi:timeline:highlight:number_of_fragments';
     const DEFAULT_NUM_FRAGS = 25;
@@ -235,12 +237,24 @@ define(function (require) {
                   const startValue = value;
                   const startRawValue = startRawFieldValue[i];
 
-                  let content =
-                      '<div title="index: ' + indexId +
-                      ', startField: ' + params.startField +
-                      (params.endField ? ', endField: ' + params.endField : '') + '">' + labelValue +
-                      (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
-                      '</p>' : '') + '</div>';
+                  //let content =
+                  //    '<div title="index: ' + indexId +
+                  //    ', startField: ' + params.startField +
+                  //    (params.endField ? ', endField: ' + params.endField : '') + '">' + labelValue +
+                  //    (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
+                  //    '</p>' : '') + '</div>';
+                  const $itemscope = $scope.$new();
+                  $itemscope.contentDict = {
+                    indexId: indexId,
+                    startField: params.startField,
+                    endField: params.endField,
+                    labelValue: labelValue,
+                    useHighlight: params.useHighlight,
+                    highlight: timelineHelper.pluckHighlights(hit, highlightTags)
+                  };
+                  let content = $compile(itemTemplate)($itemscope)[0].innerHTML;
+                  console.log('INNER HTML:');
+                  console.log(content);
 
                   let style = `background-color: ${groupColor}; color: #fff;`;
                   if (!endFieldValue || startValue === endFieldValue[i]) {

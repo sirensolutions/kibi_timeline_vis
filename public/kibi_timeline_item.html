@@ -1,0 +1,8 @@
+<div>
+<div ng-if="startField" title="index: {{indexId}}, startField: {{startField}} {{endField ? ', endField: endField' : ''}}">
+{{labelValue}}
+<p ng-if="useHighlight" class="tiny-txt">{{highlight}}</p>
+</div>
+<div ng-show="contentDict.labelValue == 'Fuselage'">Fuselage</div>
+<div ng-show="contentDict.labelValue != 'Fuselage'">Without Fuselage</div>
+</div>
