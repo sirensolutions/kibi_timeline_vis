@@ -249,7 +249,6 @@ define(function (require) {
                   };
 
                   const content = timelineHelper.createItemTemplate(i, itemDict);
-                  console.log(content);
 
                   let style = `background-color: ${groupColor}; color: #fff;`;
                   if (!endFieldValue || startValue === endFieldValue[i]) {
