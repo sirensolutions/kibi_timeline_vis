@@ -7,12 +7,12 @@ define(function (require) {
     function TimelineHelper() {
     }
 
-    TimelineHelper.prototype.createItemTemplate = function (i, itemDict) {
+    TimelineHelper.prototype.createItemTemplate = function (itemDict) {
       return '<div title="index: ' + itemDict.indexId + ', startField: ' + itemDict.startField +
         (itemDict.endField ? ', endField: ' + itemDict.endField : '') + '">' +
-        (!itemDict.endFieldValue || itemDict.startValue === itemDict.endFieldValue[i]
+        (!itemDict.endFieldValue || itemDict.startValue === itemDict.endFieldValue
           ? '<div class="kibi-tl-dot-item" style="border-color:' + itemDict.groupColor + '"></div>' : '') +
-        (!itemDict.endFieldValue || itemDict.startValue === itemDict.endFieldValue[i]
+        (!itemDict.endFieldValue || itemDict.startValue === itemDict.endFieldValue
           ? '<div class="kibi-tl-label-item">' + itemDict.labelValue + '</div>' : itemDict.labelValue) +
         (itemDict.useHighlight ? '<p class="tiny-txt">' + itemDict.highlight + '</p>' : '') + '</div>';
     };

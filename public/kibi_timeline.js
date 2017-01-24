@@ -245,10 +245,10 @@ define(function (require) {
                     highlight: timelineHelper.pluckHighlights(hit, highlightTags),
                     groupColor: groupColor,
                     startValue: startValue,
-                    endFieldValue: endFieldValue
+                    endFieldValue: endFieldValue ? endFieldValue[i] : null
                   };
 
-                  const content = timelineHelper.createItemTemplate(i, itemDict);
+                  const content = timelineHelper.createItemTemplate(itemDict);
 
                   let style = `background-color: ${groupColor}; color: #fff;`;
                   if (!endFieldValue || startValue === endFieldValue[i]) {
