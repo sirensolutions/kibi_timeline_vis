@@ -1,4 +1,3 @@
-/* global angular */
 define(function (require) {
   require('ui/highlight/highlight_tags');
   const _ = require('lodash');
