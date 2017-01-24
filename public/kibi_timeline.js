@@ -1,13 +1,12 @@
 /* global angular */
 define(function (require) {
   require('ui/highlight/highlight_tags');
-  const itemTemplate = require('./kibi_timeline_item.html');
   const _ = require('lodash');
   const vis = require('vis');
   const buildRangeFilter = require('ui/filter_manager/lib/range');
 
   require('ui/modules').get('kibana').directive('kibiTimeline',
-  function (Private, createNotifier, courier, indexPatterns, config, highlightTags, timefilter, $compile, $interpolate) {
+  function (Private, createNotifier, courier, indexPatterns, config, highlightTags, timefilter) {
     const kibiUtils = require('kibiutils');
     const NUM_FRAGS_CONFIG = 'kibi:timeline:highlight:number_of_fragments';
     const DEFAULT_NUM_FRAGS = 25;
@@ -237,23 +236,19 @@ define(function (require) {
                   const startValue = value;
                   const startRawValue = startRawFieldValue[i];
 
-                  //let content =
-                  //    '<div title="index: ' + indexId +
-                  //    ', startField: ' + params.startField +
-                  //    (params.endField ? ', endField: ' + params.endField : '') + '">' + labelValue +
-                  //    (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
-                  //    '</p>' : '') + '</div>';
-                  const $itemscope = $scope.$new();
-                  $itemscope.contentDict = {
+                  const itemDict = {
                     indexId: indexId,
                     startField: params.startField,
                     endField: params.endField,
                     labelValue: labelValue,
                     useHighlight: params.useHighlight,
-                    highlight: timelineHelper.pluckHighlights(hit, highlightTags)
+                    highlight: timelineHelper.pluckHighlights(hit, highlightTags),
+                    groupColor: groupColor,
+                    startValue: startValue,
+                    endFieldValue: endFieldValue
                   };
-                  let content = $compile(itemTemplate)($itemscope)[0].innerHTML;
-                  console.log('INNER HTML:');
+
+                  const content = timelineHelper.createItemTemplate(i, itemDict);
                   console.log(content);
 
                   let style = `background-color: ${groupColor}; color: #fff;`;
@@ -262,11 +257,6 @@ define(function (require) {
                     // or start field value === end field value
                     // force vis box look like vis point
                     style = `border-style: none; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
-                    const divregex = /(<div.*>)(.*)(<\/div>)/g;
-                    const contentDivParts = divregex.exec(content);
-                    const pointDot = `<div class="dot-item" style="border-color:${groupColor}"></div>`;
-                    const labelDiv = `<div class="label-item">${contentDivParts[2]}</div>`;
-                    content = contentDivParts[1] + pointDot + labelDiv + contentDivParts[3];
                   }
 
                   if (params.invertFirstLabelInstance &&

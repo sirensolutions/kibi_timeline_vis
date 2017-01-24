@@ -7,6 +7,16 @@ define(function (require) {
     function TimelineHelper() {
     }
 
+    TimelineHelper.prototype.createItemTemplate = function (i, itemDict) {
+      return '<div title="index: ' + itemDict.indexId + ', startField: ' + itemDict.startField +
+        (itemDict.endField ? ', endField: ' + itemDict.endField : '') + '">' +
+        (!itemDict.endFieldValue || itemDict.startValue === itemDict.endFieldValue[i]
+          ? '<div class="kibi-tl-dot-item" style="border-color:' + itemDict.groupColor + '"></div>' : '') +
+        (!itemDict.endFieldValue || itemDict.startValue === itemDict.endFieldValue[i]
+          ? '<div class="kibi-tl-label-item">' + itemDict.labelValue + '</div>' : itemDict.labelValue) +
+        (itemDict.useHighlight ? '<p class="tiny-txt">' + itemDict.highlight + '</p>' : '') + '</div>';
+    };
+
     TimelineHelper.prototype.changeTimezone  = function (timezone) {
       if (timezone !== 'Browser') {
         return moment().tz(timezone).format('Z');

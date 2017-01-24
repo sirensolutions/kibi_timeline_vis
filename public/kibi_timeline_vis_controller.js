@@ -184,15 +184,5 @@ define(function (require) {
           removeVisStateChangedHandler();
         });
       }
-    })
-    .directive('kibiTimelineItem', function () {
-      return {
-        template: '<div>{{contentDict.labelValue}} {{contentDict.indexId}}</div>'
-        //link: function (scope, element) {
-        //  console.log('LINK:');
-        //  console.log(scope);
-        //  //element.append($compile('<div>{{contentDict.labelValue}} {{contentDict.indexId}}</div>')(scope));
-        //}
-      };
     });
 });
