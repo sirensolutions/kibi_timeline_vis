@@ -14,8 +14,8 @@ define(function (require) {
     TimelineHelper.prototype.createItemTemplate = function (itemDict) {
       let endfield = '';
       let dot = '';
-      let label = '';
       let hilit = '';
+      let label = itemDict.labelValue;
 
       if (itemDict.endField) {
         endfield = `, endField: ${itemDict.endField}`;
@@ -28,7 +28,7 @@ define(function (require) {
         hilit = `<p class="tiny-txt">${itemDict.highlight}</p>`;
       }
 
-      return `<div title="index: ${itemDict.indexId}, startField: ${itemDict.startField} ${endfield}">` +
+      return `<div title="index: ${itemDict.indexId}, startField: ${itemDict.startField}${endfield}">` +
           `${dot}${label}${hilit}</div>`;
     };
 
