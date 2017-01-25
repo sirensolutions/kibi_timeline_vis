@@ -235,18 +235,35 @@ define(function (require) {
                   const startValue = value;
                   const startRawValue = startRawFieldValue[i];
 
-                  const content =
-                      '<div title="index: ' + indexId +
-                      ', startField: ' + params.startField +
-                      (params.endField ? ', endField: ' + params.endField : '') +
-                      '">' + labelValue +
-                      (params.useHighlight ? '<p class="tiny-txt">' + timelineHelper.pluckHighlights(hit, highlightTags) +
-                      '</p>' : '') + '</div>';
+                  const itemDict = {
+                    indexId: indexId,
+                    startField: params.startField,
+                    endField: params.endField,
+                    labelValue: labelValue,
+                    useHighlight: params.useHighlight,
+                    highlight: timelineHelper.pluckHighlights(hit, highlightTags),
+                    groupColor: groupColor,
+                    startValue: startValue,
+                    endFieldValue: endFieldValue ? endFieldValue[i] : null
+                  };
 
-                  let style = 'background-color: ' + groupColor + '; color: #fff;';
+                  const content = timelineHelper.createItemTemplate(itemDict);
+
+                  let style = `background-color: ${groupColor}; color: #fff;`;
+                  if (!endFieldValue || startValue === endFieldValue[i]) {
+                    // here the end field value missing but expected
+                    // or start field value === end field value
+                    // force vis box look like vis point
+                    style = `border-style: none; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
+                  }
+
                   if (params.invertFirstLabelInstance &&
                     !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
-                    style = 'background-color: #fff; color: ' + groupColor + ';';
+                    if (!endFieldValue || startValue === endFieldValue[i]) {
+                      style = `border-style: solid; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
+                    } else {
+                      style = `background-color: #fff; color: ${groupColor};`;
+                    }
                     uniqueLabels.push(labelValue.toLowerCase().trim());
                   }
 
@@ -265,25 +282,16 @@ define(function (require) {
                     groupId: groupId
                   };
 
-                  if (params.endField) {
-                    if (!endFieldValue) {
-                      // here the end field value missing but expected
-                      // force the event to be of type point
-                      e.type = 'point';
-                    } else {
-                      const endValue = endFieldValue[i];
-                      const endRawValue = endRawFieldValue[i];
-                      if (startValue === endValue) {
-                        // also force it to be a point
-                        e.type = 'point';
-                      } else {
-                        e.type = 'range';
-                        e.end =  new Date(endRawValue);
-                        e.endField = {
-                          name: params.endField,
-                          value: endValue
-                        };
-                      }
+                  if (endFieldValue && startValue !== endFieldValue[i]) {
+                    const endValue = endFieldValue[i];
+                    const endRawValue = endRawFieldValue[i];
+                    if (startValue !== endValue) {
+                      e.type = 'range';
+                      e.end =  new Date(endRawValue);
+                      e.endField = {
+                        name: params.endField,
+                        value: endValue
+                      };
                     }
                   }
 

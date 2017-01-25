@@ -184,6 +184,5 @@ define(function (require) {
           removeVisStateChangedHandler();
         });
       }
-
     });
 });

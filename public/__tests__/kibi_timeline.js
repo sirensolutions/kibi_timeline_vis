@@ -381,23 +381,23 @@ describe('KibiTimeline Directive', function () {
         case 0:
           expect(data.value).to.be('linux');
           expect(data.start.valueOf()).to.be(date1Obj.valueOf());
-          // color is inverted
+          // emphasized, border style is solid
           expect(data.style).to.match(/color: #ff0000/);
-          expect(data.style).to.match(/background-color: #fff/);
+          expect(data.style).to.match(/border-style: solid/);
           break;
         case 1:
           expect(data.value).to.be('mac');
           expect(data.start.valueOf()).to.be(date2Obj.valueOf());
-          // color is inverted
+          // emphasized, border style is solid
           expect(data.style).to.match(/color: #ff0000/);
-          expect(data.style).to.match(/background-color: #fff/);
+          expect(data.style).to.match(/border-style: solid/);
           break;
         case 2:
           expect(data.value).to.be('linux');
           expect(data.start.valueOf()).to.be(date3Obj.valueOf());
-          // color is normal
-          expect(data.style).to.match(/color: #fff/);
-          expect(data.style).to.match(/background-color: #ff0000/);
+          // border style is none
+          expect(data.style).to.match(/color: #ff0000/);
+          expect(data.style).to.match(/border-style: none/);
           break;
         default:
           expect().fail(`Should not have the case itemIndex=${itemIndex}`);
