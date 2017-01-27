@@ -82,8 +82,10 @@ define(function (require) {
                   //kibi params
                   labelFieldSequence: timelineHelper.isMultifield(group.labelField) ? [group.labelField]
                     : fields[i].byName[group.labelField].path,
-                  startFieldSequence: fields[i].byName[group.startField].path,
-                  endFieldSequence: group.endField && fields[i].byName[group.endField].path || [],
+                  startFieldSequence: timelineHelper.isMultifield(group.startField) ? [group.startField]
+                    : fields[i].byName[group.startField].path,
+                  endFieldSequence: group.endField && (timelineHelper.isMultifield(group.endField)
+                    ? [group.endField] : fields[i].byName[group.endField].path) || [],
                   //kibana params
                   labelField: group.labelField,
                   startField: group.startField,
