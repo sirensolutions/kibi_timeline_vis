@@ -30,6 +30,7 @@ define(function (require) {
 
       return `<div title="index: ${itemDict.indexId}, startField: ${itemDict.startField}${endfield}">` +
           `${dot}${label}${hilit}</div>`;
+    };
 
     TimelineHelper.prototype.isMultifield  = function (str) {
       if (str.indexOf('.') > -1) {
