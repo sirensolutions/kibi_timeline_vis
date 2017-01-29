@@ -61,24 +61,6 @@ describe('Kibi Timeline', function () {
         sinon.assert.notCalled(notify.warning);
       });
 
-      it('should return the label of an event kibi-style', function () {
-        const hit = {
-          _source: {
-            aaa: {
-              bbb: {
-                ccc: 'ddd'
-              }
-            }
-          }
-        };
-        const params = {
-          labelField: 'aaa.bbb.ccc'
-        };
-
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql(['ddd']);
-        sinon.assert.notCalled(notify.warning);
-      });
-
       it('should return N/A if the event does not a value for the labelField', function () {
         const hit = {
           _source: {
