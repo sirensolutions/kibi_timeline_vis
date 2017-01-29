@@ -7,6 +7,31 @@ define(function (require) {
     function TimelineHelper() {
     }
 
+    TimelineHelper.prototype.noEndOrEqual = function (startValue, endValue) {
+      return !endValue || startValue === endValue ? true : false;
+    };
+
+    TimelineHelper.prototype.createItemTemplate = function (itemDict) {
+      let endfield = '';
+      let dot = '';
+      let hilit = '';
+      let label = itemDict.labelValue;
+
+      if (itemDict.endField) {
+        endfield = `, endField: ${itemDict.endField}`;
+      }
+      if (this.noEndOrEqual(itemDict.startValue, itemDict.endValue)) {
+        dot = `<div class="kibi-tl-dot-item" style="border-color:${itemDict.groupColor}"></div>`;
+        label = `<div class="kibi-tl-label-item">${itemDict.labelValue}</div>`;
+      }
+      if (itemDict.useHighlight) {
+        hilit = `<p class="tiny-txt">${itemDict.highlight}</p>`;
+      }
+
+      return `<div title="index: ${itemDict.indexId}, startField: ${itemDict.startField}${endfield}">` +
+          `${dot}${label}${hilit}</div>`;
+    };
+
     TimelineHelper.prototype.changeTimezone  = function (timezone) {
       if (timezone !== 'Browser') {
         return moment().tz(timezone).format('Z');
