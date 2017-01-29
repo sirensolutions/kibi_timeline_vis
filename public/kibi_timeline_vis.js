@@ -1,3 +1,6 @@
+import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
+import VisSchemasProvider from 'ui/vis/schemas';
+
 define(function (require) {
 
   require('plugins/kibi_timeline_vis/kibi_timeline_vis.less');
@@ -7,8 +10,8 @@ define(function (require) {
   require('ui/registry/vis_types').register(KibiTimelineVisProvider);
 
   function KibiTimelineVisProvider(Private) {
-    const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
-    const Schemas = Private(require('ui/Vis/Schemas'));
+    const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+    const Schemas = Private(VisSchemasProvider);
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.
