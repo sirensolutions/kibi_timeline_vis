@@ -303,7 +303,7 @@ define(function (require) {
                   }
                   return;
                 }
-              })
+              });
             });
           }
 
