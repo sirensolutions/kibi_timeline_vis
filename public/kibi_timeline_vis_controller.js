@@ -67,8 +67,10 @@ define(function (require) {
               searchSource._id = _id;
               searchSource.index(savedSearch.searchSource._state.index);
               searchSource.size(group.size || 100);
-              //TODO set source without courier exception: Cannot read property 'some' of undefined
-              //searchSource.source(_.compact([ group.labelField, group.startField, group.endField ]));
+              searchSource.source({
+                includes: _.compact([ group.labelField, group.startField, group.endField ]),
+                excludes: []
+              });
               searchSource.set('filter', queryFilter.getFilters());
 
               $scope.visOptions.groups.push({
