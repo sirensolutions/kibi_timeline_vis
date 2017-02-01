@@ -16,7 +16,7 @@ This plugin can be installed in both:
 ### Automatic
 
 ```sh
-$ ./bin/kibi plugin -i kibi_timeline_vis -u https://github.com/sirensolutions/kibi_timeline_vis/raw/4.6.3/target/kibi_timeline_vis-4.6.3.zip
+$ ./bin/kibi plugin -i kibi_timeline_vis -u https://github.com/sirensolutions/kibi_timeline_vis/raw/4.6.3-1/target/kibi_timeline_vis-4.6.3-1.zip
 ```
 
 ### Manual    
@@ -27,7 +27,7 @@ $ cd kibi_timeline_vis
 $ npm install
 $ npm run build
 $ gulp package
-$ unzip target/kibi_timeline_vis-4.6.3.zip -d KIBANA_FOLDER_PATH/installedPlugins/
+$ unzip target/kibi_timeline_vis-4.6.3-1.zip -d KIBANA_FOLDER_PATH/installedPlugins/
 ```
 
 ## Uninstall

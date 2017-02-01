@@ -28,6 +28,8 @@
 
   <input ng-show="getVariable" type="text" ng-model="modelObject.value" class="form-control"/>
 
+  <input ng-show="filterable" placeholder="Filter" ng-model="itemsFilter" ng-change="filterItems()" ng-model-options="{debounce:750}" class="form-control"/>
+
   <select
     ng-class="{ 'red-border' : !isValid }"
     ng-show="!getVariable"
