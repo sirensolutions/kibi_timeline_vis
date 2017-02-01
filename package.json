@@ -13,13 +13,14 @@
     "test": "gulp test",
     "test:coverage": "gulp coverage",
     "start": "gulp dev",
-    "postinstall": "bower install",
     "precommit": "gulp lint",
     "build": "gulp build"
   },
   "dependencies": {
     "kibiutils": "sirensolutions/kibiutils#1.4.0",
-    "kibi-icons": "sirensolutions/kibi-icons#1.0.0"
+    "kibi-icons": "sirensolutions/kibi-icons#1.0.0",
+    "lodash": "3.10.1",
+    "vis": "4.17.0"
   },
   "devDependencies": {
     "babel-eslint": "^4.1.7",
