@@ -11,7 +11,7 @@ define(function (require) {
   require('ui/modules').get('kibi_timeline_vis/kibi_timeline_vis')
   .directive('kibiTimelineVisParams', function ($rootScope, savedSearches, Private) {
 
-    const color = Private(require('ui/vislib/components/color/color'));
+    const color = Private(require('ui/vis/components/color/color'));
 
     return {
       restrict: 'E',
