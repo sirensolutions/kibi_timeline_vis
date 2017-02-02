@@ -19,7 +19,6 @@
   "dependencies": {
     "kibiutils": "sirensolutions/kibiutils#1.4.0",
     "kibi-icons": "sirensolutions/kibi-icons#1.0.0",
-    "lodash": "3.10.1",
     "vis": "4.17.0"
   },
   "devDependencies": {
