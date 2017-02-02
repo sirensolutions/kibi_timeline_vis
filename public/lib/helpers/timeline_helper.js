@@ -50,15 +50,28 @@ define(function (require) {
      */
     TimelineHelper.prototype.pluckLabel = function (hit, params, notify) {
       let field;
-      if (params.labelFieldSequence) { // in kibi, we have the path property of a field
-        field = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
+      let value;
+      // in kibi, we have the path property of a field
+      if (params.labelFieldSequence) {
+        field = params.labelFieldSequence;
+        value = kibiUtils.getValuesAtPath(hit._source, field);
+        // get value from hit.fields in case of multi-fields
+        if (!value.length) {
+          field = field.join('.');
+          // '' if the field value is null
+          value = !hit.fields || !hit.fields[field] || hit.fields[field][0] === '' ? undefined : hit.fields[field];
+        }
       } else {
-        field = _.get(hit._source, params.labelField);
+        if (params.labelField) {
+          field = params.labelField;
+          value = _.get(hit._source, field);
+          if (!value) {
+            value = !hit.fields || !hit.fields[field] || hit.fields[field] === '' ? undefined : hit.fields[field];
+          }
+        }
       }
-      if (field && (!_.isArray(field) || field.length)) {
-        return field;
-      }
-      return 'N/A';
+
+      return value && (!_.isArray(value) || value.length) ? value : 'N/A';
     };
 
     /**
@@ -84,6 +97,14 @@ define(function (require) {
 
       if (hit.fields) {
         rawFieldValue = hit.fields[field];
+      }
+
+      // get value from hit.fields in case of multi-fields
+      if (fieldValue && !fieldValue.length) {
+        if (hit.fields[field]) {
+          const date = new Date(hit.fields[field][0]);
+          fieldValue = [ `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}` ];
+        }
       }
 
       return {

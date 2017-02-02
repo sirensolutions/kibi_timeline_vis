@@ -83,6 +83,10 @@ define(function (require) {
               searchSource.source(_.compact([ group.labelField, group.startField, group.endField ]));
               searchSource.set('filter', queryFilter.getFilters());
 
+              // save label field name to `fielddata_fields`
+              // it is needed to display not indexed fields in case of multi-fields
+              searchSource._state.fielddata_fields = [ group.labelField ];
+
               $scope.visOptions.groups.push({
                 id: group.id,
                 color: group.color,
@@ -90,10 +94,13 @@ define(function (require) {
                 searchSource: searchSource,
                 params: {
                   //kibi params
-                  labelFieldSequence: fields[i].byName[group.labelField].path,
-                  startFieldSequence: fields[i].byName[group.startField].path,
-                  endFieldSequence: group.endField && fields[i].byName[group.endField].path || [],
-                  orderBy: group.orderBy || 'start.desc',
+                  // .path property doesn't exist in case of multi-fields
+                  labelFieldSequence: !fields[i].byName[group.labelField].path.length
+                    ? [ group.labelField ] : fields[i].byName[group.labelField].path,
+                  startFieldSequence: !fields[i].byName[group.startField].path.length
+                    ? [ group.startField ] : fields[i].byName[group.startField].path,
+                  endFieldSequence: group.endField && !fields[i].byName[group.endField].path.length
+                    ? [ group.endField ] : fields[i].byName[group.endField].path,
                   //kibana params
                   labelField: group.labelField,
                   startField: group.startField,
