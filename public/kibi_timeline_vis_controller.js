@@ -25,6 +25,17 @@ define(function (require) {
         };
       };
 
+      const getGroupParamsHash = function (group) {
+        return new Date().getTime();
+        let hash = '';
+        for (const key in group) {
+          if (group.hasOwnProperty(key)) {
+            hash += key + group[key];
+          }
+        }
+        return hash;
+      };
+
       $scope.initSearchSources = function (savedVis) {
         const getSavedSearches = Promise.all(
           _(savedVis.vis.params.groups)
@@ -56,8 +67,10 @@ define(function (require) {
           });
 
           $scope.visOptions.groups = [];
+          let groupsParamsHash = '';
           _.each(savedSearchesRes, function ({ savedSearch, groups }, i) {
             for (const group of groups) {
+              groupsParamsHash += getGroupParamsHash(group);
               const _id = `_kibi_timetable_ids_source_flag${group.id}${savedSearch.id}`; // used only by kibi
               requestQueue.markAllRequestsWithSourceIdAsInactive(_id); // used only by kibi
 
@@ -91,8 +104,13 @@ define(function (require) {
               });
             }
           });
-
-          _.assign($scope.visOptions, _.omit(savedVis.vis.params, 'groups'));
+          const visOptionsButGroups = _.omit(savedVis.vis.params, 'groups');
+          // adding a hash of group parameters to detect when they changed
+          // this is needed as we are ommiting search sources when watching changes to
+          // visOptions. We can not watch changes to searchSources directly
+          // as this triggers the infinite loop in the watcher inside kibi_timeline directive)
+          visOptionsButGroups.hash = groupsParamsHash;
+          _.assign($scope.visOptions, visOptionsButGroups);
         })
         .catch(notify.error);
       };
