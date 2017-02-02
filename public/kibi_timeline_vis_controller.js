@@ -15,6 +15,7 @@ define(function (require) {
       const SearchSource = Private(require('ui/courier/data_source/search_source'));
       const requestQueue = Private(require('./lib/courier/_request_queue_wrapped'));
       const queryFilter = Private(require('ui/filter_bar/query_filter'));
+      const timelineHelper = Private(require('./lib/helpers/timeline_helper'));
 
       $scope.initOptions = function () {
         $scope.options = {
@@ -82,6 +83,8 @@ define(function (require) {
               searchSource.size(group.size || 100);
               searchSource.source(_.compact([ group.labelField, group.startField, group.endField ]));
               searchSource.set('filter', queryFilter.getFilters());
+              // Add fielddata_fields to get data from multifield of type string
+              searchSource._state.fielddata_fields = _.compact([ group.labelField ]);
 
               $scope.visOptions.groups.push({
                 id: group.id,
@@ -90,9 +93,12 @@ define(function (require) {
                 searchSource: searchSource,
                 params: {
                   //kibi params
-                  labelFieldSequence: fields[i].byName[group.labelField].path,
-                  startFieldSequence: fields[i].byName[group.startField].path,
-                  endFieldSequence: group.endField && fields[i].byName[group.endField].path || [],
+                  labelFieldSequence: timelineHelper.isMultifield(group.labelField) ? [group.labelField]
+                    : fields[i].byName[group.labelField].path,
+                  startFieldSequence: timelineHelper.isMultifield(group.startField) ? [group.startField]
+                    : fields[i].byName[group.startField].path,
+                  endFieldSequence: group.endField && (timelineHelper.isMultifield(group.endField)
+                    ? [group.endField] : fields[i].byName[group.endField].path) || [],
                   //kibana params
                   labelField: group.labelField,
                   startField: group.startField,

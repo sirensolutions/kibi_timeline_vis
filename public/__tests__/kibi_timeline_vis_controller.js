@@ -333,18 +333,18 @@ describe('Kibi Timeline', function () {
         expect($scope.visOptions.groups).to.have.length(2);
 
         const expectedA = {
-          labelFieldSequence: [ 'd.o', 't.labelFieldA' ],
-          startFieldSequence: [ 'd.o', 't.startFieldA' ],
-          endFieldSequence: [ 'd.o', 't.endFieldA' ],
+          labelFieldSequence: [ 'd.o.t.labelFieldA' ],
+          startFieldSequence: [ 'd.o.t.startFieldA' ],
+          endFieldSequence: [ 'd.o.t.endFieldA' ],
           searchSourceId: '_kibi_timetable_ids_source_flagidAsavedSearchIdA'
         };
         _.assign(expectedA, groups[0]);
         assertGroup($scope.visOptions.groups[0], expectedA);
 
         const expectedB = {
-          labelFieldSequence: [ 'd.o', 't.labelFieldB' ],
-          startFieldSequence: [ 'd.o', 't.startFieldB' ],
-          endFieldSequence: [ 'd.o', 't.endFieldB' ],
+          labelFieldSequence: [ 'd.o.t.labelFieldB' ],
+          startFieldSequence: [ 'd.o.t.startFieldB' ],
+          endFieldSequence: [ 'd.o.t.endFieldB' ],
           searchSourceId: '_kibi_timetable_ids_source_flagidBsavedSearchIdB'
         };
         _.assign(expectedB, groups[1]);
