@@ -35,29 +35,18 @@ describe('Kibi Timeline', function () {
       it('should return the label of an event kibana-style', function () {
         const hit = {
           _source: {
-            aaa: 'bbb'
+            aaa: {
+              bbb: {
+                ccc: 'ddd'
+              }
+            }
           }
         };
         const params = {
-          labelField: 'aaa'
+          labelField: 'aaa.bbb.ccc'
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
-        sinon.assert.notCalled(notify.warning);
-      });
-
-      it('should return the label of an event kibi-style', function () {
-        const hit = {
-          _source: {
-            aaa: 'bbb'
-          }
-        };
-        const params = {
-          labelField: 'aaa',
-          labelFieldSequence: [ 'aaa' ]
-        };
-
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql(['bbb']);
+        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql([ 'bbb' ]);
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -72,7 +61,8 @@ describe('Kibi Timeline', function () {
           }
         };
         const params = {
-          labelField: 'aaa.bbb.ccc'
+          labelField: 'aaa.bbb.ccc',
+          labelFieldSequence: [ 'aaa', 'bbb', 'ccc' ]
         };
 
         expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql(['ddd']);
