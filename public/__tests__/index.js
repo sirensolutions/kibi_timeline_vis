@@ -1,6 +1,4 @@
-describe('Kibi Timeline', function () {
-  require('./kibi_timeline');
-  require('./_vis');
-  require('./kibi_select');
-  require('../lib/helpers/__tests__/timeline_helper');
-});
+import './kibi_timeline';
+import './_vis';
+import './kibi_select';
+import '../lib/helpers/__tests__/timeline_helper';

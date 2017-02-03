@@ -35,7 +35,7 @@ var knownOptions = {
 };
 var options = minimist(process.argv.slice(2), knownOptions);
 
-var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/installedPlugins/' + pkg.name);
+var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + pkg.name);
 
 
 function syncPluginTo(dest, done) {

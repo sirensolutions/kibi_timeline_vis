@@ -1,13 +1,13 @@
-const expect = require('expect.js');
-const timelineHelper = require('../timeline_helper')();
-const moment = require('moment');
-const sinon = require('auto-release-sinon');
+import expect from 'expect.js';
+import TimelineHelper from '../timeline_helper';
+import moment from 'moment';
+import sinon from 'auto-release-sinon';
 
 describe('Kibi Timeline', function () {
   describe('TimelineHelper', function () {
     describe('getSortOnStartFieldObject', function () {
       it('should return a sort ES object from startField', function () {
-        expect(timelineHelper.getSortOnStartFieldObject({ startField: 'date' })).to.eql({
+        expect(TimelineHelper.getSortOnStartFieldObject({ startField: 'date' })).to.eql({
           date: {
             order: 'asc'
           }
@@ -15,7 +15,7 @@ describe('Kibi Timeline', function () {
       });
 
       it('should return a sort ES object from startFieldSequence', function () {
-        expect(timelineHelper.getSortOnStartFieldObject({ startFieldSequence: [ 'my.other', 'date' ] })).to.eql({
+        expect(TimelineHelper.getSortOnStartFieldObject({ startFieldSequence: [ 'my.other', 'date' ] })).to.eql({
           'my.other.date': {
             order: 'asc'
           }
@@ -42,7 +42,7 @@ describe('Kibi Timeline', function () {
           labelField: 'aaa'
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
+        expect(TimelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -57,7 +57,7 @@ describe('Kibi Timeline', function () {
           labelFieldSequence: [ 'aaa' ]
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql(['bbb']);
+        expect(TimelineHelper.pluckLabel(hit, params, notify)).to.eql(['bbb']);
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -72,7 +72,7 @@ describe('Kibi Timeline', function () {
           labelFieldSequence: [ 'aaa' ]
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('N/A');
+        expect(TimelineHelper.pluckLabel(hit, params, notify)).to.be('N/A');
         sinon.assert.notCalled(notify.warning);
       });
     });
@@ -90,7 +90,7 @@ describe('Kibi Timeline', function () {
           }
         };
 
-        expect(timelineHelper.pluckHighlights(hit, highlightTags)).to.be('');
+        expect(TimelineHelper.pluckHighlights(hit, highlightTags)).to.be('');
       });
 
       it('should return the highlighted terms in the event', function () {
@@ -110,52 +110,52 @@ describe('Kibi Timeline', function () {
           }
         };
 
-        expect(timelineHelper.pluckHighlights(hit, highlightTags)).to.be('bbb: 2, ccc: 1, ddd: 1');
+        expect(TimelineHelper.pluckHighlights(hit, highlightTags)).to.be('bbb: 2, ccc: 1, ddd: 1');
       });
     });
 
     describe('changeTimezone', function () {
       it('should return Browser for default Kibana timezone ', function () {
-        expect(timelineHelper.changeTimezone('Browser')).to.be('Browser');
+        expect(TimelineHelper.changeTimezone('Browser')).to.be('Browser');
       });
 
       it('should return -04:00 for America/Nassau timezone ', function () {
         if (moment('America/Nassau').isDST()) {
-          expect(timelineHelper.changeTimezone('America/Nassau')).to.be('-04:00');
+          expect(TimelineHelper.changeTimezone('America/Nassau')).to.be('-04:00');
         } else {
-          expect(timelineHelper.changeTimezone('America/Nassau')).to.be('-05:00');
+          expect(TimelineHelper.changeTimezone('America/Nassau')).to.be('-05:00');
         }
       });
 
       it('should return 13 for Etc/GMT-13 timezone ', function () {
-        expect(timelineHelper.changeTimezone('Etc/GMT-13')).to.be('+13:00');
+        expect(TimelineHelper.changeTimezone('Etc/GMT-13')).to.be('+13:00');
       });
 
       it('should return -4 for Etc/GMT+4 timezone ', function () {
-        expect(timelineHelper.changeTimezone('Etc/GMT+4')).to.be('-04:00');
+        expect(TimelineHelper.changeTimezone('Etc/GMT+4')).to.be('-04:00');
       });
 
       it('should return 0 for Etc/GMT timezone ', function () {
-        expect(timelineHelper.changeTimezone('Etc/GMT')).to.be('+00:00');
+        expect(TimelineHelper.changeTimezone('Etc/GMT')).to.be('+00:00');
       });
 
       it('should return 0 for Etc/GMT0 timezone ', function () {
-        expect(timelineHelper.changeTimezone('Etc/GMT0')).to.be('+00:00');
+        expect(TimelineHelper.changeTimezone('Etc/GMT0')).to.be('+00:00');
       });
 
       it('should return +09:30 for Australia/Darwin timezone ', function () {
         if (moment('Australia/Darwin').isDST()) {
-          expect(timelineHelper.changeTimezone('Australia/Darwin')).to.be('+08:30');
+          expect(TimelineHelper.changeTimezone('Australia/Darwin')).to.be('+08:30');
         } else {
-          expect(timelineHelper.changeTimezone('Australia/Darwin')).to.be('+09:30');
+          expect(TimelineHelper.changeTimezone('Australia/Darwin')).to.be('+09:30');
         }
       });
 
       it('should return +05:45 for Asia/Katmandu timezone ', function () {
         if (moment('Asia/Katmandu').isDST()) {
-          expect(timelineHelper.changeTimezone('Asia/Katmandu')).to.be('+04:45');
+          expect(TimelineHelper.changeTimezone('Asia/Katmandu')).to.be('+04:45');
         } else {
-          expect(timelineHelper.changeTimezone('Asia/Katmandu')).to.be('+05:45');
+          expect(TimelineHelper.changeTimezone('Asia/Katmandu')).to.be('+05:45');
         }
       });
     });

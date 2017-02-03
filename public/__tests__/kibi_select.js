@@ -1,10 +1,10 @@
-const sinon = require('auto-release-sinon');
-const angular = require('angular');
-const _ = require('lodash');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-
-require('../lib/directives/kibi_select');
+import SelectHelperProvider from '../lib/directives/kibi_select_helper';
+import sinon from 'auto-release-sinon';
+import angular from 'angular';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import '../lib/directives/kibi_select';
 
 let $rootScope;
 let $elem;
@@ -18,7 +18,7 @@ const init = function (initValue,items, objectType,include) {
     $rootScope = _$rootScope_;
     $rootScope.model = initValue;
 
-    const selectHelper = Private(require('../lib/directives/kibi_select_helper'));
+    const selectHelper = Private(SelectHelperProvider);
     $rootScope.action = sinon.stub(selectHelper, 'getObjects').returns(Promise.resolve(items));
 
     let select = '<kibi-select-port ng-model="model" object-type="' + objectType + '"';
