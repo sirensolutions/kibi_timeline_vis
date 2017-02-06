@@ -179,6 +179,9 @@ define(function (require) {
         if (params.invertFirstLabelInstance) {
           searchSource.sort(timelineHelper.getSortOnStartFieldObject(params));
         }
+
+        // We sort values to prevent the possibility of undefined records
+        // (these ones, after sort function, are at the bottom of the object)
         if (searchSource._state && searchSource._state.index.id === '*') {
           if (!params.endField) {
             searchSource.sort(timelineHelper.getSortOnStartFieldObject(params));
