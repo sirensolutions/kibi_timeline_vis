@@ -75,38 +75,70 @@ describe('Kibi Timeline', function () {
         expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('N/A');
         sinon.assert.notCalled(notify.warning);
       });
+
+      it('should return a label value in case of multi-fields, kibi-style', function () {
+        const hit = {
+          _source: {
+            'city': 'Galway'
+          },
+          fields: {
+            'city.raw': ['Galway']
+          }
+        };
+        const params = {
+          labelField: 'city.raw',
+          labelFieldSequence: [ 'city.raw' ]
+        };
+
+        expect(timelineHelper.pluckLabel(hit, params)).to.eql(['Galway']);
+        sinon.assert.notCalled(notify.warning);
+      });
+
+      it('should return a label value in case of multi-fields, kibana-style', function () {
+        const hit = {
+          _source: {
+            'city': 'Galway'
+          },
+          fields: {
+            'city.raw': ['Galway']
+          }
+        };
+        const params = {
+          labelField: 'city.raw',
+          labelFieldSequence: undefined
+        };
+
+        expect(timelineHelper.pluckLabel(hit, params)).to.eql(['Galway']);
+        sinon.assert.notCalled(notify.warning);
+      });
     });
 
     describe('pluckDate', function () {
 
-      it('should return a date string value, kibi style', function () {
+      const arrive = {
+        value: '2016-12-5',
+        raw: Date.parse('2016-12-5')
+      };
+
+      it('should return a date string value and raw value, in case of multi-fields, kibi-style', function () {
         const hit = {
           _source: {
-            arrive: '2016-12-5'
+            'city': 'Galway'
+          },
+          fields: {
+            'arrive.raw': [ arrive.raw ]
           }
         };
         const params = {
-          startField: 'arrive',
-          startFieldSequence: [ 'arrive' ]
+          labelField: 'city',
+          labelFieldSequence: [ 'city' ],
+          startField: 'arrive.raw',
+          startFieldSequence: [ 'arrive.raw' ],
         };
 
         const date = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
-        expect(date.value).to.eql([ hit._source.arrive ]);
-      });
-
-      it('should return a date string value, kibana style', function () {
-        const hit = {
-          _source: {
-            arrive: '2016-12-5'
-          }
-        };
-        const params = {
-          startField: 'arrive',
-          startFieldSequence: [ ]
-        };
-
-        const date = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
-        expect(date.value).to.eql([ hit._source.arrive ]);
+        expect(date.value).to.eql([ arrive.value ]);
+        expect(date.raw).to.eql([ arrive.raw ]);
       });
 
     });
@@ -193,5 +225,6 @@ describe('Kibi Timeline', function () {
         }
       });
     });
+
   });
 });
