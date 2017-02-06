@@ -107,7 +107,7 @@ define(function (require) {
     }
 
     /**
-     * Creates an Elasticsearch sort object to sort in chronological order
+     * Creates an Elasticsearch sort object to sort in chronological order on start field
      *
      * @param params group configuraton parameters
      * @returns Elasticsearch sort object
@@ -118,6 +118,22 @@ define(function (require) {
         sortObj[params.startFieldSequence.join('.')] = { order: 'asc' };
       } else {
         sortObj[params.startField] = { order: 'asc' };
+      }
+      return sortObj;
+    };
+
+    /**
+     * Creates an Elasticsearch sort object to sort in chronological order on end field
+     *
+     * @param params group configuraton parameters
+     * @returns Elasticsearch sort object
+     */
+    TimelineHelper.prototype.getSortOnEndFieldObject = function (params) {
+      const sortObj = {};
+      if (params.endFieldSequence) {
+        sortObj[params.endFieldSequence.join('.')] = { order: 'asc' };
+      } else {
+        sortObj[params.endField] = { order: 'asc' };
       }
       return sortObj;
     };

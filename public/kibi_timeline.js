@@ -179,6 +179,13 @@ define(function (require) {
         if (params.invertFirstLabelInstance) {
           searchSource.sort(timelineHelper.getSortOnStartFieldObject(params));
         }
+        if (searchSource._state && searchSource._state.index.id === '*') {
+          if (!params.endField) {
+            searchSource.sort(timelineHelper.getSortOnStartFieldObject(params));
+          } else {
+            searchSource.sort(timelineHelper.getSortOnEndFieldObject(params));
+          }
+        }
 
         searchSource.onResults().then(function onResults(searchResp) {
           const events = [];
