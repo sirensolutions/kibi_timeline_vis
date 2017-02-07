@@ -41,6 +41,17 @@ define(function (require) {
     };
 
     /**
+     * isMultiField checks if the field is a multi-field
+     *
+     * @param hit the document of the event
+     * @param field name
+     * @returns true or false
+     */
+    TimelineHelper.prototype.isMultiField = function (hit, field) {
+      return hit.fields && hit.fields[field] && !hit._source[field];
+    };
+
+    /**
      * pluckLabel returns the label of an event
      *
      * @param hit the document of the event
@@ -51,13 +62,14 @@ define(function (require) {
     TimelineHelper.prototype.pluckLabel = function (hit, params, notify) {
       let field;
       let value;
+
       // in kibi, we have the path property of a field
-      if (params.labelFieldSequence) {
+      if (params.labelFieldSequence || this.isMultiField(hit, params.labelField)) {
         field = params.labelFieldSequence;
         value = kibiUtils.getValuesAtPath(hit._source, field);
         // get value from hit.fields in case of multi-fields
-        if (!value.length) {
-          field = field.join('.');
+        if (!value || !value.length) {
+          field = !field || !field.length ? params.labelField : field.join('.');
           // '' if the field value is null
           value = !hit.fields || !hit.fields[field] || hit.fields[field][0] === '' ? undefined : hit.fields[field];
         }

@@ -95,12 +95,9 @@ define(function (require) {
                 params: {
                   //kibi params
                   // .path property doesn't exist in case of multi-fields
-                  labelFieldSequence: !fields[i].byName[group.labelField].path.length
-                    ? [ group.labelField ] : fields[i].byName[group.labelField].path,
-                  startFieldSequence: !fields[i].byName[group.startField].path.length
-                    ? [ group.startField ] : fields[i].byName[group.startField].path,
-                  endFieldSequence: group.endField && !fields[i].byName[group.endField].path.length
-                    ? [ group.endField ] : fields[i].byName[group.endField].path,
+                  labelFieldSequence: fields[i].byName[group.labelField].path,
+                  startFieldSequence: fields[i].byName[group.startField].path,
+                  endFieldSequence: group.endField && fields[i].byName[group.endField].path || [],
                   //kibana params
                   labelField: group.labelField,
                   startField: group.startField,
