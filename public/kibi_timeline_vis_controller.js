@@ -93,6 +93,7 @@ define(function (require) {
                   labelFieldSequence: fields[i].byName[group.labelField].path,
                   startFieldSequence: fields[i].byName[group.startField].path,
                   endFieldSequence: group.endField && fields[i].byName[group.endField].path || [],
+                  orderBy: group.orderBy || 'start.desc',
                   //kibana params
                   labelField: group.labelField,
                   startField: group.startField,

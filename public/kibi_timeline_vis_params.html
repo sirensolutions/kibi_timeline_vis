@@ -63,6 +63,17 @@
             <input type="number" ng-model="group.size" class="form-control" />
           </div>
 
+          <div class="form-group">
+            <label>Order By <span class="small_note">(Optional, default: Start Field DESC)</span></label>
+            <select ng-model="group.orderBy" class="form-control">
+              <option value=""></option>
+              <option value="start.asc">Start Field ASC</option>
+              <option value="start.desc">Start Field DESC</option>
+              <option ng-if="group.endField !== ''" value="end.asc">End Field ASC</option>
+              <option ng-if="group.endField !== ''" value="end.desc">End Field DESC</option>
+            </select>
+          </div>
+
           <div class="btn-group rightCorner">
             <array-param-up-port index="{{ $index }}" model="vis.params.groups"></array-param-up-port>
             <array-param-down-port index="{{ $index }}" model="vis.params.groups"></array-param-down-port>
