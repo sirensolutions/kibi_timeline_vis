@@ -5,9 +5,9 @@ const sinon = require('auto-release-sinon');
 
 describe('Kibi Timeline', function () {
   describe('TimelineHelper', function () {
-    describe('getSortOnStartFieldObject', function () {
+    describe('getSortOnFieldObject', function () {
       it('should return a sort ES object from startField', function () {
-        expect(timelineHelper.getSortOnStartFieldObject({ startField: 'date' })).to.eql({
+        expect(timelineHelper.getSortOnFieldObject('date', '', 'asc')).to.eql({
           date: {
             order: 'asc'
           }
@@ -15,7 +15,7 @@ describe('Kibi Timeline', function () {
       });
 
       it('should return a sort ES object from startFieldSequence', function () {
-        expect(timelineHelper.getSortOnStartFieldObject({ startFieldSequence: [ 'my.other', 'date' ] })).to.eql({
+        expect(timelineHelper.getSortOnFieldObject('', [ 'my.other', 'date' ], 'asc')).to.eql({
           'my.other.date': {
             order: 'asc'
           }

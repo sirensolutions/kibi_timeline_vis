@@ -177,7 +177,7 @@ define(function (require) {
           });
         }
         if (params.invertFirstLabelInstance) {
-          searchSource.sort(timelineHelper.getSortOnStartFieldObject(params));
+          searchSource.sort(timelineHelper.getSortOnFieldObject(params.startField, params.startFieldSequence, 'asc'));
         }
 
         // We sort values to prevent the possibility of undefined records
