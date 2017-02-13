@@ -204,120 +204,127 @@ define(function (require) {
             const uniqueLabels = [];
 
             _.each(searchResp.hits.hits, function (hit) {
-              let labelValue = timelineHelper.pluckLabel(hit, params, notify);
-              if (labelValue.constructor === Array) {
-                labelValue = labelValue.join(', ');
+              let labelValues = timelineHelper.pluckLabel(hit, params, notify);
+
+              if (!params.splitOnArray && labelValues.constructor === Array) {
+                labelValues = labelValues.join(', ');
               }
 
-              if (params.startFieldSequence) { // in kibi, we have the path property of a field
-                startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
-              } else {
-                startFieldValue = _.get(hit._source, params.startField);
-                if (startFieldValue && startFieldValue.constructor !== Array) {
-                  startFieldValue =  [ startFieldValue ];
-                }
+              if (labelValues.constructor !== Array) {
+                labelValues = Array.of(labelValues);
               }
-              startRawFieldValue = hit.fields[params.startField];
 
-              let endFieldValue = null;
-              if (params.endField) {
-                if (params.endFieldSequence) { // in kibi, we have the path property of a field
-                  endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
+              _.each(labelValues, function (labelValue) {
+                if (params.startFieldSequence) { // in kibi, we have the path property of a field
+                  startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
                 } else {
-                  endFieldValue = _.get(hit._source, params.endField);
-                  if (endFieldValue) {
-                    endFieldValue = (endFieldValue.constructor !== Array) ? [endFieldValue] : endFieldValue;
+                  startFieldValue = _.get(hit._source, params.startField);
+                  if (startFieldValue && startFieldValue.constructor !== Array) {
+                    startFieldValue =  [ startFieldValue ];
                   }
                 }
-                endRawFieldValue = hit.fields[params.endField];
+                startRawFieldValue = hit.fields[params.startField];
 
-                if (endFieldValue.length !== startFieldValue.length) {
-                  if ($scope.visOptions.notifyDataErrors) {
-                    notify.warning('Check your data - the number of values in the field \'' + params.endField + '\' ' +
-                                   'must be equal to the number of values in the field \'' + params.startField +
-                                   '\': document ID=' + hit._id);
+                let endFieldValue = null;
+                if (params.endField) {
+                  if (params.endFieldSequence) { // in kibi, we have the path property of a field
+                    endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
+                  } else {
+                    endFieldValue = _.get(hit._source, params.endField);
+                    if (endFieldValue) {
+                      endFieldValue = (endFieldValue.constructor !== Array) ? [endFieldValue] : endFieldValue;
+                    }
                   }
-                  return; // break
+                  endRawFieldValue = hit.fields[params.endField];
+
+                  if (endFieldValue.length !== startFieldValue.length) {
+                    if ($scope.visOptions.notifyDataErrors) {
+                      notify.warning('Check your data - the number of values in the field \'' + params.endField + '\' ' +
+                        'must be equal to the number of values in the field \'' + params.startField +
+                        '\': document ID=' + hit._id);
+                    }
+                    return; // break
+                  }
                 }
-              }
 
-              if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
-                const indexId = searchSource.get('index').id;
+                if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
+                  const indexId = searchSource.get('index').id;
 
-                _.each(startFieldValue, function (value, i) {
-                  const startValue = value;
-                  const startRawValue = startRawFieldValue[i];
+                  _.each(startFieldValue, function (value, i) {
+                    const startValue = value;
+                    const startRawValue = startRawFieldValue[i];
 
-                  const itemDict = {
-                    indexId: indexId,
-                    startField: params.startField,
-                    endField: params.endField,
-                    labelValue: labelValue,
-                    useHighlight: params.useHighlight,
-                    highlight: timelineHelper.pluckHighlights(hit, highlightTags),
-                    groupColor: groupColor,
-                    startValue: startValue,
-                    endFieldValue: endFieldValue ? endFieldValue[i] : null
-                  };
+                    const itemDict = {
+                      indexId: indexId,
+                      startField: params.startField,
+                      endField: params.endField,
+                      labelValue: labelValue,
+                      useHighlight: params.useHighlight,
+                      highlight: timelineHelper.pluckHighlights(hit, highlightTags),
+                      groupColor: groupColor,
+                      startValue: startValue,
+                      endFieldValue: endFieldValue ? endFieldValue[i] : null
+                    };
 
-                  const content = timelineHelper.createItemTemplate(itemDict);
+                    const content = timelineHelper.createItemTemplate(itemDict);
 
-                  let style = `background-color: ${groupColor}; color: #fff;`;
-                  if (!endFieldValue || startValue === endFieldValue[i]) {
-                    // here the end field value missing but expected
-                    // or start field value === end field value
-                    // force vis box look like vis point
-                    style = `border-style: none; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
-                  }
-
-                  if (params.invertFirstLabelInstance &&
-                    !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
+                    let style = `background-color: ${groupColor}; color: #fff;`;
                     if (!endFieldValue || startValue === endFieldValue[i]) {
-                      style = `border-style: solid; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
-                    } else {
-                      style = `background-color: #fff; color: ${groupColor};`;
+                      // here the end field value missing but expected
+                      // or start field value === end field value
+                      // force vis box look like vis point
+                      style = `border-style: none; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
                     }
-                    uniqueLabels.push(labelValue.toLowerCase().trim());
-                  }
 
-                  const e =  {
-                    index: indexId,
-                    content: content,
-                    value: labelValue,
-                    start: new Date(startRawValue),
-                    startField: {
-                      name: params.startField,
-                      value: startValue
-                    },
-                    type: 'box',
-                    group: $scope.groupsOnSeparateLevels === true ? index : 0,
-                    style: style,
-                    groupId: groupId
-                  };
-
-                  if (endFieldValue && startValue !== endFieldValue[i]) {
-                    const endValue = endFieldValue[i];
-                    const endRawValue = endRawFieldValue[i];
-                    if (startValue !== endValue) {
-                      e.type = 'range';
-                      e.end =  new Date(endRawValue);
-                      e.endField = {
-                        name: params.endField,
-                        value: endValue
-                      };
+                    if (params.invertFirstLabelInstance &&
+                      !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
+                      if (!endFieldValue || startValue === endFieldValue[i]) {
+                        style = `border-style: solid; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
+                      } else {
+                        style = `background-color: #fff; color: ${groupColor};`;
+                      }
+                      uniqueLabels.push(labelValue.toLowerCase().trim());
                     }
+
+                    const e =  {
+                      index: indexId,
+                      content: content,
+                      value: labelValue,
+                      start: new Date(startRawValue),
+                      startField: {
+                        name: params.startField,
+                        value: startValue
+                      },
+                      type: 'box',
+                      group: $scope.groupsOnSeparateLevels === true ? index : 0,
+                      style: style,
+                      groupId: groupId
+                    };
+
+                    if (endFieldValue && startValue !== endFieldValue[i]) {
+                      const endValue = endFieldValue[i];
+                      const endRawValue = endRawFieldValue[i];
+                      if (startValue !== endValue) {
+                        e.type = 'range';
+                        e.end = new Date(endRawValue);
+                        e.endField = {
+                          name: params.endField,
+                          value: endValue
+                        };
+                      }
+                    }
+
+                    events.push(e);
+
+                  });
+                } else {
+                  if ($scope.visOptions.notifyDataErrors) {
+                    notify.warning('Check your data - null start date not allowed.' +
+                      ' You can disable these errors in visualisation configuration');
                   }
-
-                  events.push(e);
-
-                });
-              } else {
-                if ($scope.visOptions.notifyDataErrors) {
-                  notify.warning('Check your data - null start date not allowed.' +
-                  ' You can disable these errors in visualisation configuration');
+                  return;
                 }
-                return;
-              }
+              });
             });
           }
 

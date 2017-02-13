@@ -34,6 +34,13 @@
                 Show highlighted terms
                 <kbn-info info="Show highlighted terms in event label."></kbn-info>
              </label>
+             <label>
+                <input type="checkbox"
+                       name="splitOnArray"
+                       ng-model="group.splitOnArray">
+                Show values in array field as seperate instances
+                <kbn-info info="Show seperate instances for every value in an field with multiple values. When unchecked, the values will be combined by a comma."></kbn-info>
+             </label>
             <label>
               <input type="checkbox"
                 name="highlightFirstLabelInstance"
