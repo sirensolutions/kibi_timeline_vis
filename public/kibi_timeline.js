@@ -177,7 +177,20 @@ define(function (require) {
           });
         }
         if (params.invertFirstLabelInstance) {
-          searchSource.sort(timelineHelper.getSortOnStartFieldObject(params));
+          searchSource.sort(timelineHelper.getSortOnFieldObject(params.startField, params.startFieldSequence, 'asc'));
+        }
+
+        // We sort values to prevent the possibility of undefined records
+        // (these ones, after sort function, are at the bottom of the object)
+        if (params.orderBy || (searchSource._state && searchSource._state.index.id === '*')) {
+          const orderBy = params.orderBy;
+          const field = orderBy.substring(0, orderBy.indexOf('.'));
+          const order = orderBy.substring(orderBy.indexOf('.') + 1);
+          if (field === 'start') {
+            searchSource.sort(timelineHelper.getSortOnFieldObject(params.startField, params.startFieldSequence, order));
+          } else {
+            searchSource.sort(timelineHelper.getSortOnFieldObject(params.endField, params.endFieldSequence, order));
+          }
         }
 
         searchSource.onResults().then(function onResults(searchResp) {

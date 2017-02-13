@@ -14,7 +14,7 @@ describe('KibiTimeline Directive', function () {
   let searchSource;
   let highlightTags;
 
-  let getSortOnStartFieldObjectSpy;
+  let getSortOnFieldObjectSpy;
 
   const init = function ($elem, props) {
     ngMock.inject(function (_$rootScope_, $compile) {
@@ -45,7 +45,7 @@ describe('KibiTimeline Directive', function () {
     $elem = angular.element(directive);
     ngMock.inject(function (_highlightTags_, Private) {
       const timelineHelper = Private(require('../lib/helpers/timeline_helper'));
-      getSortOnStartFieldObjectSpy = sinon.spy(timelineHelper, 'getSortOnStartFieldObject');
+      getSortOnFieldObjectSpy = sinon.spy(timelineHelper, 'getSortOnFieldObject');
 
       highlightTags = _highlightTags_;
 
@@ -372,7 +372,7 @@ describe('KibiTimeline Directive', function () {
     searchSource.crankResults(results);
     $scope.$digest();
     expect($scope.timeline.itemsData.length).to.be(3);
-    sinon.assert.called(getSortOnStartFieldObjectSpy);
+    sinon.assert.called(getSortOnFieldObjectSpy);
     sinon.assert.called(searchSource.sort);
 
     let itemIndex = 0;

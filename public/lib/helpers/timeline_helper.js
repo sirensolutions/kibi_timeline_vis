@@ -1,7 +1,7 @@
 define(function (require) {
   const _ = require('lodash');
   const kibiUtils = require('kibiutils');
-  const moment = require('moment');
+  const moment = require('moment-timezone');
 
   return function TimelineHelperFactory() {
     function TimelineHelper() {
@@ -107,17 +107,17 @@ define(function (require) {
     }
 
     /**
-     * Creates an Elasticsearch sort object to sort in chronological order
+     * Creates an Elasticsearch sort object to sort in chronological order on start field
      *
      * @param params group configuraton parameters
      * @returns Elasticsearch sort object
      */
-    TimelineHelper.prototype.getSortOnStartFieldObject = function (params) {
+    TimelineHelper.prototype.getSortOnFieldObject = function (field, fieldSequence, orderBy) {
       const sortObj = {};
-      if (params.startFieldSequence) {
-        sortObj[params.startFieldSequence.join('.')] = { order: 'asc' };
+      if (fieldSequence) {
+        sortObj[fieldSequence.join('.')] = { order: orderBy };
       } else {
-        sortObj[params.startField] = { order: 'asc' };
+        sortObj[field] = { order: orderBy };
       }
       return sortObj;
     };
