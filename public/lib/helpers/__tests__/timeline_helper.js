@@ -77,6 +77,40 @@ describe('Kibi Timeline', function () {
       });
     });
 
+    describe('pluckDate', function () {
+
+      it('should return a date string value, kibi style', function () {
+        const hit = {
+          _source: {
+            arrive: '2016-12-5'
+          }
+        };
+        const params = {
+          startField: 'arrive',
+          startFieldSequence: [ 'arrive' ]
+        };
+
+        const date = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
+        expect(date.value).to.eql([ hit._source.arrive ]);
+      });
+
+      it('should return a date string value, kibana style', function () {
+        const hit = {
+          _source: {
+            arrive: '2016-12-5'
+          }
+        };
+        const params = {
+          startField: 'arrive',
+          startFieldSequence: [ ]
+        };
+
+        const date = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
+        expect(date.value).to.eql([ hit._source.arrive ]);
+      });
+
+    });
+
     describe('pluckHighlights', function () {
       const highlightTags = {
         pre: '<em>',
