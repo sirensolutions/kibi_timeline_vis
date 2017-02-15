@@ -62,6 +62,53 @@ define(function (require) {
     };
 
     /**
+     * pluckDate returns date field value/raw value
+     *
+     * @param raw the number to represent date
+     * @returns date in string format: YYYY-M-D
+     */
+    TimelineHelper.prototype.rawDateToString = function (raw) {
+      const date = new Date(raw);
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    };
+
+    /**
+     * pluckDate returns date field value/raw value
+     *
+     * @param hit the document of the event
+     * @param field to represent params.startField or params.endField
+     * @param fieldSequence to represent params.startFieldSequence or params.endFieldSequence
+     * @returns object with two properties: value and raw value
+     */
+    TimelineHelper.prototype.pluckDate = function (hit, field, fieldSequence) {
+      let fieldValue = [];
+      let rawFieldValue = [];
+
+      if (fieldSequence && fieldSequence.length) {
+        fieldValue = kibiUtils.getValuesAtPath(hit._source, fieldSequence);
+      } else {
+        fieldValue = _.get(hit._source, field);
+        if (fieldValue && fieldValue.constructor !== Array) {
+          fieldValue = [ fieldValue ];
+        }
+      }
+
+      // get value from hit.fields in case of multi-fields
+      if (fieldValue && !fieldValue.length) {
+        if (hit.fields[field]) {
+          fieldValue = [ this.rawDateToString(hit.fields[field][0]) ];
+        }
+      }
+
+      rawFieldValue = hit.fields[field];
+
+      return {
+        value: fieldValue,
+        raw: rawFieldValue
+      };
+    };
+
+    /**
      * pluckHighlights returns the highlighted terms for the event.
      * The terms are sorted first on the number of occurrences of a term, and then alphabetically.
      *

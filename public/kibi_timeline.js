@@ -197,10 +197,8 @@ define(function (require) {
           const events = [];
 
           if (params.startField) {
-            let startFieldValue;
-            let startRawFieldValue;
-            let endFieldValue;
-            let endRawFieldValue;
+            let startField = { value: undefined, raw: undefined };
+            let endField = { value: undefined, raw: undefined };
             const uniqueLabels = [];
 
             _.each(searchResp.hits.hits, function (hit) {
@@ -209,29 +207,12 @@ define(function (require) {
                 labelValue = labelValue.join(', ');
               }
 
-              if (params.startFieldSequence) { // in kibi, we have the path property of a field
-                startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
-              } else {
-                startFieldValue = _.get(hit._source, params.startField);
-                if (startFieldValue && startFieldValue.constructor !== Array) {
-                  startFieldValue =  [ startFieldValue ];
-                }
-              }
-              startRawFieldValue = hit.fields[params.startField];
+              startField = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
 
-              let endFieldValue = null;
               if (params.endField) {
-                if (params.endFieldSequence) { // in kibi, we have the path property of a field
-                  endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
-                } else {
-                  endFieldValue = _.get(hit._source, params.endField);
-                  if (endFieldValue) {
-                    endFieldValue = (endFieldValue.constructor !== Array) ? [endFieldValue] : endFieldValue;
-                  }
-                }
-                endRawFieldValue = hit.fields[params.endField];
+                endField = timelineHelper.pluckDate(hit, params.endField, params.endFieldSequence);
 
-                if (endFieldValue.length !== startFieldValue.length) {
+                if (endField.value.length !== startField.value.length) {
                   if ($scope.visOptions.notifyDataErrors) {
                     notify.warning('Check your data - the number of values in the field \'' + params.endField + '\' ' +
                                    'must be equal to the number of values in the field \'' + params.startField +
@@ -241,12 +222,12 @@ define(function (require) {
                 }
               }
 
-              if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
+              if (startField.value && (!_.isArray(startField.value) || startField.value.length)) {
                 const indexId = searchSource.get('index').id;
 
-                _.each(startFieldValue, function (value, i) {
+                _.each(startField.value, function (value, i) {
                   const startValue = value;
-                  const startRawValue = startRawFieldValue[i];
+                  const startRawValue = startField.raw[i];
 
                   const itemDict = {
                     indexId: indexId,
@@ -257,13 +238,13 @@ define(function (require) {
                     highlight: timelineHelper.pluckHighlights(hit, highlightTags),
                     groupColor: groupColor,
                     startValue: startValue,
-                    endFieldValue: endFieldValue ? endFieldValue[i] : null
+                    endFieldValue: endField.value ? endField.value[i] : null
                   };
 
                   const content = timelineHelper.createItemTemplate(itemDict);
 
                   let style = `background-color: ${groupColor}; color: #fff;`;
-                  if (!endFieldValue || startValue === endFieldValue[i]) {
+                  if (!endField.value || startValue === endField.value[i]) {
                     // here the end field value missing but expected
                     // or start field value === end field value
                     // force vis box look like vis point
@@ -272,7 +253,7 @@ define(function (require) {
 
                   if (params.invertFirstLabelInstance &&
                     !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
-                    if (!endFieldValue || startValue === endFieldValue[i]) {
+                    if (!endField.value || startValue === endField.value[i]) {
                       style = `border-style: solid; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
                     } else {
                       style = `background-color: #fff; color: ${groupColor};`;
@@ -295,9 +276,9 @@ define(function (require) {
                     groupId: groupId
                   };
 
-                  if (endFieldValue && startValue !== endFieldValue[i]) {
-                    const endValue = endFieldValue[i];
-                    const endRawValue = endRawFieldValue[i];
+                  if (endField.value && startValue !== endField.value[i]) {
+                    const endValue = endField.value[i];
+                    const endRawValue = endField.raw[i];
                     if (startValue !== endValue) {
                       e.type = 'range';
                       e.end =  new Date(endRawValue);
