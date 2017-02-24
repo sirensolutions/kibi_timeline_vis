@@ -115,30 +115,21 @@ describe('Kibi Timeline', function () {
 
     describe('pluckDate', function () {
 
-      const arrive = {
-        value: '2016-12-5',
-        raw: Date.parse('2016-12-5')
-      };
-
-      it('should return a date string value and raw value, in case of multi-fields, kibi-style', function () {
+      it('should return a date string value and raw value, in case of multi-fields', function () {
         const hit = {
-          _source: {
-            'city': 'Galway'
-          },
+          _source: {},
           fields: {
-            'arrive.raw': [ arrive.raw ]
+            'arrive.raw': [ Date.parse('2016-12-1') ]
           }
         };
         const params = {
-          labelField: 'city',
-          labelFieldSequence: [ 'city' ],
           startField: 'arrive.raw',
           startFieldSequence: [ 'arrive.raw' ],
         };
 
         const date = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
-        expect(date.value).to.eql([ arrive.value ]);
-        expect(date.raw).to.eql([ arrive.raw ]);
+        expect(date.value).to.eql([ '2016-12-1 0:0:0' ]);
+        expect(date.raw).to.eql([ Date.parse('2016-12-1') ]);
       });
 
     });

@@ -52,6 +52,37 @@ define(function (require) {
     };
 
     /**
+     * getMultiFieldValue get a field value if the field is a multi-field
+     *
+     * @param hit the document of the event
+     * @param f field name
+     * @param style 'kibi' or 'date'
+     * @returns field value
+     */
+    TimelineHelper.prototype.getMultiFieldValue = function (hit, f, style = false) {
+      if (style === 'date') {
+        // date field and value are absent in _source
+        if (hit.fields[f]) {
+          const date = new Date(hit.fields[f][0]);
+          const dateString = [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-');
+          const timeString = [date.getHours(), date.getMinutes(), date.getMilliseconds()].join(':');
+          console.log('------------------------DEBUG-----------------------------');
+          console.log(`${dateString} ${timeString}`);
+          return `${dateString} ${timeString}`;
+        } else {
+          return [];
+        }
+      }
+
+      if (style === 'kibi') {
+        // '' if the field value is null
+        return !hit.fields || !hit.fields[f] || hit.fields[f][0] === '' ? undefined : hit.fields[f];
+      } else {
+        return !hit.fields || !hit.fields[f] || hit.fields[f] === '' ? undefined : hit.fields[f];
+      }
+    };
+
+    /**
      * pluckLabel returns the label of an event
      *
      * @param hit the document of the event
@@ -67,19 +98,17 @@ define(function (require) {
       if (params.labelFieldSequence || this.isMultiField(hit, params.labelField)) {
         field = params.labelFieldSequence;
         value = kibiUtils.getValuesAtPath(hit._source, field);
-        // get value from hit.fields in case of multi-fields
+
         if (!value || !value.length) {
           field = !field || !field.length ? params.labelField : field.join('.');
-          // '' if the field value is null
-          value = !hit.fields || !hit.fields[field] || hit.fields[field][0] === '' ? undefined : hit.fields[field];
+          value = this.getMultiFieldValue(hit, field, 'kibi');
         }
-      } else {
-        if (params.labelField) {
-          field = params.labelField;
-          value = _.get(hit._source, field);
-          if (!value) {
-            value = !hit.fields || !hit.fields[field] || hit.fields[field] === '' ? undefined : hit.fields[field];
-          }
+      } else if (params.labelField) {
+        field = params.labelField;
+        value = _.get(hit._source, field);
+
+        if (!value) {
+          value = this.getMultiFieldValue(hit, field);
         }
       }
 
@@ -95,33 +124,21 @@ define(function (require) {
      * @returns object with two properties: value and raw value
      */
     TimelineHelper.prototype.pluckDate = function (hit, field, fieldSequence) {
-      let fieldValue = [];
-      let rawFieldValue = [];
+      let value = [];
 
       if (fieldSequence && fieldSequence.length) {
         fieldValue = kibiUtils.getValuesAtPath(hit._source, fieldSequence);
       } else {
-        fieldValue = _.get(hit._source, field);
-        if (fieldValue && fieldValue.constructor !== Array) {
-          fieldValue = [ fieldValue ];
-        }
+        value = _.get(hit._source, field);
       }
 
-      if (hit.fields) {
-        rawFieldValue = hit.fields[field];
-      }
-
-      // get value from hit.fields in case of multi-fields
-      if (fieldValue && !fieldValue.length) {
-        if (hit.fields[field]) {
-          const date = new Date(hit.fields[field][0]);
-          fieldValue = [ `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}` ];
-        }
+      if (value && !value.length) {
+        value = this.getMultiFieldValue(hit, field, 'date');
       }
 
       return {
-        value: fieldValue,
-        raw: rawFieldValue
+        value: (value && value.constructor !== Array) ? [ value ] : value,
+        raw: hit.fields[field]
       };
     };
 
