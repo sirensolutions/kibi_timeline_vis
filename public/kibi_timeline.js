@@ -197,8 +197,8 @@ define(function (require) {
           const events = [];
 
           if (params.startField) {
-            let startField = { value: undefined, raw: undefined };
-            let endField = { value: undefined, raw: undefined };
+            const startField = {};
+            const endField = {};
             const uniqueLabels = [];
 
             _.each(searchResp.hits.hits, function (hit) {
@@ -207,10 +207,10 @@ define(function (require) {
                 labelValue = labelValue.join(', ');
               }
 
-              startField = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
+              startField.value = timelineHelper.pluckDate(hit, params.startField);
 
               if (params.endField) {
-                endField = timelineHelper.pluckDate(hit, params.endField, params.endFieldSequence);
+                endField.value = timelineHelper.pluckDate(hit, params.endField);
 
                 if (endField.value.length !== startField.value.length) {
                   if ($scope.visOptions.notifyDataErrors) {
@@ -222,12 +222,12 @@ define(function (require) {
                 }
               }
 
-              if (startField.value && (!_.isArray(startField.value) || startField.value.length)) {
+              if (startField.value.length) {
                 const indexId = searchSource.get('index').id;
 
-                _.each(startField.value, function (value, i) {
-                  const startValue = value;
-                  const startRawValue = startField.raw[i];
+                _.each(startField.value, function (startValue, i) {
+                  startValue = new Date(startValue);
+                  const endValue = endField.value && endField.value.length ? new Date(endField.value[i]) : null;
 
                   const itemDict = {
                     indexId: indexId,
@@ -238,22 +238,21 @@ define(function (require) {
                     highlight: timelineHelper.pluckHighlights(hit, highlightTags),
                     groupColor: groupColor,
                     startValue: startValue,
-                    endFieldValue: endField.value ? endField.value[i] : null
+                    endFieldValue: endValue
                   };
 
                   const content = timelineHelper.createItemTemplate(itemDict);
 
                   let style = `background-color: ${groupColor}; color: #fff;`;
-                  if (!endField.value || startValue === endField.value[i]) {
+                  if (!endValue || startValue.getTime() === endValue.getTime()) {
                     // here the end field value missing but expected
                     // or start field value === end field value
                     // force vis box look like vis point
                     style = `border-style: none; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
                   }
 
-                  if (params.invertFirstLabelInstance &&
-                    !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
-                    if (!endField.value || startValue === endField.value[i]) {
+                  if (params.invertFirstLabelInstance && !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
+                    if (!endValue || startValue.getTime() === endValue.getTime()) {
                       style = `border-style: solid; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
                     } else {
                       style = `background-color: #fff; color: ${groupColor};`;
@@ -265,7 +264,7 @@ define(function (require) {
                     index: indexId,
                     content: content,
                     value: labelValue,
-                    start: new Date(startRawValue),
+                    start: startValue,
                     startField: {
                       name: params.startField,
                       value: startValue
@@ -276,12 +275,10 @@ define(function (require) {
                     groupId: groupId
                   };
 
-                  if (endField.value && startValue !== endField.value[i]) {
-                    const endValue = endField.value[i];
-                    const endRawValue = endField.raw[i];
-                    if (startValue !== endValue) {
+                  if (endValue && startValue.getTime() !== endValue.getTime()) {
+                    if (startValue.getTime() !== endValue.getTime()) {
                       e.type = 'range';
-                      e.end =  new Date(endRawValue);
+                      e.end = endValue;
                       e.endField = {
                         name: params.endField,
                         value: endValue

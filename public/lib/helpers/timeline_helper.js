@@ -56,24 +56,10 @@ define(function (require) {
      *
      * @param hit the document of the event
      * @param f field name
-     * @param style 'kibi' or 'date'
+     * @param style 'kibi'
      * @returns field value
      */
     TimelineHelper.prototype.getMultiFieldValue = function (hit, f, style = false) {
-      if (style === 'date') {
-        // date field and value are absent in _source
-        if (hit.fields[f]) {
-          const date = new Date(hit.fields[f][0]);
-          const dateString = [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-');
-          const timeString = [date.getHours(), date.getMinutes(), date.getMilliseconds()].join(':');
-          console.log('------------------------DEBUG-----------------------------');
-          console.log(`${dateString} ${timeString}`);
-          return `${dateString} ${timeString}`;
-        } else {
-          return [];
-        }
-      }
-
       if (style === 'kibi') {
         // '' if the field value is null
         return !hit.fields || !hit.fields[f] || hit.fields[f][0] === '' ? undefined : hit.fields[f];
@@ -120,26 +106,11 @@ define(function (require) {
      *
      * @param hit the document of the event
      * @param field to represent params.startField or params.endField
-     * @param fieldSequence to represent params.startFieldSequence or params.endFieldSequence
-     * @returns object with two properties: value and raw value
+     * @returns date raw value
      */
-    TimelineHelper.prototype.pluckDate = function (hit, field, fieldSequence) {
-      let value = [];
-
-      if (fieldSequence && fieldSequence.length) {
-        fieldValue = kibiUtils.getValuesAtPath(hit._source, fieldSequence);
-      } else {
-        value = _.get(hit._source, field);
-      }
-
-      if (value && !value.length) {
-        value = this.getMultiFieldValue(hit, field, 'date');
-      }
-
-      return {
-        value: (value && value.constructor !== Array) ? [ value ] : value,
-        raw: hit.fields[field]
-      };
+    TimelineHelper.prototype.pluckDate = function (hit, field) {
+      // there is no date string value in _source in case of multi-fields
+      return hit.fields[field] ? hit.fields[field] : [];
     };
 
     /**
