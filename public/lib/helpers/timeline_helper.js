@@ -41,30 +41,16 @@ define(function (require) {
     };
 
     /**
-     * isMultiField checks if the field is a multi-field
-     *
-     * @param hit the document of the event
-     * @param field name
-     * @returns true or false
-     */
-    TimelineHelper.prototype.isMultiField = function (hit, field) {
-      return hit.fields && hit.fields[field] && !hit._source[field];
-    };
-
-    /**
      * getMultiFieldValue get a field value if the field is a multi-field
      *
      * @param hit the document of the event
      * @param f field name
-     * @param style 'kibi'
      * @returns field value
      */
-    TimelineHelper.prototype.getMultiFieldValue = function (hit, f, style = false) {
-      if (style === 'kibi') {
-        // '' if the field value is null
-        return !hit.fields || !hit.fields[f] || hit.fields[f][0] === '' ? undefined : hit.fields[f];
-      } else {
-        return !hit.fields || !hit.fields[f] || hit.fields[f] === '' ? undefined : hit.fields[f];
+    TimelineHelper.prototype.getMultiFieldValue = function (hit, f) {
+      if (hit.fields && hit.fields[f]) {
+        const val = hit.fields[f];
+        return _.isArray(val) && val.length === 1 ? val[0] : val
       }
     };
 
@@ -81,21 +67,16 @@ define(function (require) {
       let value;
 
       // in kibi, we have the path property of a field
-      if (params.labelFieldSequence || this.isMultiField(hit, params.labelField)) {
+      if (params.labelFieldSequence && params.labelFieldSequence.length) {
         field = params.labelFieldSequence;
         value = kibiUtils.getValuesAtPath(hit._source, field);
-
-        if (!value || !value.length) {
-          field = !field || !field.length ? params.labelField : field.join('.');
-          value = this.getMultiFieldValue(hit, field, 'kibi');
-        }
       } else if (params.labelField) {
         field = params.labelField;
         value = _.get(hit._source, field);
+      }
 
-        if (!value) {
-          value = this.getMultiFieldValue(hit, field);
-        }
+      if (!value || !value.length) {
+        value = this.getMultiFieldValue(hit, field);
       }
 
       return value && (!_.isArray(value) || value.length) ? value : 'N/A';
@@ -110,7 +91,7 @@ define(function (require) {
      */
     TimelineHelper.prototype.pluckDate = function (hit, field) {
       // there is no date string value in _source in case of multi-fields
-      return hit.fields[field] ? hit.fields[field] : [];
+      return hit.fields[field] || [];
     };
 
     /**
