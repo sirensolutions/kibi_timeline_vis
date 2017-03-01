@@ -90,7 +90,7 @@ describe('Kibi Timeline', function () {
           labelFieldSequence: [ 'city.raw' ]
         };
 
-        expect(timelineHelper.pluckLabel(hit, params)).to.eql(['Galway']);
+        expect(timelineHelper.pluckLabel(hit, params)).to.eql('Galway');
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -108,7 +108,7 @@ describe('Kibi Timeline', function () {
           labelFieldSequence: undefined
         };
 
-        expect(timelineHelper.pluckLabel(hit, params)).to.eql(['Galway']);
+        expect(timelineHelper.pluckLabel(hit, params)).to.eql('Galway');
         sinon.assert.notCalled(notify.warning);
       });
     });

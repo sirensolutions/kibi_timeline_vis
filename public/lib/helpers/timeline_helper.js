@@ -50,7 +50,7 @@ define(function (require) {
     TimelineHelper.prototype.getMultiFieldValue = function (hit, f) {
       if (hit.fields && hit.fields[f]) {
         const val = hit.fields[f];
-        return _.isArray(val) && val.length === 1 ? val[0] : val
+        return _.isArray(val) && val.length === 1 ? val[0] : val;
       }
     };
 
