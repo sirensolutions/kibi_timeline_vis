@@ -119,7 +119,7 @@ describe('Kibi Timeline', function () {
         const hit = {
           _source: {},
           fields: {
-            'arrive.raw': [ Date.parse('Aug 9, 2016') ]
+            'arrive.raw': [ Date.parse('Wed, 09 Aug 1995 00:00:00 GMT') ]
           }
         };
         const params = {
@@ -128,7 +128,7 @@ describe('Kibi Timeline', function () {
         };
 
         const date = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
-        expect(date).to.eql([ 1470693600000 ]);
+        expect(date).to.eql([ 807926400000 ]);
       });
 
     });
