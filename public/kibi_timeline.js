@@ -76,7 +76,7 @@ define(function (require) {
                 queryFilter.addFilters([rangeFilter1, rangeFilter2]);
               });
             }
-          } else if ($scope.visOptions.selectValue === 'id') {
+          } else if ($scope.visOptions.selectValue === 'label') {
             let searchField = undefined;
             for (let i = 0; i < $scope.visOptions.groups.length; i++) {
               if (selected.groupId === $scope.visOptions.groups[i].id) {
@@ -94,6 +94,19 @@ define(function (require) {
             q2.query.match[searchField] = {
               query: selected.value,
               type: 'phrase'
+            };
+            queryFilter.addFilters([q2]);
+          } else if ($scope.visOptions.selectValue === 'id') {
+            const q2 = {
+              query: {
+                ids: {}
+              },
+              meta: {
+                index: selected.index
+              }
+            };
+            q2.query.ids = {
+              values: [ selected._id ]
             };
             queryFilter.addFilters([q2]);
           }
@@ -261,6 +274,7 @@ define(function (require) {
                   }
 
                   const e =  {
+                    _id: hit._id,
                     index: indexId,
                     content: content,
                     value: labelValue,
