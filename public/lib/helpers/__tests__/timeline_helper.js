@@ -35,29 +35,37 @@ describe('Kibi Timeline', function () {
       it('should return the label of an event kibana-style', function () {
         const hit = {
           _source: {
-            aaa: 'bbb'
+            aaa: {
+              bbb: {
+                ccc: 'ddd'
+              }
+            }
           }
         };
         const params = {
-          labelField: 'aaa'
+          labelField: 'aaa.bbb.ccc'
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
+        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql([ 'bbb' ]);
         sinon.assert.notCalled(notify.warning);
       });
 
       it('should return the label of an event kibi-style', function () {
         const hit = {
           _source: {
-            aaa: 'bbb'
+            aaa: {
+              bbb: {
+                ccc: 'ddd'
+              }
+            }
           }
         };
         const params = {
-          labelField: 'aaa',
-          labelFieldSequence: [ 'aaa' ]
+          labelField: 'aaa.bbb.ccc',
+          labelFieldSequence: [ 'aaa', 'bbb', 'ccc' ]
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql(['bbb']);
+        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql(['ddd']);
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -119,7 +127,7 @@ describe('Kibi Timeline', function () {
         const hit = {
           _source: {},
           fields: {
-            'arrive.raw': [ Date.parse('Aug 9, 2016') ]
+            'arrive.raw': [ Date.parse('Wed, 09 Aug 1995 00:00:00 GMT') ]
           }
         };
         const params = {
@@ -128,7 +136,7 @@ describe('Kibi Timeline', function () {
         };
 
         const date = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
-        expect(date).to.eql([ 1470693600000 ]);
+        expect(date).to.eql([ 807926400000 ]);
       });
 
     });
