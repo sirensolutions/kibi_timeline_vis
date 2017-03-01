@@ -106,6 +106,7 @@ define(function (require) {
               }
             };
             q2.query.ids = {
+              type: selected._type,
               values: [ selected._id ]
             };
             queryFilter.addFilters([q2]);
@@ -275,6 +276,7 @@ define(function (require) {
 
                   const e =  {
                     _id: hit._id,
+                    _type: hit._type,
                     index: indexId,
                     content: content,
                     value: labelValue,
