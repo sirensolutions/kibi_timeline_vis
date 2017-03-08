@@ -32,6 +32,7 @@ describe('KibiTimeline Directive', function () {
   const destroy = function () {
     $scope.$destroy();
     $rootScope.$destroy();
+    $elem.remove();
   };
 
   function initTimeline({ invertFirstLabelInstance = false, useHighlight = false, withFieldSequence, endField, startField, labelField }) {
@@ -45,6 +46,10 @@ describe('KibiTimeline Directive', function () {
                         timeline-options="timelineOptions">
                       </kibi-timeline>`;
     $elem = angular.element(directive);
+    // this is so the elements gets correctly properties like offsetWidth
+    // plus the timeline is actually visible when tests are run in dev mode
+    $elem.appendTo('body');
+
     ngMock.inject(function (_highlightTags_, Private) {
       const timelineHelper = Private(require('../lib/helpers/timeline_helper'));
       getSortOnFieldObjectSpy = sinon.spy(timelineHelper, 'getSortOnFieldObject');
@@ -140,7 +145,7 @@ describe('KibiTimeline Directive', function () {
     });
   });
 
-  it('should return only element by object ID', function () {
+  it('correct filter should be created - (default) ID one', function (done) {
     initTimeline({
       startField: '@timestamp',
       endField: '',
@@ -179,17 +184,56 @@ describe('KibiTimeline Directive', function () {
         ]
       }
     };
+    const addFilterSpy = sinon.spy(queryFilter, 'addFilters');
+
     searchSource.crankResults(results);
     $scope.$digest();
-    expect($scope.timeline.itemsData.length).to.be(1);
 
-    console.log($elem);
-    const addFilterSpy = sinon.spy(queryFilter, 'addFilters');
+    const expectedFilters = [{
+      query: {
+        ids: {
+          type: 'apache',
+          values: ['61']
+        }
+      },
+      meta: {
+        index: 'logstash-*'
+      }
+    }];
+
+    // wait until timeline is fully rendered
     setTimeout(function () {
-      console.log($elem.find('.vis-panel.vis-center .vis-content .vis-itemset .vis-foreground .vis-group'));
-      console.log($elem.find('.vis-panel.vis-center .vis-content .vis-itemset .vis-foreground .vis-group').size());
-      // .vis-item .vis-item-content
-    }, 1000);
+      expect($scope.timeline.itemsData.length).to.be(1);
+      const $panel = $elem.find('.vis-panel.vis-center');
+      const $item = $panel.find('.vis-content .vis-itemset .vis-foreground .vis-group .vis-item .vis-item-content .kibi-tl-label-item');
+      const event = new MouseEvent('click', {
+        target: {
+          // cheat that we clicked on the item
+          'timeline-item': {}
+        }
+      });
+      const eventData = {
+        target: $item[0],
+        srcEvent: event
+      };
+      // cheat again and trigger the tap with fake eventData
+      $panel[0].hammer[0].emit('tap', eventData);
+      sinon.assert.calledOnce(addFilterSpy);
+      sinon.assert.calledWith(addFilterSpy, expectedFilters);
+      done();
+    }, 200);
+  });
+
+  it('correct filter should be created - LABEL one', function (done) {
+    done(new Error('implement'));
+  });
+
+  it('correct filter should be created - DATE one', function (done) {
+    done(new Error('implement'));
+  });
+
+  it('correct filter should be created - DATE RANGE one', function (done) {
+    done(new Error('implement'));
   });
 
   it('should return an event with the all the labels joined', function () {
