@@ -13,17 +13,19 @@ describe('KibiTimeline Directive', function () {
   let $scope;
   let searchSource;
   let highlightTags;
+  let queryFilter;
 
   let getSortOnFieldObjectSpy;
 
   const init = function ($elem, props) {
-    ngMock.inject(function (_$rootScope_, $compile) {
+    ngMock.inject(function (_$rootScope_, $compile, Private) {
       $rootScope = _$rootScope_;
       $compile($elem)($rootScope);
       $elem.scope().$digest();
       $scope = $elem.isolateScope();
       _.assign($scope, props);
       $scope.$digest();
+      queryFilter = Private(require('ui/filter_bar/query_filter'));
     });
   };
 
@@ -136,6 +138,58 @@ describe('KibiTimeline Directive', function () {
       expect(data.value).to.be('linux');
       expect(data.start.valueOf()).to.be(dateObj.valueOf());
     });
+  });
+
+  it('should return only element by object ID', function () {
+    initTimeline({
+      startField: '@timestamp',
+      endField: '',
+      labelField: 'machine.os'
+    });
+
+    const date = '25-01-1995';
+    const dateObj = moment(date, 'DD-MM-YYYY');
+    const results = {
+      took: 73,
+      timed_out: false,
+      _shards: {
+        total: 144,
+        successful: 144,
+        failed: 0
+      },
+      hits: {
+        total : 49487,
+        max_score : 1.0,
+        hits: [
+          {
+            _index: 'logstash-2014.09.09',
+            _type: 'apache',
+            _id: '61',
+            _score: 1,
+            _source: {
+              '@timestamp': date,
+              machine: {
+                os: 'linux'
+              }
+            },
+            fields: {
+              '@timestamp': [ dateObj ]
+            }
+          }
+        ]
+      }
+    };
+    searchSource.crankResults(results);
+    $scope.$digest();
+    expect($scope.timeline.itemsData.length).to.be(1);
+
+    console.log($elem);
+    const addFilterSpy = sinon.spy(queryFilter, 'addFilters');
+    setTimeout(function () {
+      console.log($elem.find('.vis-panel.vis-center .vis-content .vis-itemset .vis-foreground .vis-group'));
+      console.log($elem.find('.vis-panel.vis-center .vis-content .vis-itemset .vis-foreground .vis-group').size());
+      // .vis-item .vis-item-content
+    }, 1000);
   });
 
   it('should return an event with the all the labels joined', function () {
