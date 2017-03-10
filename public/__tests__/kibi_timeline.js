@@ -14,11 +14,12 @@ describe('KibiTimeline Directive', function () {
   let searchSource;
   let highlightTags;
   let queryFilter;
+  let indexPatterns;
 
   let getSortOnFieldObjectSpy;
 
   const init = function ($elem, props) {
-    ngMock.inject(function (_$rootScope_, $compile, Private) {
+    ngMock.inject(function (_$rootScope_, $compile, Private, indexPatterns) {
       $rootScope = _$rootScope_;
       $compile($elem)($rootScope);
       $elem.scope().$digest();
@@ -26,6 +27,7 @@ describe('KibiTimeline Directive', function () {
       _.assign($scope, props);
       $scope.$digest();
       queryFilter = Private(require('ui/filter_bar/query_filter'));
+      indexPatterns = indexPatterns;
     });
   };
 
@@ -225,15 +227,254 @@ describe('KibiTimeline Directive', function () {
   });
 
   it('correct filter should be created - LABEL one', function (done) {
-    done(new Error('implement'));
+    initTimeline({
+      startField: '@timestamp',
+      endField: '',
+      labelField: 'machine.os'
+    });
+
+    const date = '25-01-1995';
+    const dateObj = moment(date, 'DD-MM-YYYY');
+    const results = {
+      took: 73,
+      timed_out: false,
+      _shards: {
+        total: 144,
+        successful: 144,
+        failed: 0
+      },
+      hits: {
+        total : 49487,
+        max_score : 1.0,
+        hits: [
+          {
+            _index: 'logstash-2014.09.09',
+            _type: 'apache',
+            _id: '61',
+            _score: 1,
+            _source: {
+              '@timestamp': date,
+              machine: {
+                os: 'linux'
+              }
+            },
+            fields: {
+              '@timestamp': [ dateObj ]
+            }
+          }
+        ]
+      }
+    };
+    const addFilterSpy = sinon.spy(queryFilter, 'addFilters');
+
+    $scope.visOptions.selectValue = 'label';
+
+    searchSource.crankResults(results);
+    $scope.$digest();
+
+    const expectedFilters = [{
+      meta: {
+        index: 'logstash-*'
+      },
+      query: {
+        match: {
+          'machine.os': {
+            query: 'linux',
+            type: 'phrase'
+          }
+        }
+      }
+    }];
+
+    // wait until timeline is fully rendered
+    setTimeout(function () {
+      expect($scope.timeline.itemsData.length).to.be(1);
+      const $panel = $elem.find('.vis-panel.vis-center');
+      const $item = $panel.find('.vis-content .vis-itemset .vis-foreground .vis-group .vis-item .vis-item-content .kibi-tl-label-item');
+      const event = new MouseEvent('click', {
+        target: {
+          // cheat that we clicked on the item
+          'timeline-item': {}
+        }
+      });
+      const eventData = {
+        target: $item[0],
+        srcEvent: event
+      };
+      // cheat again and trigger the tap with fake eventData
+      $panel[0].hammer[0].emit('tap', eventData);
+      sinon.assert.calledOnce(addFilterSpy);
+      sinon.assert.calledWith(addFilterSpy, expectedFilters);
+      done();
+    }, 200);
   });
 
   it('correct filter should be created - DATE one', function (done) {
-    done(new Error('implement'));
+    initTimeline({
+      startField: '@timestamp',
+      endField: '',
+      labelField: 'machine.os'
+    });
+
+    const date = '25-01-1995';
+    const dateObj = moment(date, 'DD-MM-YYYY');
+    const results = {
+      took: 73,
+      timed_out: false,
+      _shards: {
+        total: 144,
+        successful: 144,
+        failed: 0
+      },
+      hits: {
+        total : 49487,
+        max_score : 1.0,
+        hits: [
+          {
+            _index: 'logstash-2014.09.09',
+            _type: 'apache',
+            _id: '61',
+            _score: 1,
+            _source: {
+              '@timestamp': date,
+              machine: {
+                os: 'linux'
+              }
+            },
+            fields: {
+              '@timestamp': [ dateObj ]
+            }
+          }
+        ]
+      }
+    };
+    const addFilterSpy = sinon.spy(queryFilter, 'addFilters');
+
+    $scope.visOptions.selectValue = 'date';
+
+    searchSource.crankResults(results);
+    $scope.$digest();
+
+    const expectedFilters = [{
+      meta: {
+        index: 'logstash-*'
+      },
+      query: {
+        match: {
+          '@timestamp': {
+            query: Date.parse(dateObj),
+            type: 'phrase'
+          }
+        }
+      }
+    }];
+
+    // wait until timeline is fully rendered
+    setTimeout(function () {
+      expect($scope.timeline.itemsData.length).to.be(1);
+      const $panel = $elem.find('.vis-panel.vis-center');
+      const $item = $panel.find('.vis-content .vis-itemset .vis-foreground .vis-group .vis-item .vis-item-content .kibi-tl-label-item');
+      const event = new MouseEvent('click', {
+        target: {
+          // cheat that we clicked on the item
+          'timeline-item': {}
+        }
+      });
+      const eventData = {
+        target: $item[0],
+        srcEvent: event
+      };
+      // cheat again and trigger the tap with fake eventData
+      $panel[0].hammer[0].emit('tap', eventData);
+      sinon.assert.calledOnce(addFilterSpy);
+      sinon.assert.calledWith(addFilterSpy, expectedFilters);
+      done();
+    }, 200);
   });
 
-  it('correct filter should be created - DATE RANGE one', function (done) {
-    done(new Error('implement'));
+  it('correct filter should be created - DATE RANGE', function (done) {
+    initTimeline({
+      startField: '@timestamp',
+      endField: 'endDate',
+      labelField: 'machine.os'
+    });
+
+    const dateStart = '25-01-1995';
+    const dateStartObj = moment(dateStart, 'DD-MM-YYYY');
+    const dateEnd = '27-01-1995';
+    const dateEndObj = moment(dateEnd, 'DD-MM-YYYY');
+    const results = {
+      took: 73,
+      timed_out: false,
+      _shards: {
+        total: 144,
+        successful: 144,
+        failed: 0
+      },
+      hits: {
+        total : 49487,
+        max_score : 1.0,
+        hits: [
+          {
+            _index: 'logstash-2014.09.09',
+            _type: 'apache',
+            _id: '61',
+            _score: 1,
+            _source: {
+              '@timestamp': dateStart,
+              'endDate': dateEnd,
+              machine: {
+                os: 'linux'
+              }
+            },
+            fields: {
+              '@timestamp': [ dateStartObj ],
+              'endDate': [ dateEndObj ],
+            }
+          }
+        ]
+      }
+    };
+    const addFilterSpy = sinon.spy(queryFilter, 'addFilters');
+
+    $scope.visOptions.selectValue = 'date';
+
+    sinon.stub(indexPatterns, 'get').returns(Promise.resolve(
+      {
+        id: 'logstash-*',
+        fields: [
+          {name: '@timestamp'},
+          {name: 'endDate'}
+        ]
+      }
+    ));
+    searchSource.crankResults(results);
+    $scope.$digest();
+
+    const expectedFilters = [{}, {}];
+
+
+    // wait until timeline is fully rendered
+    setTimeout(function () {
+      expect($scope.timeline.itemsData.length).to.be(1);
+      const $panel = $elem.find('.vis-panel.vis-center');
+      const $item = $panel.find('.vis-content .vis-itemset .vis-foreground .vis-group .vis-item .vis-item-content .kibi-tl-label-item');
+      const event = new MouseEvent('click', {
+        target: {
+          // cheat that we clicked on the item
+          'timeline-item': {}
+        }
+      });
+      const eventData = {
+        target: $item[0],
+        srcEvent: event
+      };
+      // cheat again and trigger the tap with fake eventData
+      $panel[0].hammer[0].emit('tap', eventData);
+      sinon.assert.calledOnce(addFilterSpy);
+      sinon.assert.calledWith(addFilterSpy, expectedFilters);
+      done();
+    }, 200);
   });
 
   it('should return an event with the all the labels joined', function () {
