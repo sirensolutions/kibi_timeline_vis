@@ -14,7 +14,7 @@ describe('KibiTimeline Directive', function () {
   let searchSource;
   let highlightTags;
 
-  let getSortOnStartFieldObjectSpy;
+  let getSortOnFieldObjectSpy;
 
   const init = function ($elem, props) {
     ngMock.inject(function (_$rootScope_, $compile) {
@@ -45,7 +45,7 @@ describe('KibiTimeline Directive', function () {
     $elem = angular.element(directive);
     ngMock.inject(function (_highlightTags_, Private) {
       const timelineHelper = Private(require('../lib/helpers/timeline_helper'));
-      getSortOnStartFieldObjectSpy = sinon.spy(timelineHelper, 'getSortOnStartFieldObject');
+      getSortOnFieldObjectSpy = sinon.spy(timelineHelper, 'getSortOnFieldObject');
 
       highlightTags = _highlightTags_;
 
@@ -372,7 +372,7 @@ describe('KibiTimeline Directive', function () {
     searchSource.crankResults(results);
     $scope.$digest();
     expect($scope.timeline.itemsData.length).to.be(3);
-    sinon.assert.called(getSortOnStartFieldObjectSpy);
+    sinon.assert.called(getSortOnFieldObjectSpy);
     sinon.assert.called(searchSource.sort);
 
     let itemIndex = 0;
@@ -381,23 +381,23 @@ describe('KibiTimeline Directive', function () {
         case 0:
           expect(data.value).to.be('linux');
           expect(data.start.valueOf()).to.be(date1Obj.valueOf());
-          // color is inverted
+          // emphasized, border style is solid
           expect(data.style).to.match(/color: #ff0000/);
-          expect(data.style).to.match(/background-color: #fff/);
+          expect(data.style).to.match(/border-style: solid/);
           break;
         case 1:
           expect(data.value).to.be('mac');
           expect(data.start.valueOf()).to.be(date2Obj.valueOf());
-          // color is inverted
+          // emphasized, border style is solid
           expect(data.style).to.match(/color: #ff0000/);
-          expect(data.style).to.match(/background-color: #fff/);
+          expect(data.style).to.match(/border-style: solid/);
           break;
         case 2:
           expect(data.value).to.be('linux');
           expect(data.start.valueOf()).to.be(date3Obj.valueOf());
-          // color is normal
-          expect(data.style).to.match(/color: #fff/);
-          expect(data.style).to.match(/background-color: #ff0000/);
+          // border style is none
+          expect(data.style).to.match(/color: #ff0000/);
+          expect(data.style).to.match(/border-style: none/);
           break;
         default:
           expect().fail(`Should not have the case itemIndex=${itemIndex}`);

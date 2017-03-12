@@ -1,17 +1,56 @@
 define(function (require) {
   const _ = require('lodash');
   const kibiUtils = require('kibiutils');
-  const moment = require('moment');
+  const moment = require('moment-timezone');
 
   return function TimelineHelperFactory() {
     function TimelineHelper() {
     }
+
+    TimelineHelper.prototype.noEndOrEqual = function (startValue, endValue) {
+      return !endValue || startValue === endValue ? true : false;
+    };
+
+    TimelineHelper.prototype.createItemTemplate = function (itemDict) {
+      let endfield = '';
+      let dot = '';
+      let hilit = '';
+      let label = itemDict.labelValue;
+
+      if (itemDict.endField) {
+        endfield = `, endField: ${itemDict.endField}`;
+      }
+      if (this.noEndOrEqual(itemDict.startValue, itemDict.endValue)) {
+        dot = `<div class="kibi-tl-dot-item" style="border-color:${itemDict.groupColor}"></div>`;
+        label = `<div class="kibi-tl-label-item">${itemDict.labelValue}</div>`;
+      }
+      if (itemDict.useHighlight) {
+        hilit = `<p class="tiny-txt">${itemDict.highlight}</p>`;
+      }
+
+      return `<div title="index: ${itemDict.indexId}, startField: ${itemDict.startField}${endfield}">` +
+          `${dot}${label}${hilit}</div>`;
+    };
 
     TimelineHelper.prototype.changeTimezone  = function (timezone) {
       if (timezone !== 'Browser') {
         return moment().tz(timezone).format('Z');
       } else {
         return timezone;
+      }
+    };
+
+    /**
+     * getMultiFieldValue get a field value if the field is a multi-field
+     *
+     * @param hit the document of the event
+     * @param f field name
+     * @returns field value
+     */
+    TimelineHelper.prototype.getMultiFieldValue = function (hit, f) {
+      if (hit.fields && hit.fields[f]) {
+        const val = hit.fields[f];
+        return _.isArray(val) && val.length === 1 ? val[0] : val;
       }
     };
 
@@ -25,16 +64,34 @@ define(function (require) {
      */
     TimelineHelper.prototype.pluckLabel = function (hit, params, notify) {
       let field;
-      if (params.labelFieldSequence) { // in kibi, we have the path property of a field
-        field = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
-      } else { // create kibi path property from ES path by splitting on .
-        const kibanaSequence = params.labelField.split('.');
-        field = kibiUtils.getValuesAtPath(hit._source, kibanaSequence);
+      let value;
+
+      // in kibi, we have the path property of a field
+      if (params.labelFieldSequence && params.labelFieldSequence.length) {
+        field = params.labelFieldSequence;
+        value = kibiUtils.getValuesAtPath(hit._source, field);
+      } else if (params.labelField) {
+        field = params.labelField;
+        value = kibiUtils.getValuesAtPath(hit._source, params.labelField.split('.'));
       }
-      if (field && (!_.isArray(field) || field.length)) {
-        return field;
+
+      if (!value || !value.length) {
+        value = this.getMultiFieldValue(hit, field);
       }
-      return 'N/A';
+
+      return value && (!_.isArray(value) || value.length) ? value : 'N/A';
+    };
+
+    /**
+     * pluckDate returns date field value/raw value
+     *
+     * @param hit the document of the event
+     * @param field to represent params.startField or params.endField
+     * @returns date raw value
+     */
+    TimelineHelper.prototype.pluckDate = function (hit, field) {
+      // there is no date string value in _source in case of multi-fields
+      return hit.fields[field] || [];
     };
 
     /**
@@ -83,17 +140,17 @@ define(function (require) {
     }
 
     /**
-     * Creates an Elasticsearch sort object to sort in chronological order
+     * Creates an Elasticsearch sort object to sort in chronological order on start field
      *
      * @param params group configuraton parameters
      * @returns Elasticsearch sort object
      */
-    TimelineHelper.prototype.getSortOnStartFieldObject = function (params) {
+    TimelineHelper.prototype.getSortOnFieldObject = function (field, fieldSequence, orderBy) {
       const sortObj = {};
-      if (params.startFieldSequence) {
-        sortObj[params.startFieldSequence.join('.')] = { order: 'asc' };
+      if (fieldSequence) {
+        sortObj[fieldSequence.join('.')] = { order: orderBy };
       } else {
-        sortObj[params.startField] = { order: 'asc' };
+        sortObj[field] = { order: orderBy };
       }
       return sortObj;
     };

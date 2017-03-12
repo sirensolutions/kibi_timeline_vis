@@ -5,9 +5,9 @@ const sinon = require('auto-release-sinon');
 
 describe('Kibi Timeline', function () {
   describe('TimelineHelper', function () {
-    describe('getSortOnStartFieldObject', function () {
+    describe('getSortOnFieldObject', function () {
       it('should return a sort ES object from startField', function () {
-        expect(timelineHelper.getSortOnStartFieldObject({ startField: 'date' })).to.eql({
+        expect(timelineHelper.getSortOnFieldObject('date', '', 'asc')).to.eql({
           date: {
             order: 'asc'
           }
@@ -15,7 +15,7 @@ describe('Kibi Timeline', function () {
       });
 
       it('should return a sort ES object from startFieldSequence', function () {
-        expect(timelineHelper.getSortOnStartFieldObject({ startFieldSequence: [ 'my.other', 'date' ] })).to.eql({
+        expect(timelineHelper.getSortOnFieldObject('', [ 'my.other', 'date' ], 'asc')).to.eql({
           'my.other.date': {
             order: 'asc'
           }
@@ -83,6 +83,62 @@ describe('Kibi Timeline', function () {
         expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('N/A');
         sinon.assert.notCalled(notify.warning);
       });
+
+      it('should return a label value in case of multi-fields, kibi-style', function () {
+        const hit = {
+          _source: {
+            'city': 'Galway'
+          },
+          fields: {
+            'city.raw': ['Galway']
+          }
+        };
+        const params = {
+          labelField: 'city.raw',
+          labelFieldSequence: [ 'city.raw' ]
+        };
+
+        expect(timelineHelper.pluckLabel(hit, params)).to.eql('Galway');
+        sinon.assert.notCalled(notify.warning);
+      });
+
+      it('should return a label value in case of multi-fields, kibana-style', function () {
+        const hit = {
+          _source: {
+            'city': 'Galway'
+          },
+          fields: {
+            'city.raw': ['Galway']
+          }
+        };
+        const params = {
+          labelField: 'city.raw',
+          labelFieldSequence: undefined
+        };
+
+        expect(timelineHelper.pluckLabel(hit, params)).to.eql('Galway');
+        sinon.assert.notCalled(notify.warning);
+      });
+    });
+
+    describe('pluckDate', function () {
+
+      it('should return a date string value and raw value, in case of multi-fields', function () {
+        const hit = {
+          _source: {},
+          fields: {
+            'arrive.raw': [ Date.parse('Wed, 09 Aug 1995 00:00:00 GMT') ]
+          }
+        };
+        const params = {
+          startField: 'arrive.raw',
+          startFieldSequence: [ 'arrive.raw' ],
+        };
+
+        const date = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
+        expect(date).to.eql([ 807926400000 ]);
+      });
+
     });
 
     describe('pluckHighlights', function () {
@@ -167,5 +223,6 @@ describe('Kibi Timeline', function () {
         }
       });
     });
+
   });
 });

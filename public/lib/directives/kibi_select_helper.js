@@ -3,7 +3,7 @@ define(function (require) {
   const chrome = require('ui/chrome');
 
   return function KibiSelectHelperFactory(
-    config, $http, courier, indexPatterns, timefilter, Private, Promise, kbnIndex
+    config, $http, courier, indexPatterns, timefilter, Private, Promise, kbnIndex, savedSearches
     ) {
 
     function KibiSelectHelper() {
@@ -15,17 +15,15 @@ define(function (require) {
       return $http.get(chrome.getBasePath() + '/elasticsearch/' + kbnIndex + '/' + type + '/_search?size=100');
     };
 
-    KibiSelectHelper.prototype.getObjects = function (type) {
-      return searchRequest(type).then(function (objects) {
-        if (objects.data.hits && objects.data.hits.hits) {
-          const items = _.map(objects.data.hits.hits, function (hit) {
-            return {
-              label: hit._source.title,
-              value: hit._id
-            };
-          });
-          return items;
-        }
+    KibiSelectHelper.prototype.getObjects = function (type, filter) {
+      return savedSearches.find(filter).then(function (resp) {
+        const items = _.map(resp.hits, function (hit) {
+          return {
+            label: hit.title,
+            value: hit.id
+          };
+        });
+        return items;
       });
     };
 

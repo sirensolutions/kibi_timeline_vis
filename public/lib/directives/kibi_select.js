@@ -31,7 +31,8 @@ define(function (require) {
         modelDisabled:    '=?', // use to disable the underlying select
         modelRequired:    '=?', // use to disable the underlying select
         include:          '=?', // extra values can be passed here
-        analyzedWarning:  '@'   // set to true or false to disable/enable analyzed field warning
+        analyzedWarning:  '@',  // set to true or false to disable/enable analyzed field warning
+        filterable:       '=?' // optional - enable selection filtering
       },
       template: require('./kibi_select.html'),
       link: function (scope, element, attrs, ngModelCtrl) {
@@ -168,7 +169,7 @@ define(function (require) {
 
           switch (scope.objectType) {
             case 'search':
-              promise = selectHelper.getObjects(scope.objectType);
+              promise = selectHelper.getObjects(scope.objectType, scope.itemsFilter);
               break;
             case 'field':
               promise = selectHelper.getFields(scope.indexPatternId, scope.fieldTypes);
@@ -182,6 +183,11 @@ define(function (require) {
               ngModelCtrl.$setValidity('stSelect', false);
             });
           }
+        };
+
+        scope.filterItems = function () {
+          scope.itemsFilter = this.itemsFilter;
+          _render();
         };
 
         scope.$watchMulti(['indexPatternId', 'indexPatternType', 'queryId', 'include', 'modelDisabled', 'modelRequired'], function () {

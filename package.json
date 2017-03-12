@@ -1,6 +1,6 @@
 {
   "name": "kibi_timeline_vis",
-  "version": "4.6.3",
+  "version": "4.6.3-1",
   "authors": [
     "SIREn Solutions <info@siren.solutions>"
   ],
@@ -8,23 +8,23 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "homepage": "http://siren.solutions/kibi",
+  "repository": "https://github.com/sirensolutions/kibi_timeline_vis",
   "scripts": {
     "lintFix": "gulp lintFix",
     "test": "gulp test",
     "test:coverage": "gulp coverage",
     "start": "gulp dev",
-    "postinstall": "bower install",
     "precommit": "gulp lint",
     "build": "gulp build"
   },
   "dependencies": {
     "kibiutils": "sirensolutions/kibiutils#1.4.0",
-    "kibi-icons": "sirensolutions/kibi-icons#1.0.0"
+    "kibi-icons": "sirensolutions/kibi-icons#1.0.0",
+    "vis": "4.17.0"
   },
   "devDependencies": {
     "babel-eslint": "^4.1.7",
     "bluebird": "^3.0.6",
-    "bower": "^1.6.9",
     "eslint": "^1.10.3",
     "gulp": "^3.9.0",
     "gulp-eslint": "^1.1.1",

@@ -12,12 +12,36 @@
     font-size: 0.8em;
     margin: 0;
   }
+
+  .vis-timeline {
+    border: none !important;
+  }
+
+  .vis-panel .vis-shadow {
+    box-shadow: none!important; /* disable the shadow */
+  }
+
+  .kibi-tl-dot-item {
+    position: relative;
+    padding: 0;
+    border-width: 4px;
+    border-style: solid;
+    border-radius: 4px;
+    float: left;
+    margin-top: 6px;
+    margin-right: 4px;
+    border-color: red;
+  }
+
+  .kibi-tl-label-item {
+    margin-left: 15px;
+  }
 }
 
 .kibi-timeline-vis-params{
   span.small_note {
     font-weight: normal;
-    color: #ccc;
+    color: #999;
   }
 
 
@@ -55,10 +79,4 @@
   }
 }
 
-.vis-timeline {
-  border: none !important;
-}
 
-.vis-panel .vis-shadow {
-  box-shadow: none!important; /* disable the shadow */
-}
