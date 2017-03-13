@@ -19,7 +19,7 @@ describe('KibiTimeline Directive', function () {
   let getSortOnFieldObjectSpy;
 
   const init = function ($elem, props) {
-    ngMock.inject(function (_$rootScope_, $compile, Private, indexPatterns) {
+    ngMock.inject(function (_$rootScope_, $compile, Private, _indexPatterns_) {
       $rootScope = _$rootScope_;
       $compile($elem)($rootScope);
       $elem.scope().$digest();
@@ -27,7 +27,7 @@ describe('KibiTimeline Directive', function () {
       _.assign($scope, props);
       $scope.$digest();
       queryFilter = Private(require('ui/filter_bar/query_filter'));
-      indexPatterns = indexPatterns;
+      indexPatterns = _indexPatterns_;
     });
   };
 
@@ -226,6 +226,23 @@ describe('KibiTimeline Directive', function () {
     }, 200);
   });
 
+  const simulateClickOnItem = function ($el) {
+    const $panel = $el.find('.vis-panel.vis-center');
+    const $item = $el.find('.vis-content .vis-itemset .vis-foreground .vis-group .vis-item .vis-item-content .kibi-tl-label-item');
+    const event = new MouseEvent('click', {
+      target: {
+        // cheat that we clicked on the item
+        'timeline-item': {}
+      }
+    });
+    const eventData = {
+      target: $item[0],
+      srcEvent: event
+    };
+    // cheat again and trigger the tap with fake eventData
+    $panel[0].hammer[0].emit('tap', eventData);
+  };
+
   it('correct filter should be created - LABEL one', function (done) {
     initTimeline({
       startField: '@timestamp',
@@ -289,20 +306,7 @@ describe('KibiTimeline Directive', function () {
     // wait until timeline is fully rendered
     setTimeout(function () {
       expect($scope.timeline.itemsData.length).to.be(1);
-      const $panel = $elem.find('.vis-panel.vis-center');
-      const $item = $panel.find('.vis-content .vis-itemset .vis-foreground .vis-group .vis-item .vis-item-content .kibi-tl-label-item');
-      const event = new MouseEvent('click', {
-        target: {
-          // cheat that we clicked on the item
-          'timeline-item': {}
-        }
-      });
-      const eventData = {
-        target: $item[0],
-        srcEvent: event
-      };
-      // cheat again and trigger the tap with fake eventData
-      $panel[0].hammer[0].emit('tap', eventData);
+      simulateClickOnItem($elem);
       sinon.assert.calledOnce(addFilterSpy);
       sinon.assert.calledWith(addFilterSpy, expectedFilters);
       done();
@@ -372,20 +376,7 @@ describe('KibiTimeline Directive', function () {
     // wait until timeline is fully rendered
     setTimeout(function () {
       expect($scope.timeline.itemsData.length).to.be(1);
-      const $panel = $elem.find('.vis-panel.vis-center');
-      const $item = $panel.find('.vis-content .vis-itemset .vis-foreground .vis-group .vis-item .vis-item-content .kibi-tl-label-item');
-      const event = new MouseEvent('click', {
-        target: {
-          // cheat that we clicked on the item
-          'timeline-item': {}
-        }
-      });
-      const eventData = {
-        target: $item[0],
-        srcEvent: event
-      };
-      // cheat again and trigger the tap with fake eventData
-      $panel[0].hammer[0].emit('tap', eventData);
+      simulateClickOnItem($elem);
       sinon.assert.calledOnce(addFilterSpy);
       sinon.assert.calledWith(addFilterSpy, expectedFilters);
       done();
@@ -435,7 +426,11 @@ describe('KibiTimeline Directive', function () {
         ]
       }
     };
-    const addFilterSpy = sinon.spy(queryFilter, 'addFilters');
+
+    let filters;
+    const addFilterSpy = sinon.stub(queryFilter, 'addFilters', function (f) {
+      filters = f;
+    });
 
     $scope.visOptions.selectValue = 'date';
 
@@ -451,29 +446,28 @@ describe('KibiTimeline Directive', function () {
     searchSource.crankResults(results);
     $scope.$digest();
 
-    const expectedFilters = [{}, {}];
-
-
     // wait until timeline is fully rendered
     setTimeout(function () {
       expect($scope.timeline.itemsData.length).to.be(1);
-      const $panel = $elem.find('.vis-panel.vis-center');
-      const $item = $panel.find('.vis-content .vis-itemset .vis-foreground .vis-group .vis-item .vis-item-content .kibi-tl-label-item');
-      const event = new MouseEvent('click', {
-        target: {
-          // cheat that we clicked on the item
-          'timeline-item': {}
-        }
-      });
-      const eventData = {
-        target: $item[0],
-        srcEvent: event
-      };
-      // cheat again and trigger the tap with fake eventData
-      $panel[0].hammer[0].emit('tap', eventData);
-      sinon.assert.calledOnce(addFilterSpy);
-      sinon.assert.calledWith(addFilterSpy, expectedFilters);
-      done();
+      simulateClickOnItem($elem);
+      setTimeout(function () {
+        sinon.assert.calledOnce(addFilterSpy);
+
+        // not using calledWith
+        // as dates depends on browser timezones it is safer to check
+        // individual properties
+        const lowerBound = '' + filters[0].range['@timestamp'].gte;
+        const lowerMeta = filters[0].meta;
+        const higherBound = '' + filters[1].range.endDate.lte;
+        const higherMeta = filters[1].meta;
+        expect(lowerBound.indexOf('Wed Jan 25 1995')).to.equal(0);
+        expect(lowerMeta.alias.indexOf('@timestamp >= Wed Jan 25 1995')).to.equal(0);
+        expect(lowerMeta.index).to.equal('logstash-*');
+        expect(higherBound.indexOf('Fri Jan 27 1995')).to.equal(0);
+        expect(higherMeta.alias.indexOf('endDate <= Fri Jan 27 1995')).to.equal(0);
+        expect(higherMeta.index).to.equal('logstash-*');
+        done();
+      }, 1000);
     }, 200);
   });
 
