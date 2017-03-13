@@ -68,11 +68,11 @@ define(function (require) {
 
       // in kibi, we have the path property of a field
       if (params.labelFieldSequence && params.labelFieldSequence.length) {
-        field = params.labelFieldSequence;
-        value = kibiUtils.getValuesAtPath(hit._source, field);
+        field = params.labelFieldSequence.join('.'); // labelFieldSequence is an array
+        value = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
       } else if (params.labelField) {
-        field = params.labelField;
-        value = _.get(hit._source, field);
+        field = params.labelField; // labelField is a plain string
+        value = kibiUtils.getValuesAtPath(hit._source, field.split('.'));
       }
 
       if (!value || !value.length) {

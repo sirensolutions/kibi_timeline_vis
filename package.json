@@ -12,6 +12,7 @@
   "scripts": {
     "lintFix": "gulp lintFix",
     "test": "gulp test",
+    "testdev": "gulp testdev",
     "test:coverage": "gulp coverage",
     "start": "gulp dev",
     "precommit": "gulp lint",
