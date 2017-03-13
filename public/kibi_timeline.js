@@ -99,16 +99,16 @@ define(function (require) {
           } else if ($scope.visOptions.selectValue === 'id') {
             const q2 = {
               query: {
-                ids: {}
+                ids: {
+                  type: selected._type,
+                  values: [ selected._id ]
+                }
               },
               meta: {
                 index: selected.index
               }
             };
-            q2.query.ids = {
-              type: selected._type,
-              values: [ selected._id ]
-            };
+
             queryFilter.addFilters([q2]);
           }
         }
