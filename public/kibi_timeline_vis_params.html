@@ -113,10 +113,13 @@
         <label>On select:</label>
         <div class="radio">
           <label>
-            <input type="radio" ng-model="vis.params.selectValue" value="id" /> Select and filter object ID
+            <input type="radio" ng-model="vis.params.selectValue" value="id" /> Select and filter by the object ID associated with the event
           </label>
           <label>
-            <input type="radio" ng-model="vis.params.selectValue" value="date" /> Select and filter date/range associated with object
+            <input type="radio" ng-model="vis.params.selectValue" value="label" /> Select and filter by the label associated with the event
+          </label>
+          <label>
+            <input type="radio" ng-model="vis.params.selectValue" value="date" /> Select and filter by the date/range associated with the event
           </label>
         </div>
       </div>
