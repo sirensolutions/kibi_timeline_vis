@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import kibiUtils from 'kibiutils';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 function extractFragment(highlightedElement, openTag, closeTag) {
   const openIndex = highlightedElement.indexOf(openTag);
@@ -42,34 +42,67 @@ export default class TimelineHelper {
   }
 
   /**
-    * pluckLabel returns the label of an event
-    *
-    * @param hit the document of the event
-    * @param params configuration parameters for the event
-    * @param notify object for user notification
-    * @returns the label as a string
-    */
-  static pluckLabel(hit, params, notify) {
-    let field;
-    if (params.labelFieldSequence) { // in kibi, we have the path property of a field
-      field = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
-    } else {
-      field = _.get(hit._source, params.labelField);
+   * getMultiFieldValue get a field value if the field is a multi-field
+   *
+   * @param hit the document of the event
+   * @param f field name
+   * @returns field value
+   */
+  static getMultiFieldValue(hit, f) {
+    if (hit.fields && hit.fields[f]) {
+      const val = hit.fields[f];
+      return _.isArray(val) && val.length === 1 ? val[0] : val;
     }
-    if (field && (!_.isArray(field) || field.length)) {
-      return field;
-    }
-    return 'N/A';
-  }
+  };
 
   /**
-    * pluckHighlights returns the highlighted terms for the event.
-    * The terms are sorted first on the number of occurrences of a term, and then alphabetically.
-    *
-    * @param hit the event
-    * @param highlightTags the tags that wrap the term
-    * @returns a comma-separated string of the highlighted terms and their number of occurrences
-    */
+   * pluckLabel returns the label of an event
+   *
+   * @param hit the document of the event
+   * @param params configuration parameters for the event
+   * @param notify object for user notification
+   * @returns the label as a string
+   */
+  static pluckLabel(hit, params, notify) {
+    let field;
+    let value;
+
+    // in kibi, we have the path property of a field
+    if (params.labelFieldSequence && params.labelFieldSequence.length) {
+      field = params.labelFieldSequence.join('.'); // labelFieldSequence is an array
+      value = kibiUtils.getValuesAtPath(hit._source, params.labelFieldSequence);
+    } else if (params.labelField) {
+      field = params.labelField; // labelField is a plain string
+      value = kibiUtils.getValuesAtPath(hit._source, field.split('.'));
+    }
+
+    if (!value || !value.length) {
+      value = this.getMultiFieldValue(hit, field);
+    }
+
+    return value && (!_.isArray(value) || value.length) ? value : 'N/A';
+  };
+
+  /**
+   * pluckDate returns date field value/raw value
+   *
+   * @param hit the document of the event
+   * @param field to represent params.startField or params.endField
+   * @returns date raw value
+   */
+  static pluckDate(hit, field) {
+    // there is no date string value in _source in case of multi-fields
+    return hit.fields[field] || [];
+  };
+
+  /**
+   * pluckHighlights returns the highlighted terms for the event.
+   * The terms are sorted first on the number of occurrences of a term, and then alphabetically.
+   *
+   * @param hit the event
+   * @param highlightTags the tags that wrap the term
+   * @returns a comma-separated string of the highlighted terms and their number of occurrences
+   */
   static pluckHighlights(hit, highlightTags) {
     if (!hit.highlight) {
       return '';
@@ -89,31 +122,32 @@ export default class TimelineHelper {
     });
 
     return Array.from(counts.keys())
-      .sort(function (a, b) {
-        //same count, return alphabetic order
-        if (counts.get(a) === counts.get(b)) {
-          return a > b;
-        }
-        //return count order
-        return counts.get(a) < counts.get(b);
-      })
-      .map(key => `${key}: ${counts.get(key)}`)
-      .join(', ');
+    .sort(function (a, b) {
+      //same count, return alphabetic order
+      if (counts.get(a) === counts.get(b)) {
+        return a > b;
+      }
+      //return count order
+      return counts.get(a) < counts.get(b);
+    })
+    .map(key => `${key}: ${counts.get(key)}`)
+    .join(', ');
   }
 
+
   /**
-    * Creates an Elasticsearch sort object to sort in chronological order
-    *
-    * @param params group configuraton parameters
-    * @returns Elasticsearch sort object
-    */
-  static getSortOnStartFieldObject(params) {
+   * Creates an Elasticsearch sort object to sort in chronological order on start field
+   *
+   * @param params group configuraton parameters
+   * @returns Elasticsearch sort object
+   */
+  static getSortOnFieldObject = function (field, fieldSequence, orderBy) {
     const sortObj = {};
-    if (params.startFieldSequence) {
-      sortObj[params.startFieldSequence.join('.')] = { order: 'asc' };
+    if (fieldSequence) {
+      sortObj[fieldSequence.join('.')] = { order: orderBy };
     } else {
-      sortObj[params.startField] = { order: 'asc' };
+      sortObj[field] = { order: orderBy };
     }
     return sortObj;
-  }
+  };
 }

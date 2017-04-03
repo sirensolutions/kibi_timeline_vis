@@ -1,2 +1,2 @@
-require('bower_components/vis/dist/vis.min.css');
-module.exports = require('bower_components/vis/dist/vis.min.js');
+require('../../node_modules/vis/dist/vis.min.css');
+module.exports = require('../../node_modules/vis/dist/vis.js');

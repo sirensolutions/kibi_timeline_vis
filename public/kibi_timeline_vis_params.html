@@ -60,7 +60,18 @@
 
           <div class="form-group">
             <label>Events number limit <span class="small_note">(Optional, default: 100)</span></label>
-            <input type="text" ng-model="group.size" class="form-control" />
+            <input type="number" ng-model="group.size" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label>Order By <span class="small_note">(Optional, default: Start Field DESC)</span></label>
+            <select ng-model="group.orderBy" class="form-control">
+              <option value=""></option>
+              <option value="start.asc">Start Field ASC</option>
+              <option value="start.desc">Start Field DESC</option>
+              <option ng-if="group.endField !== ''" value="end.asc">End Field ASC</option>
+              <option ng-if="group.endField !== ''" value="end.desc">End Field DESC</option>
+            </select>
           </div>
 
           <div class="btn-group rightCorner">
@@ -93,7 +104,7 @@
           <input type="checkbox" ng-model="vis.params.notifyDataErrors"/> Notify about errors in the data
         </label>
         <label>
-          <input type="checkbox" ng-model="vis.params.syncTime"/> 
+          <input type="checkbox" ng-model="vis.params.syncTime"/>
           Sync application time with the timeline
           <kbn-info info="Turn this timeline into a control. Moving and zooming the timeline will set applcation time to timeline boundaries."></kbn-info>
         </label>
@@ -102,10 +113,13 @@
         <label>On select:</label>
         <div class="radio">
           <label>
-            <input type="radio" ng-model="vis.params.selectValue" value="id" /> Select and filter object ID
+            <input type="radio" ng-model="vis.params.selectValue" value="id" /> Select and filter by the object ID associated with the event
           </label>
           <label>
-            <input type="radio" ng-model="vis.params.selectValue" value="date" /> Select and filter date/range associated with object
+            <input type="radio" ng-model="vis.params.selectValue" value="label" /> Select and filter by the label associated with the event
+          </label>
+          <label>
+            <input type="radio" ng-model="vis.params.selectValue" value="date" /> Select and filter by the date/range associated with the event
           </label>
         </div>
       </div>

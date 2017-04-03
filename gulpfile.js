@@ -1,7 +1,6 @@
 var gulp = require('gulp');
 var _ = require('lodash');
 var path = require('path');
-var gulpUtil = require('gulp-util');
 var mkdirp = require('mkdirp');
 var Rsync = require('rsync');
 var Promise = require('bluebird');
@@ -22,12 +21,8 @@ var buildTarget = path.resolve(buildDir, packageName);
 var include = [
   'package.json',
   'index.js',
-  'node_modules',
   'public'
 ];
-var exclude = Object.keys(pkg.devDependencies).map(function (name) {
-  return path.join('node_modules', name);
-});
 
 var knownOptions = {
   string: 'kibanahomepath',
@@ -51,7 +46,6 @@ function syncPluginTo(dest, done) {
           .flags('uav')
           .recursive(true)
           .set('delete')
-          .exclude(exclude)
           .output(function (data) {
             process.stdout.write(data.toString('utf8'));
           });
@@ -65,7 +59,19 @@ function syncPluginTo(dest, done) {
       });
     }))
     .then(function () {
-      done();
+      return new Promise(function (resolve, reject) {
+        mkdirp(path.join(buildTarget, 'node_modules'), function (err) {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    })
+    .then(function () {
+      spawn('npm', ['install', '--production'], {
+        cwd: dest,
+        stdio: 'inherit'
+      })
+      .on('close', done);
     })
     .catch(done);
   });
@@ -113,8 +119,8 @@ gulp.task('build', ['clean'], function (done) {
 gulp.task('package', ['build'], function (done) {
   return gulp.src([
       path.join(buildDir, '**', '*'),
-      '!**/webpackShims/bower_components/vis/examples/**',
-      '!**/webpackShims/bower_components/vis/docs/**'
+      '!**/node_modules/vis/examples/**',
+      '!**/node_modules/vis/docs/**'
     ])
     .pipe(zip(packageName + '.zip'))
     .pipe(gulp.dest(targetDir));

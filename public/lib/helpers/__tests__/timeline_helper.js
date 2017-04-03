@@ -5,9 +5,9 @@ import sinon from 'auto-release-sinon';
 
 describe('Kibi Timeline', function () {
   describe('TimelineHelper', function () {
-    describe('getSortOnStartFieldObject', function () {
+    describe('getSortOnFieldObject', function () {
       it('should return a sort ES object from startField', function () {
-        expect(TimelineHelper.getSortOnStartFieldObject({ startField: 'date' })).to.eql({
+        expect(TimelineHelper.getSortOnFieldObject('date', '', 'asc')).to.eql({
           date: {
             order: 'asc'
           }
@@ -15,7 +15,7 @@ describe('Kibi Timeline', function () {
       });
 
       it('should return a sort ES object from startFieldSequence', function () {
-        expect(TimelineHelper.getSortOnStartFieldObject({ startFieldSequence: [ 'my.other', 'date' ] })).to.eql({
+        expect(TimelineHelper.getSortOnFieldObject('', [ 'my.other', 'date' ], 'asc')).to.eql({
           'my.other.date': {
             order: 'asc'
           }
@@ -35,29 +35,37 @@ describe('Kibi Timeline', function () {
       it('should return the label of an event kibana-style', function () {
         const hit = {
           _source: {
-            aaa: 'bbb'
+            aaa: {
+              bbb: {
+                ccc: 'ddd'
+              }
+            }
           }
         };
         const params = {
-          labelField: 'aaa'
+          labelField: 'aaa.bbb.ccc'
         };
 
-        expect(TimelineHelper.pluckLabel(hit, params, notify)).to.be('bbb');
+        expect(TimelineHelper.pluckLabel(hit, params, notify)).to.eql([ 'ddd' ]);
         sinon.assert.notCalled(notify.warning);
       });
 
       it('should return the label of an event kibi-style', function () {
         const hit = {
           _source: {
-            aaa: 'bbb'
+            aaa: {
+              bbb: {
+                ccc: 'ddd'
+              }
+            }
           }
         };
         const params = {
-          labelField: 'aaa',
-          labelFieldSequence: [ 'aaa' ]
+          labelField: 'aaa.bbb.ccc',
+          labelFieldSequence: [ 'aaa', 'bbb', 'ccc' ]
         };
 
-        expect(TimelineHelper.pluckLabel(hit, params, notify)).to.eql(['bbb']);
+        expect(TimelineHelper.pluckLabel(hit, params, notify)).to.eql(['ddd']);
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -75,6 +83,60 @@ describe('Kibi Timeline', function () {
         expect(TimelineHelper.pluckLabel(hit, params, notify)).to.be('N/A');
         sinon.assert.notCalled(notify.warning);
       });
+
+      it('should return a label value in case of multi-fields, kibi-style', function () {
+        const hit = {
+          _source: {
+            'city': 'Galway'
+          },
+          fields: {
+            'city.raw': ['Galway']
+          }
+        };
+        const params = {
+          labelField: 'city.raw',
+          labelFieldSequence: [ 'city.raw' ]
+        };
+
+        expect(TimelineHelper.pluckLabel(hit, params)).to.eql('Galway');
+        sinon.assert.notCalled(notify.warning);
+      });
+
+      it('should return a label value in case of multi-fields, kibana-style', function () {
+        const hit = {
+          _source: {},
+          fields: {
+            'city.raw': ['Galway']
+          }
+        };
+        const params = {
+          labelField: 'city.raw',
+          labelFieldSequence: undefined
+        };
+
+        expect(TimelineHelper.pluckLabel(hit, params)).to.eql('Galway');
+        sinon.assert.notCalled(notify.warning);
+      });
+    });
+
+    describe('pluckDate', function () {
+
+      it('should return a date string value and raw value, in case of multi-fields', function () {
+        const hit = {
+          _source: {},
+          fields: {
+            'arrive.raw': [ Date.parse('Wed, 09 Aug 1995 00:00:00 GMT') ]
+          }
+        };
+        const params = {
+          startField: 'arrive.raw',
+          startFieldSequence: [ 'arrive.raw' ],
+        };
+
+        const date = TimelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
+        expect(date).to.eql([ 807926400000 ]);
+      });
+
     });
 
     describe('pluckHighlights', function () {
@@ -115,49 +177,14 @@ describe('Kibi Timeline', function () {
     });
 
     describe('changeTimezone', function () {
-      it('should return Browser for default Kibana timezone ', function () {
+      it('should return Browser for default Kibana timezone', function () {
         expect(TimelineHelper.changeTimezone('Browser')).to.be('Browser');
       });
 
-      it('should return -04:00 for America/Nassau timezone ', function () {
-        if (moment('America/Nassau').isDST()) {
-          expect(TimelineHelper.changeTimezone('America/Nassau')).to.be('-04:00');
-        } else {
-          expect(TimelineHelper.changeTimezone('America/Nassau')).to.be('-05:00');
-        }
-      });
-
-      it('should return 13 for Etc/GMT-13 timezone ', function () {
-        expect(TimelineHelper.changeTimezone('Etc/GMT-13')).to.be('+13:00');
-      });
-
-      it('should return -4 for Etc/GMT+4 timezone ', function () {
-        expect(TimelineHelper.changeTimezone('Etc/GMT+4')).to.be('-04:00');
-      });
-
-      it('should return 0 for Etc/GMT timezone ', function () {
-        expect(TimelineHelper.changeTimezone('Etc/GMT')).to.be('+00:00');
-      });
-
-      it('should return 0 for Etc/GMT0 timezone ', function () {
-        expect(TimelineHelper.changeTimezone('Etc/GMT0')).to.be('+00:00');
-      });
-
-      it('should return +09:30 for Australia/Darwin timezone ', function () {
-        if (moment('Australia/Darwin').isDST()) {
-          expect(TimelineHelper.changeTimezone('Australia/Darwin')).to.be('+08:30');
-        } else {
-          expect(TimelineHelper.changeTimezone('Australia/Darwin')).to.be('+09:30');
-        }
-      });
-
-      it('should return +05:45 for Asia/Katmandu timezone ', function () {
-        if (moment('Asia/Katmandu').isDST()) {
-          expect(TimelineHelper.changeTimezone('Asia/Katmandu')).to.be('+04:45');
-        } else {
-          expect(TimelineHelper.changeTimezone('Asia/Katmandu')).to.be('+05:45');
-        }
+      it('should be a moment object', function () {
+        expect(TimelineHelper.changeTimezone('America/Nassau')).to.match(/[-+][0-9]{2}:[0-9]{2}/);
       });
     });
+
   });
 });

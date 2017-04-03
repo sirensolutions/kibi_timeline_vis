@@ -25,6 +25,17 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
     };
   };
 
+  const getGroupParamsHash = function (group) {
+    return new Date().getTime();
+    let hash = '';
+    for (const key in group) {
+      if (group.hasOwnProperty(key)) {
+        hash += key + group[key];
+      }
+    }
+    return hash;
+  };
+
   $scope.initSearchSources = function (savedVis) {
     const getSavedSearches = Promise.all(
       _(savedVis.vis.params.groups)
@@ -56,8 +67,10 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
       });
 
       $scope.visOptions.groups = [];
+      let groupsParamsHash = '';
       _.each(savedSearchesRes, function ({ savedSearch, groups }, i) {
         for (const group of groups) {
+          groupsParamsHash += getGroupParamsHash(group);
           const _id = `_kibi_timetable_ids_source_flag${group.id}${savedSearch.id}`; // used only by kibi
           requestQueue.markAllRequestsWithSourceIdAsInactive(_id); // used only by kibi
 
@@ -73,6 +86,10 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
           });
           searchSource.set('filter', queryFilter.getFilters());
 
+          // save label field name to `fielddata_fields`
+          // it is needed to display not indexed fields in case of multi-fields
+          searchSource._state.fielddata_fields = [ group.labelField ];
+
           $scope.visOptions.groups.push({
             id: group.id,
             color: group.color,
@@ -80,6 +97,7 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
             searchSource: searchSource,
             params: {
               //kibi params
+              // .path property doesn't exist in case of multi-fields
               labelFieldSequence: fields[i].byName[group.labelField].path,
               startFieldSequence: fields[i].byName[group.startField].path,
               endFieldSequence: group.endField && fields[i].byName[group.endField].path || [],
@@ -95,7 +113,13 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
         }
       });
 
-      _.assign($scope.visOptions, _.omit(savedVis.vis.params, 'groups'));
+      const visOptionsButGroups = _.omit(savedVis.vis.params, 'groups');
+      // adding a hash of group parameters to detect when they changed
+      // this is needed as we are ommiting search sources when watching changes to
+      // visOptions. We can not watch changes to searchSources directly
+      // as this triggers the infinite loop in the watcher inside kibi_timeline directive)
+      visOptionsButGroups.hash = groupsParamsHash;
+      _.assign($scope.visOptions, visOptionsButGroups);
     })
     .catch(notify.error);
   };

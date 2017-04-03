@@ -6,7 +6,6 @@ import _ from 'lodash';
 import vis from 'vis';
 import buildRangeFilter from 'ui/filter_manager/lib/range';
 import uiModules from 'ui/modules';
-import kibiUtils from 'kibiutils';
 
 uiModules
 .get('kibana')
@@ -77,7 +76,7 @@ uiModules
               queryFilter.addFilters([rangeFilter1, rangeFilter2]);
             });
           }
-        } else if ($scope.visOptions.selectValue === 'id') {
+        } else if ($scope.visOptions.selectValue === 'label') {
           let searchField = undefined;
           for (let i = 0; i < $scope.visOptions.groups.length; i++) {
             if (selected.groupId === $scope.visOptions.groups[i].id) {
@@ -96,6 +95,20 @@ uiModules
             query: selected.value,
             type: 'phrase'
           };
+          queryFilter.addFilters([q2]);
+        } else if ($scope.visOptions.selectValue === 'id') {
+          const q2 = {
+            query: {
+              ids: {
+                type: selected._type,
+                values: [ selected._id ]
+              }
+            },
+            meta: {
+              index: selected.index
+            }
+          };
+
           queryFilter.addFilters([q2]);
         }
       }
@@ -178,17 +191,29 @@ uiModules
         });
       }
       if (params.invertFirstLabelInstance) {
-        searchSource.sort(TimelineHelper.getSortOnStartFieldObject(params));
+        searchSource.sort(TimelineHelper.getSortOnFieldObject(params.startField, params.startFieldSequence, 'asc'));
       }
 
-      searchSource.onResults().then(function onResults(searchResp) {
+      // We sort values to prevent the possibility of undefined records
+      // (these ones, after sort function, are at the bottom of the object)
+      if (params.orderBy || (searchSource._state && searchSource._state.index.id === '*')) {
+        const orderBy = params.orderBy;
+        const field = orderBy.substring(0, orderBy.indexOf('.'));
+        const order = orderBy.substring(orderBy.indexOf('.') + 1);
+        if (field === 'start') {
+          searchSource.sort(TimelineHelper.getSortOnFieldObject(params.startField, params.startFieldSequence, order));
+        } else {
+          searchSource.sort(TimelineHelper.getSortOnFieldObject(params.endField, params.endFieldSequence, order));
+        }
+      }
+
+      searchSource.onResults()
+      .then(function onResults(searchResp) {
         const events = [];
 
         if (params.startField) {
-          let startFieldValue;
-          let startRawFieldValue;
-          let endFieldValue;
-          let endRawFieldValue;
+          const startField = {};
+          const endField = {};
           const uniqueLabels = [];
 
           _.each(searchResp.hits.hits, function (hit) {
@@ -197,29 +222,12 @@ uiModules
               labelValue = labelValue.join(', ');
             }
 
-            if (params.startFieldSequence) { // in kibi, we have the path property of a field
-              startFieldValue = kibiUtils.getValuesAtPath(hit._source, params.startFieldSequence);
-            } else {
-              startFieldValue = _.get(hit._source, params.startField);
-              if (startFieldValue && startFieldValue.constructor !== Array) {
-                startFieldValue =  [ startFieldValue ];
-              }
-            }
-            startRawFieldValue = hit.fields[params.startField];
+            startField.value = TimelineHelper.pluckDate(hit, params.startField);
 
-            let endFieldValue = null;
             if (params.endField) {
-              if (params.endFieldSequence) { // in kibi, we have the path property of a field
-                endFieldValue = kibiUtils.getValuesAtPath(hit._source, params.endFieldSequence);
-              } else {
-                endFieldValue = _.get(hit._source, params.endField);
-                if (endFieldValue) {
-                  endFieldValue = (endFieldValue.constructor !== Array) ? [endFieldValue] : endFieldValue;
-                }
-              }
-              endRawFieldValue = hit.fields[params.endField];
+              endField.value = TimelineHelper.pluckDate(hit, params.endField);
 
-              if (endFieldValue.length !== startFieldValue.length) {
+              if (endField.value.length !== startField.value.length) {
                 if ($scope.visOptions.notifyDataErrors) {
                   notify.warning('Check your data - the number of values in the field \'' + params.endField + '\' ' +
                                  'must be equal to the number of values in the field \'' + params.startField +
@@ -229,12 +237,12 @@ uiModules
               }
             }
 
-            if (startFieldValue && (!_.isArray(startFieldValue) || startFieldValue.length)) {
+            if (startField.value.length) {
               const indexId = searchSource.get('index').id;
 
-              _.each(startFieldValue, function (value, i) {
-                const startValue = value;
-                const startRawValue = startRawFieldValue[i];
+              _.each(startField.value, function (startValue, i) {
+                startValue = new Date(startValue);
+                const endValue = endField.value && endField.value.length ? new Date(endField.value[i]) : null;
 
                 const itemDict = {
                   indexId: indexId,
@@ -245,22 +253,21 @@ uiModules
                   highlight: TimelineHelper.pluckHighlights(hit, highlightTags),
                   groupColor: groupColor,
                   startValue: startValue,
-                  endFieldValue: endFieldValue ? endFieldValue[i] : null
+                  endFieldValue: endValue
                 };
 
                 const content = TimelineHelper.createItemTemplate(itemDict);
 
                 let style = `background-color: ${groupColor}; color: #fff;`;
-                if (!endFieldValue || startValue === endFieldValue[i]) {
+                if (!endValue || startValue.getTime() === endValue.getTime()) {
                   // here the end field value missing but expected
                   // or start field value === end field value
                   // force vis box look like vis point
                   style = `border-style: none; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
                 }
 
-                if (params.invertFirstLabelInstance &&
-                  !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
-                  if (!endFieldValue || startValue === endFieldValue[i]) {
+                if (params.invertFirstLabelInstance && !_.includes(uniqueLabels, labelValue.toLowerCase().trim())) {
+                  if (!endValue || startValue.getTime() === endValue.getTime()) {
                     style = `border-style: solid; background-color: #fff; color: ${groupColor}; border-color: ${groupColor}`;
                   } else {
                     style = `background-color: #fff; color: ${groupColor};`;
@@ -269,10 +276,12 @@ uiModules
                 }
 
                 const e =  {
+                  _id: hit._id,
+                  _type: hit._type,
                   index: indexId,
                   content: content,
                   value: labelValue,
-                  start: new Date(startRawValue),
+                  start: startValue,
                   startField: {
                     name: params.startField,
                     value: startValue
@@ -283,12 +292,10 @@ uiModules
                   groupId: groupId
                 };
 
-                if (endFieldValue && startValue !== endFieldValue[i]) {
-                  const endValue = endFieldValue[i];
-                  const endRawValue = endRawFieldValue[i];
-                  if (startValue !== endValue) {
+                if (endValue && startValue.getTime() !== endValue.getTime()) {
+                  if (startValue.getTime() !== endValue.getTime()) {
                     e.type = 'range';
-                    e.end =  new Date(endRawValue);
+                    e.end = endValue;
                     e.endField = {
                       name: params.endField,
                       value: endValue

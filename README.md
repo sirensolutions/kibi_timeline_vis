@@ -1,6 +1,6 @@
 ## Kibi/Kibana Timeline Plugin    
 
-This is a plugin for Kibana 4.3+ and Kibi 0.3 (our extention of Kibana for Relational Data).
+This is a plugin for Kibana 4.3+ and Kibi 0.3+ (our extention of Kibana for Relational Data).
 
 The plugin displays a timeline of events taken from multiple saved searches.
 
@@ -40,7 +40,7 @@ $ bin/kibana plugin  --remove kibi_timeline_vis
 
 - Clone the repository at the same level of a Kibana > 4.2 clone
 - If needed, switch to the same node version as Kibana using nvm 
-  (e.g. `nvm use 0.12`)
+  (e.g. `nvm use 6.9.0`)
 - Install dependencies with `npm install`
 - Install the plugin to Kibana and start watching for changes by running 
   `npm start`
