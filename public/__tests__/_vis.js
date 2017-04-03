@@ -1,7 +1,8 @@
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-
-require('../kibi_timeline');
+import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import visProvider from 'ui/vis';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import '../kibi_timeline';
 
 describe('Kibi Timeline', function () {
   describe('Visualization', function () {
@@ -18,8 +19,8 @@ describe('Kibi Timeline', function () {
       });
 
       ngMock.inject(function ($injector, Private) {
-        const Vis = Private(require('ui/Vis'));
-        const indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        const Vis = Private(visProvider);
+        const indexPattern = Private(IndexPatternProvider);
         vis = new Vis(indexPattern, {
           type: 'kibi_timeline'
         });

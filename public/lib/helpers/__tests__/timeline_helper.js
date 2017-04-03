@@ -1,13 +1,13 @@
-const expect = require('expect.js');
-const timelineHelper = require('../timeline_helper')();
-const moment = require('moment');
-const sinon = require('auto-release-sinon');
+import expect from 'expect.js';
+import TimelineHelper from '../timeline_helper';
+import moment from 'moment';
+import sinon from 'auto-release-sinon';
 
 describe('Kibi Timeline', function () {
   describe('TimelineHelper', function () {
     describe('getSortOnFieldObject', function () {
       it('should return a sort ES object from startField', function () {
-        expect(timelineHelper.getSortOnFieldObject('date', '', 'asc')).to.eql({
+        expect(TimelineHelper.getSortOnFieldObject('date', '', 'asc')).to.eql({
           date: {
             order: 'asc'
           }
@@ -15,7 +15,7 @@ describe('Kibi Timeline', function () {
       });
 
       it('should return a sort ES object from startFieldSequence', function () {
-        expect(timelineHelper.getSortOnFieldObject('', [ 'my.other', 'date' ], 'asc')).to.eql({
+        expect(TimelineHelper.getSortOnFieldObject('', [ 'my.other', 'date' ], 'asc')).to.eql({
           'my.other.date': {
             order: 'asc'
           }
@@ -46,7 +46,7 @@ describe('Kibi Timeline', function () {
           labelField: 'aaa.bbb.ccc'
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql([ 'ddd' ]);
+        expect(TimelineHelper.pluckLabel(hit, params, notify)).to.eql([ 'ddd' ]);
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -65,7 +65,7 @@ describe('Kibi Timeline', function () {
           labelFieldSequence: [ 'aaa', 'bbb', 'ccc' ]
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.eql(['ddd']);
+        expect(TimelineHelper.pluckLabel(hit, params, notify)).to.eql(['ddd']);
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -80,7 +80,7 @@ describe('Kibi Timeline', function () {
           labelFieldSequence: [ 'aaa' ]
         };
 
-        expect(timelineHelper.pluckLabel(hit, params, notify)).to.be('N/A');
+        expect(TimelineHelper.pluckLabel(hit, params, notify)).to.be('N/A');
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -98,7 +98,7 @@ describe('Kibi Timeline', function () {
           labelFieldSequence: [ 'city.raw' ]
         };
 
-        expect(timelineHelper.pluckLabel(hit, params)).to.eql('Galway');
+        expect(TimelineHelper.pluckLabel(hit, params)).to.eql('Galway');
         sinon.assert.notCalled(notify.warning);
       });
 
@@ -114,7 +114,7 @@ describe('Kibi Timeline', function () {
           labelFieldSequence: undefined
         };
 
-        expect(timelineHelper.pluckLabel(hit, params)).to.eql('Galway');
+        expect(TimelineHelper.pluckLabel(hit, params)).to.eql('Galway');
         sinon.assert.notCalled(notify.warning);
       });
     });
@@ -133,7 +133,7 @@ describe('Kibi Timeline', function () {
           startFieldSequence: [ 'arrive.raw' ],
         };
 
-        const date = timelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
+        const date = TimelineHelper.pluckDate(hit, params.startField, params.startFieldSequence);
         expect(date).to.eql([ 807926400000 ]);
       });
 
@@ -152,7 +152,7 @@ describe('Kibi Timeline', function () {
           }
         };
 
-        expect(timelineHelper.pluckHighlights(hit, highlightTags)).to.be('');
+        expect(TimelineHelper.pluckHighlights(hit, highlightTags)).to.be('');
       });
 
       it('should return the highlighted terms in the event', function () {
@@ -172,17 +172,17 @@ describe('Kibi Timeline', function () {
           }
         };
 
-        expect(timelineHelper.pluckHighlights(hit, highlightTags)).to.be('bbb: 2, ccc: 1, ddd: 1');
+        expect(TimelineHelper.pluckHighlights(hit, highlightTags)).to.be('bbb: 2, ccc: 1, ddd: 1');
       });
     });
 
     describe('changeTimezone', function () {
       it('should return Browser for default Kibana timezone', function () {
-        expect(timelineHelper.changeTimezone('Browser')).to.be('Browser');
+        expect(TimelineHelper.changeTimezone('Browser')).to.be('Browser');
       });
 
       it('should be a moment object', function () {
-        expect(timelineHelper.changeTimezone('America/Nassau')).to.match(/[-+][0-9]{2}:[0-9]{2}/);
+        expect(TimelineHelper.changeTimezone('America/Nassau')).to.match(/[-+][0-9]{2}:[0-9]{2}/);
       });
     });
 

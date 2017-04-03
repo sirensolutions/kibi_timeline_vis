@@ -1,9 +1,12 @@
-const sinon = require('auto-release-sinon');
-const angular = require('angular');
-const expect = require('expect.js');
-const _ = require('lodash');
-const ngMock = require('ngMock');
-const moment = require('moment');
+import SearchSourceProvider from 'fixtures/stubbed_search_source';
+import TimelineHelper from '../lib/helpers/timeline_helper';
+import sinon from 'auto-release-sinon';
+import angular from 'angular';
+import expect from 'expect.js';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import moment from 'moment';
+import 'plugins/kibi_timeline_vis/kibi_timeline_vis_controller';
 
 require('plugins/kibi_timeline_vis/kibi_timeline_vis_controller');
 
@@ -53,12 +56,12 @@ describe('KibiTimeline Directive', function () {
     $elem.appendTo('body');
 
     ngMock.inject(function (_highlightTags_, Private) {
-      const timelineHelper = Private(require('../lib/helpers/timeline_helper'));
-      getSortOnFieldObjectSpy = sinon.spy(timelineHelper, 'getSortOnFieldObject');
+      const TimelineHelper = Private(require('../lib/helpers/timeline_helper'));
+      getSortOnFieldObjectSpy = sinon.spy(TimelineHelper, 'getSortOnFieldObject');
 
       highlightTags = _highlightTags_;
 
-      searchSource = Private(require('fixtures/stubbed_search_source'));
+      searchSource = Private(SearchSourceProvider);
       searchSource.highlight = sinon.stub();
       searchSource.sort = sinon.stub();
     });
@@ -146,7 +149,6 @@ describe('KibiTimeline Directive', function () {
       expect(data.start.valueOf()).to.be(dateObj.valueOf());
     });
   });
-
 
   it('should return an event with the all the labels joined', function () {
     initTimeline({
@@ -417,6 +419,7 @@ describe('KibiTimeline Directive', function () {
   });
 
   describe('Missing data', function () {
+
     it('should support documents with missing label', function () {
       initTimeline({
         startField: '@timestamp',
@@ -515,6 +518,7 @@ describe('KibiTimeline Directive', function () {
   });
 
   describe('Filter creation', function () {
+
     const simulateClickOnItem = function ($el) {
       const $panel = $el.find('.vis-panel.vis-center');
       const $item = $el.find('.vis-content .vis-itemset .vis-foreground .vis-group .vis-item .vis-item-content .kibi-tl-label-item');
@@ -545,8 +549,8 @@ describe('KibiTimeline Directive', function () {
         failed: 0
       },
       hits: {
-        total : 49487,
-        max_score : 1.0,
+        total: 49487,
+        max_score: 1.0,
         hits: [
           {
             _index: 'logstash-2014.09.09',
@@ -561,14 +565,13 @@ describe('KibiTimeline Directive', function () {
               }
             },
             fields: {
-              '@timestamp': [ dateStartObj ],
-              'endDate': [ dateEndObj ],
+              '@timestamp': [dateStartObj],
+              'endDate': [dateEndObj],
             }
           }
         ]
       }
     };
-
 
     it('correct filter should be created - (default) ID', function (done) {
       initTimeline({
@@ -723,6 +726,8 @@ describe('KibiTimeline Directive', function () {
         }, 0);
       }, 0);
     });
+
   });
 
 });
+
