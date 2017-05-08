@@ -25,8 +25,7 @@ $ ./bin/kibi plugin -i kibi_timeline_vis -u https://github.com/sirensolutions/ki
 $ git clone https://github.com/sirensolutions/kibi_timeline_vis.git
 $ cd kibi_timeline_vis
 $ npm install
-$ npm run build
-$ gulp package
+$ npm run package
 $ unzip target/kibi_timeline_vis-5.2.2.zip -d KIBANA_FOLDER_PATH/plugins/
 ```
 

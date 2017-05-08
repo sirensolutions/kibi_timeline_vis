@@ -3,7 +3,8 @@ import TimelineHelper from './lib/helpers/timeline_helper';
 import RequestQueueProvider from './lib/courier/_request_queue_wrapped';
 import 'ui/highlight/highlight_tags';
 import _ from 'lodash';
-import vis from 'vis';
+import { Timeline, DataSet } from 'vis-timeline';
+import moment from 'moment';
 import buildRangeFilter from 'ui/filter_manager/lib/range';
 import uiModules from 'ui/modules';
 
@@ -117,12 +118,12 @@ uiModules
     const initTimeline = function () {
       if (!timeline) {
         // create a new one
-        $scope.timeline = timeline = new vis.Timeline($element[0]);
+        $scope.timeline = timeline = new Timeline($element[0]);
         if ($scope.timelineOptions) {
           const utcOffset = TimelineHelper.changeTimezone(config.get('dateFormat:tz'));
           if (utcOffset !== 'Browser') {
             $scope.timelineOptions.moment = function (date) {
-              return vis.moment(date).utcOffset(utcOffset);
+              return moment(date).utcOffset(utcOffset);
             };
           }
           timeline.setOptions($scope.timelineOptions);
@@ -159,7 +160,7 @@ uiModules
         });
       });
 
-      data = new vis.DataSet(points);
+      data = new DataSet(points);
       timeline.setItems(data);
       timeline.fit();
     };
@@ -342,7 +343,7 @@ uiModules
           style: 'background-color: none;'
         });
       }
-      const dataGroups = new vis.DataSet(groups);
+      const dataGroups = new DataSet(groups);
       timeline.setGroups(dataGroups);
     };
 
