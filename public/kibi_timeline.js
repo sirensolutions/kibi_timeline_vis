@@ -7,10 +7,11 @@ import { Timeline, DataSet } from 'vis-timeline';
 import moment from 'moment';
 import buildRangeFilter from 'ui/filter_manager/lib/range';
 import uiModules from 'ui/modules';
+import highlightTags from 'ui/highlight/highlight_tags';
 
 uiModules
 .get('kibana')
-.directive('kibiTimeline', function (Private, createNotifier, courier, indexPatterns, config, highlightTags, timefilter) {
+.directive('kibiTimeline', function (Private, createNotifier, courier, indexPatterns, config, timefilter) {
   const NUM_FRAGS_CONFIG = 'kibi:timeline:highlight:number_of_fragments';
   const DEFAULT_NUM_FRAGS = 25;
   const requestQueue = Private(RequestQueueProvider);
