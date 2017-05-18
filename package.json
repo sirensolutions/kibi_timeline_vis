@@ -19,7 +19,8 @@
     "test:coverage": "gulp coverage",
     "start": "gulp dev",
     "precommit": "gulp lint",
-    "build": "gulp build"
+    "build": "gulp build",
+    "package": "gulp package"
   },
   "dependencies": {
     "kibiutils": "sirensolutions/kibiutils#1.4.0",
@@ -29,7 +30,6 @@
   "devDependencies": {
     "babel-eslint": "6.1.2",
     "bluebird": "^3.0.6",
-    "bower": "^1.6.9",
     "eslint": "3.11.1",
     "gulp": "^3.9.0",
     "gulp-eslint": "^1.1.1",

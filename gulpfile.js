@@ -120,7 +120,11 @@ gulp.task('package', ['build'], function (done) {
   return gulp.src([
       path.join(buildDir, '**', '*'),
       '!**/node_modules/vis/examples/**',
-      '!**/node_modules/vis/docs/**'
+      '!**/node_modules/vis/docs/**',
+      '!**/node_modules/moment/**',
+      '!**/node_modules/vis/examples',
+      '!**/node_modules/vis/docs',
+      '!**/node_modules/moment'
     ])
     .pipe(zip(packageName + '.zip'))
     .pipe(gulp.dest(targetDir));
@@ -130,8 +134,7 @@ gulp.task('dev', ['sync'], function (done) {
   gulp.watch([
     'package.json',
     'index.js',
-    'public/**/*',
-    'server/**/*'
+    'public/**/*'
   ], ['sync', 'lint']);
 });
 

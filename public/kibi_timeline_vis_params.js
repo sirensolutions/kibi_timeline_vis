@@ -4,7 +4,6 @@ import './lib/directives/array_param';
 import './lib/directives/kibi_select';
 // === ported kibi directives ===
 import _ from 'lodash';
-import vis from 'vis';
 import uiModules from 'ui/modules';
 import template from 'plugins/kibi_timeline_vis/kibi_timeline_vis_params.html';
 
