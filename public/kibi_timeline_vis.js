@@ -31,6 +31,7 @@ function KibiTimelineVisProvider(Private) {
     defaultSection: 'options',
     requiresSearch: false,
     requiresMultiSearch: true,
+    requiresTimePicker: true,
     delegateSearch: true
   });
 }
