@@ -1,3 +1,4 @@
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import 'plugins/kibi_timeline_vis/kibi_timeline_vis.less';
@@ -7,6 +8,7 @@ import visTypesRegisty from 'ui/registry/vis_types';
 import template from 'plugins/kibi_timeline_vis/kibi_timeline_vis.html';
 
 function KibiTimelineVisProvider(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -14,8 +16,9 @@ function KibiTimelineVisProvider(Private) {
   // Vis object of this type.
   return new TemplateVisType({
     name: 'kibi_timeline',
-    title: 'Kibi timeline',
+    title: 'Kibi Timeline',
     icon: 'fak-timeline',
+    category: VisType.CATEGORY.KIBI,
     description: 'Timeline widget for visualization of events',
     template,
     params: {
