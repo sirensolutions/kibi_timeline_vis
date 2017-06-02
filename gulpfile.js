@@ -16,7 +16,7 @@ var packageName = pkg.name  + '-' + pkg.version;
 
 var buildDir = path.resolve(__dirname, 'build');
 var targetDir = path.resolve(__dirname, 'target');
-var buildTarget = path.resolve(buildDir, packageName);
+var buildTarget = path.resolve(buildDir, 'kibana', packageName);
 
 var include = [
   'package.json',
