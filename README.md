@@ -1,4 +1,4 @@
-## Kibi/Kibana Timeline Plugin    
+## Kibi/Kibana Timeline Plugin
 
 This is a plugin for Kibana 4.3+ and Kibi 0.3+ (our extention of Kibana for Relational Data).
 
@@ -9,39 +9,51 @@ The plugin displays a timeline of events taken from multiple saved searches.
 ##Installation
 
 This plugin can be installed in both:
- 
+
  * [Kibana: 4.3+](https://www.elastic.co/downloads/past-releases/kibana-4-3-0)
  * [Kibi: 0.3+](https://siren.solutions/kibi) (Coming soon ...)
 
 ### Automatic
 
+#### Kibi 5.x
 ```sh
-$ ./bin/kibi plugin -i kibi_timeline_vis -u https://github.com/sirensolutions/kibi_timeline_vis/raw/5.2.2/target/kibi_timeline_vis-5.2.2.zip
+$ ./bin/kibi-plugin install https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.4.0-2/kibi_timeline_vis-5.4.0-2.zip
 ```
 
-### Manual    
+#### Kibi 4.x
+```sh
+$ ./bin/kibi plugin -i kibi_timeline_vis -u https://github.com/sirensolutions/kibi_timeline_vis/releases/download/4.6.4/kibi_timeline_vis-4.6.4.zip
+```
+
+### Manual
 
 ```sh
 $ git clone https://github.com/sirensolutions/kibi_timeline_vis.git
 $ cd kibi_timeline_vis
 $ npm install
 $ npm run package
-$ unzip target/kibi_timeline_vis-5.2.2.zip -d KIBANA_FOLDER_PATH/plugins/
+$ unzip target/kibi_timeline_vis-5.4.0-2.zip -d KIBANA_FOLDER_PATH/plugins/
 ```
 
 ## Uninstall
 
+#### Kibi/Kibana 5.x
 ```sh
-$ bin/kibana plugin  --remove kibi_timeline_vis
+$ bin/kibi-plugin remove kibi_timeline_vis
+```
+
+#### Kibi/Kibana 4.x
+```sh
+$ bin/kibi plugin --remove kibi_timeline_vis
 ```
 
 ## Development
 
 - Clone the repository at the same level of a Kibana > 4.2 clone
-- If needed, switch to the same node version as Kibana using nvm 
+- If needed, switch to the same node version as Kibana using nvm
   (e.g. `nvm use 6.9.0`)
 - Install dependencies with `npm install`
-- Install the plugin to Kibana and start watching for changes by running 
+- Install the plugin to Kibana and start watching for changes by running
   `npm start`
 - run tests with `npm test`
 
@@ -60,9 +72,9 @@ $ gulp dev  --kibanahomepath=../kibi-internal
 $ gulp testdev --kibanahomepath=../kibi-internal
 ```
 
-In this way files are synced on every change 
-and you can reload the browser to re-run tests 
-In the browser adress bar put ```?grep=Kibi Timeline``` 
+In this way files are synced on every change
+and you can reload the browser to re-run tests
+In the browser address bar put ```?grep=Kibi Timeline```
 to execute test relevant for this visualisation
 
 
