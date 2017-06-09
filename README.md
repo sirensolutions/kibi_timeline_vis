@@ -44,7 +44,7 @@ $ bin/kibi-plugin remove kibi_timeline_vis
 
 #### Kibi/Kibana 4.x
 ```sh
-$ bin/kibana plugin  --remove kibi_timeline_vis
+$ bin/kibi plugin --remove kibi_timeline_vis
 ```
 
 ## Development
@@ -74,7 +74,7 @@ $ gulp testdev --kibanahomepath=../kibi-internal
 
 In this way files are synced on every change
 and you can reload the browser to re-run tests
-In the browser adress bar put ```?grep=Kibi Timeline```
+In the browser address bar put ```?grep=Kibi Timeline```
 to execute test relevant for this visualisation
 
 
