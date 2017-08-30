@@ -1,5 +1,5 @@
 import ArrayHelper from '../helpers/array_helper';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import addTemplate from '../directives/array_param_add.html';
 
 uiModules

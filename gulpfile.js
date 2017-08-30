@@ -26,7 +26,7 @@ var include = [
 
 var knownOptions = {
   string: 'kibanahomepath',
-  default: { kibanahomepath: 'kibana' }
+  default: { kibanahomepath: '../kibi-internal' }
 };
 var options = minimist(process.argv.slice(2), knownOptions);
 

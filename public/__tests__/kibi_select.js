@@ -1,5 +1,5 @@
 import SelectHelperProvider from '../lib/directives/kibi_select_helper';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';

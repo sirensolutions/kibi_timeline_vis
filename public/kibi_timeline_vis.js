@@ -1,15 +1,16 @@
-import VisVisTypeProvider from 'ui/vis/vis_type';
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+
 import 'plugins/kibi_timeline_vis/kibi_timeline_vis.less';
 import 'plugins/kibi_timeline_vis/kibi_timeline_vis_controller';
 import 'plugins/kibi_timeline_vis/kibi_timeline_vis_params';
-import visTypesRegisty from 'ui/registry/vis_types';
 import template from 'plugins/kibi_timeline_vis/kibi_timeline_vis.html';
 
 function KibiTimelineVisProvider(Private) {
   const VisType = Private(VisVisTypeProvider);
-  const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+  const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   // return the visType object, which kibana will use to display and configure new
@@ -39,4 +40,4 @@ function KibiTimelineVisProvider(Private) {
   });
 }
 
-visTypesRegisty.register(KibiTimelineVisProvider);
+VisTypesRegistryProvider.register(KibiTimelineVisProvider);

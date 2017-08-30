@@ -2,8 +2,8 @@ import ngMock from 'ng_mock';
 import _ from 'lodash';
 import expect from 'expect.js';
 import $ from 'jquery';
-import sinon from 'auto-release-sinon';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import sinon from 'sinon';
+import { mockSavedObjects }  from 'fixtures/kibi/mock_saved_objects';
 import '../kibi_timeline_vis_controller';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
