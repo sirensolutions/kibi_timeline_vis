@@ -1,14 +1,12 @@
-import SearchSourceProvider from 'fixtures/stubbed_search_source';
+import { StubbedSearchSourceProvider } from 'fixtures/stubbed_search_source';
 import TimelineHelper from '../lib/helpers/timeline_helper';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import angular from 'angular';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import moment from 'moment';
 import 'plugins/kibi_timeline_vis/kibi_timeline_vis_controller';
-
-require('plugins/kibi_timeline_vis/kibi_timeline_vis_controller');
 
 describe('KibiTimeline Directive', function () {
   let $elem;
@@ -61,7 +59,7 @@ describe('KibiTimeline Directive', function () {
 
       highlightTags = _highlightTags_;
 
-      searchSource = Private(SearchSourceProvider);
+      searchSource = Private(StubbedSearchSourceProvider);
       searchSource.highlight = sinon.stub();
       searchSource.sort = sinon.stub();
     });
@@ -730,4 +728,3 @@ describe('KibiTimeline Directive', function () {
   });
 
 });
-

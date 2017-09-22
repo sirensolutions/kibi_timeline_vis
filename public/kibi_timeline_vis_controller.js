@@ -1,20 +1,20 @@
-import QueryFilterProvider from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import RequestQueueProvider from './lib/courier/_request_queue_wrapped';
-import searchSourceProvider from 'ui/courier/data_source/search_source';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import chrome from 'ui/chrome';
 import './kibi_timeline';
 import 'ui/modules';
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 function controller(createNotifier, $location, $rootScope, $scope, $route, savedSearches, savedVisualizations, Private, Promise, courier,
   timefilter, indexPatterns) {
   const notify = createNotifier({
     location: 'Kibi Timeline'
   });
-  const SearchSource = Private(searchSourceProvider);
+  const SearchSource = Private(SearchSourceProvider);
   const requestQueue = Private(RequestQueueProvider);
-  const queryFilter = Private(QueryFilterProvider);
+  const queryFilter = Private(FilterBarQueryFilterProvider);
 
   $scope.initOptions = function () {
     $scope.options = {

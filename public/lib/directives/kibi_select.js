@@ -1,6 +1,6 @@
 import SelectHelperProvider from './kibi_select_helper';
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './kibi_select.html';
 
 uiModules.get('kibana')

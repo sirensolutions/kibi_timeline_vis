@@ -1,4 +1,4 @@
-import RequestQueueProvider from 'ui/courier/_request_queue';
+import { RequestQueueProvider } from 'ui/courier/_request_queue';
 
 export default function PendingRequestListWrapped(Private) {
   const requestQueue = Private(RequestQueueProvider);

@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import TimelineHelper from '../timeline_helper';
 import moment from 'moment';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 describe('Kibi Timeline', function () {
   describe('TimelineHelper', function () {

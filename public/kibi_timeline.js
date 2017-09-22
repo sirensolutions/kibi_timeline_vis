@@ -1,13 +1,13 @@
-import QueryFilterProvider from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import TimelineHelper from './lib/helpers/timeline_helper';
 import RequestQueueProvider from './lib/courier/_request_queue_wrapped';
 import 'ui/highlight/highlight_tags';
 import _ from 'lodash';
 import { Timeline, DataSet } from 'vis-timeline';
 import moment from 'moment';
-import buildRangeFilter from 'ui/filter_manager/lib/range';
-import uiModules from 'ui/modules';
-import highlightTags from 'ui/highlight/highlight_tags';
+import { buildRangeFilter } from 'ui/filter_manager/lib/range';
+import { uiModules } from 'ui/modules';
+import { highlightTags } from 'ui/highlight/highlight_tags';
 
 uiModules
 .get('kibana')
@@ -15,7 +15,7 @@ uiModules
   const NUM_FRAGS_CONFIG = 'kibi:timeline:highlight:number_of_fragments';
   const DEFAULT_NUM_FRAGS = 25;
   const requestQueue = Private(RequestQueueProvider);
-  const queryFilter = Private(QueryFilterProvider);
+  const queryFilter = Private(FilterBarQueryFilterProvider);
   const notify = createNotifier({
     location: 'Kibi Timeline'
   });
