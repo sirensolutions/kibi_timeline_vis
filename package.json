@@ -1,6 +1,6 @@
 {
   "name": "kibi_timeline_vis",
-  "version": "5.4.0-2",
+  "version": "5.4.3-2",
   "kibana" : {
     "version": "5.4.3"
   },
