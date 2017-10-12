@@ -1,7 +1,7 @@
 import chrome from 'ui/chrome';
 import _ from 'lodash';
 
-export default function KibiSelectHelperFactory(config, indexPatterns, savedSearches) {
+export default function KibiSelectHelperFactory(config, indexPatterns, savedSearches, $injector) {
   class KibiSelectHelper {
     getObjects(type, filter) {
       return savedSearches.find(filter).then(function (resp) {
@@ -16,14 +16,21 @@ export default function KibiSelectHelperFactory(config, indexPatterns, savedSear
     }
 
     getFields(indexPatternId, fieldTypes) {
-      let defId;
+
+      let defaultIndexPattern;
       if (indexPatternId) {
-        defId = indexPatternId;
+        defaultIndexPattern = indexPatterns.get(indexPatternId);
       } else {
-        defId = config.get('defaultIndex');
+        if ($injector.has('kibiDefaultIndexPattern')) {
+          // kibi
+          defaultIndexPattern = $injector.get('kibiDefaultIndexPattern').getDefaultIndexPattern();
+        } else {
+          // kibana
+          defaultIndexPattern = indexPatterns.get(config.get('defaultIndex'));
+        }
       }
 
-      return indexPatterns.get(defId).then(function (index) {
+      return defaultIndexPattern.then(function (index) {
         const fields = _.chain(index.fields)
           .filter(function (field) {
             // filter some fields
