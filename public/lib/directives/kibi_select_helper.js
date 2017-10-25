@@ -44,10 +44,7 @@ export default function KibiSelectHelperFactory(config, indexPatterns, savedSear
           }).map(function (field) {
             return {
               label: field.name,
-              value: field.name,
-              options: {
-                analyzed: field.analyzed
-              }
+              value: field.name
             };
           }).value();
         return fields;
