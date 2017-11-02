@@ -17,7 +17,7 @@ This plugin can be installed in both:
 
 #### Kibi 5.x
 ```sh
-$ ./bin/kibi-plugin install https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.4.0-2/kibi_timeline_vis-5.4.0-2.zip
+$ ./bin/kibi-plugin install https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.5.2/kibi_timeline_vis-5.5.2.zip
 ```
 
 #### Kibi 4.x
