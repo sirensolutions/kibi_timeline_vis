@@ -1,8 +1,8 @@
 {
   "name": "kibi_timeline_vis",
-  "version": "5.5.2",
+  "version": "5.5.3",
   "kibana" : {
-    "version": "5.5.2"
+    "version": "5.5.3"
   },
   "authors": [
     "SIREn Solutions <info@siren.solutions>"
