@@ -12,7 +12,7 @@ var spawn = require('child_process').spawn;
 var minimist = require('minimist');
 
 var pkg = require('./package.json');
-var packageName = pkg.name  + '-' + pkg.version;
+var packageName = pkg.name;
 
 var buildDir = path.resolve(__dirname, 'build/gulp');
 var targetDir = path.resolve(__dirname, 'target/gulp');
@@ -30,7 +30,7 @@ var knownOptions = {
 };
 var options = minimist(process.argv.slice(2), knownOptions);
 
-var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + pkg.name);
+var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + packageName);
 
 
 function syncPluginTo(dest, done) {
