@@ -14,8 +14,8 @@ var minimist = require('minimist');
 var pkg = require('./package.json');
 var packageName = pkg.name  + '-' + pkg.version;
 
-var buildDir = path.resolve(__dirname, 'build');
-var targetDir = path.resolve(__dirname, 'target');
+var buildDir = path.resolve(__dirname, 'build/gulp');
+var targetDir = path.resolve(__dirname, 'target/gulp');
 var buildTarget = path.resolve(buildDir, 'kibana', packageName);
 
 var include = [
