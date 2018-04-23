@@ -3,7 +3,12 @@
   <div class="form-group">
     <label>Groups</label></br>
     <ul>
-      <li ng-repeat="group in vis.params.groups" class="queryOptionArea" >
+      <!--
+        NOTE:
+        Render the group when $$indexPatternId was set
+        to prevent kibi-select-port to reset the model value to an empty string
+      -->
+      <li ng-repeat="group in vis.params.groups" class="queryOptionArea" ng-if="group.$$indexPatternId">
 
         <div class="header">
           Group {{$index + 1}}
@@ -42,19 +47,19 @@
               <kbn-info info="Cut through the clutter and make unique label values standout. When checked, the first instance of a label will be displayed with inverted colors."></kbn-info>
               </label>
             </div>
-            <kibi-select-port required object-type="field" index-pattern-id="group.indexPatternId" ng-model="group.labelField">
+            <kibi-select-port required object-type="field" index-pattern-id="group.$$indexPatternId" ng-model="group.labelField">
             </kibi-select-port>
           </div>
 
           <div class="form-group">
             <label>Event start date</label>
-            <kibi-select-port required object-type="field" index-pattern-id="group.indexPatternId" field-types="['date']" ng-model="group.startField">
+            <kibi-select-port required object-type="field" index-pattern-id="group.$$indexPatternId" field-types="['date']" ng-model="group.startField">
             </kibi-select-port>
           </div>
 
           <div class="form-group">
             <label>Event end date  <span class="small_note">(Optional)</span></label>
-            <kibi-select-port object-type="field" index-pattern-id="group.indexPatternId" field-types="['date']" ng-model="group.endField">
+            <kibi-select-port object-type="field" index-pattern-id="group.$$indexPatternId" field-types="['date']" ng-model="group.endField">
             </kibi-select-port>
           </div>
 

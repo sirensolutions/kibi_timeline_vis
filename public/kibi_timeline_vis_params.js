@@ -7,7 +7,7 @@ import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from 'plugins/kibi_timeline_vis/kibi_timeline_vis_params.html';
 
-function controller($rootScope, savedSearches, Private) {
+function controller($rootScope, savedSearches, Private, Promise) {
   const color = Private(VislibComponentsColorColorProvider);
 
   return {
@@ -32,36 +32,59 @@ function controller($rootScope, savedSearches, Private) {
         return takenIds[takenIds.length - 1] + 1;
       };
 
+      let savedSearchToIndexPatternMap;
+      const init = function () {
+        if (savedSearchToIndexPatternMap) {
+          return Promise.resolve(savedSearchToIndexPatternMap);
+        }
+        return savedSearches.find().then(savedSearches => {
+          const map = {};
+          _.each(savedSearches.hits, hit => {
+            try {
+              const searchSource = JSON.parse(hit.kibanaSavedObjectMeta.searchSourceJSON);
+              map[hit.id] = {
+                index: searchSource.index,
+                title: hit.title
+              };
+            } catch (e) {
+              // should never happen
+            }
+          });
+          savedSearchToIndexPatternMap = map;
+        });
+      };
+
       $scope.$watch('vis.params.groups', function (groups) {
+        init().then(() => {
+          const existingGroupIds = [];
+          _.each($scope.vis.params.groups, function (group) {
+            if (group.id) {
+              existingGroupIds.push(group.id);
+            }
+          });
+          existingGroupIds.sort();
 
-        const existingGroupIds = [];
-        _.each($scope.vis.params.groups, function (group) {
-          if (group.id) {
-            existingGroupIds.push(group.id);
-          }
-        });
-        existingGroupIds.sort();
-        _.each($scope.vis.params.groups, function (group) {
-
-          // we need unique ids to manage data series in timeline component
-          if (!group.id) {
-            group.id = _pickNextFreeId(existingGroupIds);
-          }
-
-          if (group.savedSearchId) {
-            savedSearches.get(group.savedSearchId)
-            .then(function (savedSearch) {
+          _.each($scope.vis.params.groups, function (group) {
+            // we need unique ids to manage data series in timeline component
+            if (!group.id) {
+              group.id = _pickNextFreeId(existingGroupIds);
+            }
+            if (group.savedSearchId) {
               if (!group.groupLabel) {
-                group.groupLabel = savedSearch.title;
+                group.groupLabel = savedSearchToIndexPatternMap[group.savedSearchId].title;
               }
-              group.indexPatternId = savedSearch.searchSource._state.index.id;
-            });
-          }
-        });
-        // 0 should always be there in case user switch to mixed mode
-        const mapGroupIdToColor = color([0].concat(_.map($scope.vis.params.groups, 'id')));
-        _.each($scope.vis.params.groups, function (group) {
-          group.color = mapGroupIdToColor(group.id);
+              // we use $$ prefix to avoid saving this temporary value into the model
+              // Angular strips values prefixed with $$ automatically
+              group.$$indexPatternId = savedSearchToIndexPatternMap[group.savedSearchId].index;
+            }
+          });
+
+          // 0 should always be there in case user switch to mixed mode
+          const mapGroupIdToColor = color([0].concat(_.map($scope.vis.params.groups, 'id')));
+          _.each($scope.vis.params.groups, function (group) {
+            group.color = mapGroupIdToColor(group.id);
+          });
+
         });
       }, true);
     }
