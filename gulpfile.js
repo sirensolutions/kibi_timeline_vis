@@ -30,7 +30,7 @@ var knownOptions = {
 };
 var options = minimist(process.argv.slice(2), knownOptions);
 
-var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + packageName);
+var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/siren_plugins/' + packageName);
 
 
 function syncPluginTo(dest, done) {
