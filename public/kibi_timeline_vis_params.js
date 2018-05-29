@@ -76,6 +76,7 @@ function controller($rootScope, savedSearches, Private, Promise) {
               // we use $$ prefix to avoid saving this temporary value into the model
               // Angular strips values prefixed with $$ automatically
               group.$$indexPatternId = savedSearchToIndexPatternMap[group.savedSearchId].index;
+              delete group.__new;
             }
           });
 
