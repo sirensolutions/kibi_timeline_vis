@@ -10,6 +10,7 @@ var zip = require('gulp-zip');
 var fs = require('fs');
 var spawn = require('child_process').spawn;
 var minimist = require('minimist');
+const gulpDebug = require('gulp-debug');
 
 var pkg = require('./package.json');
 var packageName = pkg.name;
@@ -21,7 +22,8 @@ var buildTarget = path.resolve(buildDir, 'kibana', packageName);
 var include = [
   'package.json',
   'index.js',
-  'public'
+  'public',
+  'lib'
 ];
 
 var knownOptions = {
@@ -84,15 +86,19 @@ gulp.task('sync', function (done) {
 gulp.task('lint', function (done) {
   return gulp.src([
     'public/**/*.js',
+    'lib/**/*',
     '!**/webpackShims/**'
-  ]).pipe(eslint())
-    .pipe(eslint.formatEach())
-    .pipe(eslint.failOnError());
+  ])
+  .pipe(gulpDebug())
+  .pipe(eslint())
+  .pipe(eslint.formatEach())
+  .pipe(eslint.failOnError());
 });
 
 gulp.task('lintFix', function (done) {
   return gulp.src([
     'public/**/*.js',
+    'lib/**/*',
     '!**/webpackShims/**'
   ]).pipe(eslint({
     fix: true
@@ -134,7 +140,8 @@ gulp.task('dev', ['sync'], function (done) {
   gulp.watch([
     'package.json',
     'index.js',
-    'public/**/*'
+    'public/**/*',
+    'lib/**/*'
   ], ['sync', 'lint']);
 });
 

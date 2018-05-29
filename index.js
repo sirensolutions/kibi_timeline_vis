@@ -1,4 +1,9 @@
 module.exports = function (kibana) {
+
+  const migrations = [
+    require('./lib/migrations/migration_1')
+  ];
+
   return new kibana.Plugin({
     name: 'kibi_timeline',
     require: ['kibana', 'elasticsearch'],
@@ -6,6 +11,9 @@ module.exports = function (kibana) {
       visTypes: [
         'plugins/kibi_timeline_vis/kibi_timeline_vis'
       ]
+    },
+    init: function(server) {
+      server.expose('getMigrations', () => migrations);
     }
   });
 };
