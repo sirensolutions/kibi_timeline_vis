@@ -8,8 +8,7 @@
         Render the group when $$indexPatternId was set
         to prevent kibi-select-port to reset the model value to an empty string
       -->
-      <li ng-repeat="group in vis.params.groups" class="queryOptionArea" ng-if="group.$$indexPatternId">
-
+      <li ng-repeat="group in vis.params.groups" class="queryOptionArea" ng-if="group.$$indexPatternId || group.__new">
         <div class="header">
           Group {{$index + 1}}
         </div>
@@ -88,7 +87,12 @@
         </div>
       </li>
     </ul>
-    <array-param-add-port required label="group" model="vis.params.groups"></array-param-add-port>
+    <array-param-add-port
+      required
+      label="group"
+      model="vis.params.groups"
+      default="{{ { __new: true } }}"
+    ></array-param-add-port>
   </div>
 
   <div class="vis-editor-agg-editor-advanced-toggle">
