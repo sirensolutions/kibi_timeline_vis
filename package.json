@@ -1,6 +1,6 @@
 {
   "name": "kibi_timeline_vis",
-  "version": "10.0.0",
+  "version": "10.0.0-SNAPSHOT",
   "kibana": {
     "version": "5.6.9"
   },
