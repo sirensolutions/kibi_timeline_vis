@@ -2,7 +2,7 @@
   "name": "kibi_timeline_vis",
   "version": "10.0.1-SNAPSHOT",
   "kibana": {
-    "version": "5.6.9"
+    "version": "5.6.10"
   },
   "authors": [
     "SIREn Solutions <info@siren.solutions>"
