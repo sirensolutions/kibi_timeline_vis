@@ -40,7 +40,7 @@ def packageJson = loadPackageJson()
 ///////////////////////////////////////////////////
 
 group = 'solutions.siren'
-version packageJson.version
+version = customTimelineVersion ?: packageJson.version
 
 ///////////////////////////////////////////////////
 //                                               //
@@ -255,8 +255,7 @@ publishing {
       artifact(new File("${projectDir}/target/gulp", "${packageJson.name}.zip"))
       groupId project.group
       artifactId "kibi-timeline-vis"
-      version packageJson.version
+      version project.version
     }
   }
 }
-
