@@ -88,7 +88,7 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
 
           // save label field name to `fielddata_fields`
           // it is needed to display not indexed fields in case of multi-fields
-          searchSource._state.fielddata_fields = [ group.labelField ];
+          searchSource._state.docvalue_fields = [ group.labelField ];
 
           $scope.visOptions.groups.push({
             id: group.id,
