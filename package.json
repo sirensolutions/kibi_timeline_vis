@@ -23,23 +23,25 @@
     "package": "gulp package"
   },
   "dependencies": {
-    "kibiutils": "sirensolutions/kibiutils#1.8.0",
+    "grunt": "^1.0.3",
+    "grunt-cli": "^1.2.0",
     "kibi-icons": "sirensolutions/kibi-icons#1.1.0",
+    "kibiutils": "sirensolutions/kibiutils#1.8.0",
     "vis": "4.21.0"
   },
   "devDependencies": {
     "babel-eslint": "6.1.2",
     "bluebird": "3.5.1",
-    "gulp": "^3.9.0",
-    "gulp-eslint": "^1.1.1",
     "eslint": "3.11.1",
-    "gulp-zip": "4.0.0",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^1.1.1",
     "gulp-util": "^3.0.7",
+    "gulp-zip": "4.0.0",
     "husky": "0.14.3",
     "lodash": "^3.10.1",
+    "minimist": "1.2.0",
     "mkdirp": "^0.5.1",
     "rimraf": "2.6.2",
-    "rsync": "0.6.1",
-    "minimist": "1.2.0"
+    "rsync": "0.6.1"
   }
 }
