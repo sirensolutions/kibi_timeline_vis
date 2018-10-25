@@ -11,6 +11,7 @@ var fs = require('fs');
 var spawn = require('child_process').spawn;
 var minimist = require('minimist');
 const gulpDebug = require('gulp-debug');
+const util = require('gulp-util');
 
 var pkg = require('./package.json');
 var packageName = pkg.name;
@@ -145,8 +146,17 @@ gulp.task('dev', ['sync'], function (done) {
   ], ['sync', 'lint']);
 });
 
+const grepOption = '--grep=' + (util.env.grep ? util.env.grep : 'Kibi Timeline');
+
 gulp.task('test', ['sync'], function(done) {
-  spawn('grunt', ['test:browser', '--grep=Kibi Timeline'], {
+  spawn('grunt', ['test:server', 'test:browser', grepOption], {
+    cwd: options.kibanahomepath,
+    stdio: 'inherit'
+  }).on('close', done);
+});
+
+gulp.task('testserver', ['sync'], function (done) {
+  spawn('grunt', ['test:server', grepOption], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
   }).on('close', done);
@@ -160,7 +170,7 @@ gulp.task('testdev', ['sync'], function(done) {
 });
 
 gulp.task('coverage', ['sync'], function(done) {
-  spawn('grunt', ['test:coverage', '--grep=Kibi Timeline'], {
+  spawn('grunt', ['test:coverage', grepOption], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
   }).on('close', done);
