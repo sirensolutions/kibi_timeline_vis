@@ -181,12 +181,12 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
   // requiresSearch set to true since it needs more that one search.
 
   // on kibi, the editors.js file is updated to support requiresMultiSearch so that a courier.fetch call is executed
-  const isKibi = chrome.getAppTitle() === 'Investigate';
+  const isInvestigate = chrome.getAppTitle() === 'Investigate';
 
   // update the searchSource when filters update
   $scope.$listen(queryFilter, 'update', function () {
     _.each($scope.visOptions.groups, group => group.searchSource.set('filter', queryFilter.getFilters()));
-    if (!isKibi) {
+    if (!isInvestigate) {
       courier.fetch();
     }
   });
@@ -195,7 +195,7 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
     _.each($scope.visOptions.groups, group => {
       group.searchSource.fetchQueued();
     });
-    if (!isKibi) {
+    if (!isInvestigate) {
       courier.fetch();
     }
   });
