@@ -130,7 +130,7 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
   // Set to true in editing mode
   const configMode = $location.path().indexOf('/visualize/') !== -1;
 
-  $scope.savedVis = $route.current.locals.savedVis;
+  $scope.savedVis = $route.current.locals && $route.current.locals.savedVis;
   if (!$scope.savedVis) {
     // NOTE: reloading the visualization to get the searchSource,
     // which would otherwise be unavailable by design
@@ -181,12 +181,12 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
   // requiresSearch set to true since it needs more that one search.
 
   // on kibi, the editors.js file is updated to support requiresMultiSearch so that a courier.fetch call is executed
-  const isKibi = chrome.getAppTitle() === 'Kibi';
+  const isInvestigate = chrome.getAppTitle() === 'Investigate';
 
   // update the searchSource when filters update
   $scope.$listen(queryFilter, 'update', function () {
     _.each($scope.visOptions.groups, group => group.searchSource.set('filter', queryFilter.getFilters()));
-    if (!isKibi) {
+    if (!isInvestigate) {
       courier.fetch();
     }
   });
@@ -195,7 +195,7 @@ function controller(createNotifier, $location, $rootScope, $scope, $route, saved
     _.each($scope.visOptions.groups, group => {
       group.searchSource.fetchQueued();
     });
-    if (!isKibi) {
+    if (!isInvestigate) {
       courier.fetch();
     }
   });
