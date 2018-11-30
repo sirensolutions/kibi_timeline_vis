@@ -125,10 +125,22 @@ export default class TimelineHelper {
     .sort(function (a, b) {
       //same count, return alphabetic order
       if (counts.get(a) === counts.get(b)) {
-        return a > b;
+        if (a > b) {
+          return 1;
+        } else if (a < b) {
+          return -1;
+        } else {
+          return 0;
+        };
       }
       //return count order
-      return counts.get(a) < counts.get(b);
+      if (counts.get(a) < counts.get(b)) {
+        return 1;
+      } else if (counts.get(a) > counts.get(b)) {
+        return -1;
+      } else {
+        return 0;
+      };
     })
     .map(key => `${key}: ${counts.get(key)}`)
     .join(', ');
