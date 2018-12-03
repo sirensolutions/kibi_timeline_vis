@@ -123,8 +123,10 @@ export default class TimelineHelper {
 
     return Array.from(counts.keys())
     .sort(function (a, b) {
+      const countA = counts.get(a);
+      const countB = counts.get(b);
       //same count, return alphabetic order
-      if (counts.get(a) === counts.get(b)) {
+      if (countA === countB) {
         if (a > b) {
           return 1;
         } else if (a < b) {
@@ -134,9 +136,9 @@ export default class TimelineHelper {
         };
       }
       //return count order
-      if (counts.get(a) < counts.get(b)) {
+      if (countA < countB) {
         return 1;
-      } else if (counts.get(a) > counts.get(b)) {
+      } else if (countA > countB) {
         return -1;
       } else {
         return 0;
