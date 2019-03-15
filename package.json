@@ -23,8 +23,9 @@
     "package": "gulp package"
   },
   "dependencies": {
-    "kibiutils": "sirensolutions/kibiutils#1.8.0",
     "kibi-icons": "sirensolutions/kibi-icons#1.1.0",
+    "kibiutils": "sirensolutions/kibiutils#1.8.0",
+    "natives": "^1.1.6",
     "vis": "4.21.0"
   },
   "devDependencies": {
