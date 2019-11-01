@@ -39,7 +39,7 @@
     "gulp-zip": "4.0.0",
     "gulp-debug": "4.0.0",
     "husky": "0.14.3",
-    "lodash": "4.17.5",
+    "lodash": "4.17.15",
     "minimist": "1.2.0",
     "mkdirp": "^0.5.1",
     "rimraf": "2.6.2",
