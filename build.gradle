@@ -122,7 +122,7 @@ node {
 //                                               //
 ///////////////////////////////////////////////////
 
-task gulpPackage(dependsOn: ['gulp_package']) << {}
+task gulpPackage(dependsOn: ['gulp_package']) {}
 
 // run npm install
 gulp_package.dependsOn 'npmInstall'
@@ -231,11 +231,13 @@ installGrunt.mustRunAfter 'installGruntGlobally'
 ///////////////////////////////////////////////////
 
 // Extends clean task to clean the node_modules directory
-clean << {
-    def nodeModulesDir = file("${projectDir}/node_modules")
-    if (nodeModulesDir.exists()) {
-        println "=== Cleaning node modules directory: ${nodeModulesDir} ==="
-        nodeModulesDir.deleteDir()
+clean {
+    doLast {
+        def nodeModulesDir = file("${projectDir}/node_modules")
+        if (nodeModulesDir.exists()) {
+            println "=== Cleaning node modules directory: ${nodeModulesDir} ==="
+            nodeModulesDir.deleteDir()
+        }
     }
 }
 
