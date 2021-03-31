@@ -1,7 +1,6 @@
 module.exports = function (kibana) {
 
   const migrations = [
-    require('./lib/migrations/migrations_5/migration_1')
   ];
 
   return new kibana.Plugin({
